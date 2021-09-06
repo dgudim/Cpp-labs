@@ -186,7 +186,7 @@ string parseComplex(string input) {
 
     for (int precedenceLevel = 0; precedenceLevel < precedenceLevels; precedenceLevel++) {
         while (precedenceLevelOperatorCounts_inExpression[precedenceLevel] > 0) {
-            // a/b/c/d+d*c*b*a-3
+             // a/b/c/d+d*c*b*a-3
             cout << "Calculating level " << precedenceLevel << ", " << precedenceLevelOperatorCounts_inExpression[precedenceLevel] << " left" << endl;
             int lastOperatorIndex = -1;
             for (int i = 0; i < input.length(); i++) {
