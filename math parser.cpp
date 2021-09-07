@@ -5,7 +5,6 @@ using namespace std;
 #include <limits>
 #include <string>
 
-string expression;
 string current_expression;
 
 const char precedenceLevels = 3;
@@ -18,12 +17,13 @@ char alphabet[alphabetChars] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j
 const char digitChars = 10;
 char digits[digitChars] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-const char functionCount = 14;
+const char functionCount = 12;
+const char maxFunctionLength = 4;
 string functions[functionCount] = {
     "abs", "sqrt",
     "sin", "cos", "tan", "ctg",
     "asin", "acos", "atan", "actg",
-    "ln", "log", "exp" };
+    "log", "exp" };
 
 int variableCount = 0;
 string user_variables[100];
@@ -72,6 +72,15 @@ bool charIsDigit(char input) {
 
 bool charIsAllowed(char input) {
     return charIsDigit(input) || charIsLetter(input) || charIsOperator(input) || input == '(' || input == ')';
+}
+
+bool hasParenthesis(string input) {
+    for (unsigned int i = 0; i < input.length(); i++) {
+        if (input[i] == '(' || input[i] == ')') {
+            return true;
+        }
+    }
+    return false;
 }
 
 void addUserVariable(string varName) {
@@ -124,11 +133,57 @@ double processOperator(char operatorChar, double arg1, double arg2) {
     }
 }
 
+double processFunction(int function, double arg) {
+    switch (function) {
+    case 0: 
+        return abs(arg);
+        break;
+    case 1:
+        return sqrt(arg);
+        break;
+    case 2: 
+        return sin(arg);
+        break;
+    case 3: 
+        return cos(arg);
+        break;
+    case 4: 
+        return tan(arg);
+        break;
+    case 5:
+        return 1.0 / tan(arg);
+        break;
+    case 6: 
+        return asin(arg);
+        break;
+    case 7:
+        return acos(arg);
+        break;
+    case 8: 
+        return atan(arg);
+        break;
+    case 9:
+        return atan(1.0/arg);
+        break;
+    case 10: 
+        return log10(arg);
+        break;
+    case 11: 
+        return exp(arg);
+        break;
+    case -1:
+    default:
+        cout << "Function not specified for index " << function << endl;
+        return arg;
+        break;
+    }
+}
+
 double parseElementary(string expression) {
     double arg1 = 0;
     double arg2 = 0;
     int operatorIndex = 0;
-    for (int i = 0; i < expression.length(); i++) {
+    for (unsigned int i = 0; i < expression.length(); i++) {
         if (charIsOperator(expression[i])) {
             operatorIndex = i;
             string arg1_string = expression.substr(0, i);
@@ -170,7 +225,7 @@ double parseElementary(string expression) {
 string parseComplex(string input) {
     int precedenceLevelOperatorCounts_inExpression[3] = {0, 0, 0};
     int operatorsLeft = 0;
-    for (int i = 0; i < input.length(); i++) {
+    for (unsigned int i = 0; i < input.length(); i++) {
         for (int i2 = 0; i2 < precedenceLevels; i2++) {
             if (charIsPrecedentOperator(input[i], i2)) {
                 precedenceLevelOperatorCounts_inExpression[i2] ++;
@@ -186,13 +241,12 @@ string parseComplex(string input) {
 
     for (int precedenceLevel = 0; precedenceLevel < precedenceLevels; precedenceLevel++) {
         while (precedenceLevelOperatorCounts_inExpression[precedenceLevel] > 0) {
-            // a/b/c/d+d*c*b*a-3
-            cout << "Calculating level " << precedenceLevel << ", " << precedenceLevelOperatorCounts_inExpression[precedenceLevel] << " left" << endl;
+            cout << "Calculating precedence level " << precedenceLevel << ", " << precedenceLevelOperatorCounts_inExpression[precedenceLevel] << " left" << endl;
             int lastOperatorIndex = -1;
-            for (int i = 0; i < input.length(); i++) {
+            for (unsigned int i = 0; i < input.length(); i++) {
                 if (charIsPrecedentOperator(input[i], precedenceLevel)) {
                     int lastIndex = input.length();
-                    for (int i2 = i + 1; i2 < input.length(); i2++) {
+                    for (unsigned int i2 = i + 1; i2 < input.length(); i2++) {
                         if (charIsOperator(input[i2])) {
                             lastIndex = i2;
                             break;
@@ -215,28 +269,69 @@ string parseComplex(string input) {
     return input;
 }
 
-void processDeepestExpresion(string input) {
-    int firstIndex = 0;
-    int lastIndex = input.length() - 1;
-    for (int i = 0; i < input.length(); i++) {
-        if (input[i] == '(') {
-            firstIndex = i;
+string getFunctionName(string expression, int parenthesisIndex) {
+    string functionBuffer = "";
+    if (parenthesisIndex == 0) {
+        return functionBuffer;
+    }
+    for (unsigned int f = 0; f < maxFunctionLength; f++) {
+
+        if (expression[parenthesisIndex - 1 - f] == '(' || charIsOperator(expression[parenthesisIndex - 1 - f])) {
+            break;
         }
-        if (input[i] == ')') {
+        functionBuffer.insert(0, 1, expression[parenthesisIndex - 1 - f]);
+        if (parenthesisIndex - 1 - f == 0) {
+            break;
+        }
+    }
+    return functionBuffer;
+}
+
+int getFunctionIndex(string function) {
+    for (int i = 0; i < functionCount; i++) {
+        if (functions[i] == function) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+bool isValidFunction(string function) {
+    return  function == "" || getFunctionIndex(function) != -1;
+}
+
+void processDeepestExpresion() {
+    int firstIndex = 0;
+    int lastIndex = current_expression.length() - 1;
+    int functionIndex = -1;
+    for (unsigned int i = 0; i < current_expression.length(); i++) {
+        if (current_expression[i] == '(') {
+            firstIndex = i;
+            functionIndex = getFunctionIndex(getFunctionName(current_expression, i));
+        }
+        if (current_expression[i] == ')') {
             lastIndex = i;
             break;
         }
     }
-    string value = parseComplex(input.substr(firstIndex + 1, lastIndex - firstIndex - 1));
-    input.replace(firstIndex, lastIndex - firstIndex + 1, value);
+    string value = parseComplex(current_expression.substr(firstIndex + 1, lastIndex - firstIndex - 1));
+    current_expression.replace(firstIndex, lastIndex - firstIndex + 1, value);
 }
 
 void calculate(string expressionStr) {
-    processDeepestExpresion(expressionStr);
+    current_expression = expressionStr;
+    unsigned int parenthesisPair = 0;
+    while (hasParenthesis(current_expression)) {
+        cout << "Parenthesis level: " << parenthesisPair << endl;
+        processDeepestExpresion();
+        parenthesisPair ++;
+    }
+    printResult(stold(current_expression));
 }
 
 int main()
 {
+    string expression;
     cout << "Input your expression" << endl;
     cin >> expression;
     cout << "Parsing..." << endl;
@@ -252,7 +347,7 @@ int main()
         }
     }
 
-    for (int i = 0; i < expression.length(); i++) {
+    for (unsigned int i = 0; i < expression.length(); i++) {
         if (!charIsAllowed(expression[i])) {
             cout << "Can't parse expression, illegal character " << expression[i] << endl;
             return -100;
@@ -263,7 +358,7 @@ int main()
     int numberOfRightParenthesis = 0;
     bool hasLetters = false;
     bool hasOperators = false;
-    for (int i = 0; i < expression.length(); i++) {
+    for (unsigned int i = 0; i < expression.length(); i++) {
         if (expression[i] == '(') {
             numberOfLeftParenthesis++;
         }
@@ -295,7 +390,7 @@ int main()
     expression.insert(0, "(");
 
     char lastChar = expression[0];
-    for (int i = 1; i < expression.length(); i++) {
+    for (unsigned int i = 1; i < expression.length(); i++) {
         if (hasOperators) {
             if (charIsOperator(lastChar) && charIsOperator(expression[i])) {
                 cout << "Can't parse expression, 2 or more subsequent operators" << endl;
@@ -319,15 +414,26 @@ int main()
             }
         }
         if (((lastChar == ')' || charIsDigit(lastChar) || charIsLetter(lastChar)) && expression[i] == '(') || (lastChar == ')' && (charIsDigit(expression[i]) || charIsLetter(expression[i])))) {
-            cout << "Can't parse expression, missing operator at index " + to_string(i) << endl;
-            return -6;
+
+            string functionName = getFunctionName(expression, i);
+            bool match = isValidFunction(functionName);
+
+            if (!match) {
+                if (functionName.length() > 0) {
+                    cout << "Unknown function " + functionName << endl;
+                    return -6;
+                }
+                cout << "Can't parse expression, missing operator at index " + to_string(i) << endl;
+                return -7;
+            }
+            
         }
         lastChar = expression[i];
     }
 
     cout << "Step 2: variable detection" << endl;
     string variableBuffer = "";
-    for (int i = 0; i < expression.length(); i++) {
+    for (unsigned int i = 0; i < expression.length(); i++) {
         if ((charIsOperator(expression[i]) || expression[i] == ')') && variableBuffer.length() != 0) {
             addUserVariable(variableBuffer);
             variableBuffer.clear();
