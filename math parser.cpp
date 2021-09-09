@@ -454,7 +454,9 @@ string parseComplex(string input, string functionName) {
                     input.replace(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1, doubleToString(parsedValue));
                     operatorsLeft--;
                     precedenceLevelOperatorCounts_inExpression[precedenceLevel] --;
-                    cout << input << endl;
+                    #ifdef DEBUG
+                        cout << input << endl;
+                    #endif // DEBUG
                     break;
                 }
                 if (charIsOperator(input[i]) && charIsContextOperator(input, i)) {
@@ -497,7 +499,9 @@ void calculate(string expressionStr) {
     current_expression = expressionStr;
     unsigned int parenthesisPair = 0;
     while (hasParenthesis(current_expression)) {
-        cout << "Parenthesis level: " << parenthesisPair << endl;
+        #ifdef DEBUG
+            cout << "Parenthesis level: " << parenthesisPair << endl;
+        #endif // DEBUG
         processDeepestExpresion();
         parenthesisPair ++;
     }
@@ -518,7 +522,7 @@ int main()
         string expression;
         variableCount = 0;
         current_expression = "";
-        cout << "\nInput your expression" << endl;
+        cout << "\n\nInput your expression" << endl;
         cin >> expression;
         stringToLowerCase(expression);
         cout << "Lowercased: " + expression << endl;
@@ -563,8 +567,8 @@ int main()
 
         if (!hasLetters && (operatorCount == 0 || (expression[0] == '-' && operatorCount == 1)) && numberOfLeftParenthesis == 0) {
             try { printResult(stod(expression)); 
-            throw " ";}
-            catch (const char* msg) { throw  "\nExpression is just one number... yeah..."; }
+            throw "\nExpression is just one number... yeah..."; }
+            catch (const char* e) { throw e; }
             catch (...) { cout << "Expression is not a number, who knew..."; }
         }
 
