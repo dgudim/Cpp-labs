@@ -2,6 +2,8 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #define _USE_MATH_DEFINES
 #include <math.h>
 using namespace std;
@@ -28,11 +30,20 @@ string functions[functionCount] = {
     "log", "exp", "cbrt", "ln"};
 
 int variableCount = 0;
+int costantCount = 0;
 string user_variables[100];
 double user_variable_values[100];
 
+string doubleToString(double value)
+{
+    ostringstream out;
+    out.precision(10);
+    out << std::fixed << value;
+    return out.str();
+}
+
 int printResult(long double result) {
-    cout << "\n\tResult is: " + to_string(result);
+    cout << "\n\tResult is: " + doubleToString(result);
     return 1;
 }
 
@@ -79,6 +90,24 @@ bool charIsDigit(char input) {
     return false;
 }
 
+bool containsLetters(string input) {
+    for (unsigned int i = 0; i < input.length(); i++) {
+        if (charIsLetter(input[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+double stringToDouble(string input) {
+    if (containsLetters(input)) {
+        throw "Contains letters, can't convert to double";
+    }
+    else {
+        return stod(input);
+    }
+}
+
 bool charIsDigitOrLetter(char input) {
     return charIsLetter(input) || charIsDigit(input);
 }
@@ -104,7 +133,6 @@ void addUserVariable(string varName) {
     bool duplicate = false;
     for (int i = 0; i < variableCount; i++) {
         if (varName == user_variables[i]) {
-            cout << "Found duplicate variable: " + varName << endl;
             duplicate = true;
             break;
         }
@@ -114,6 +142,14 @@ void addUserVariable(string varName) {
         user_variables[variableCount] = varName;
         variableCount++;
     }
+}
+
+void addConstant(string name, double value) {
+    cout << "Added costant: " + name << endl;
+    user_variables[variableCount] = name;
+    user_variable_values[variableCount] = value;
+    variableCount++;
+    costantCount++;
 }
 
 double inputData(string message) {
@@ -137,7 +173,7 @@ double processOperator(char operatorChar, double arg1, double arg2) {
         break;
     case '/':
         if (arg2 == 0) {
-            cout << "Division by zero" << endl;
+            throw  "Division by zero";
         }
         return arg1 / arg2;
         break;
@@ -160,8 +196,7 @@ double processFunction(int function, double arg) {
         break;
     case 1:
         if (arg < 0) {
-            cout << "Can't extract square root of a negative number" << endl;
-            return 0;
+            throw  "Can't extract square root of a negative number";
         }
         return sqrt(arg);
         break;
@@ -179,15 +214,13 @@ double processFunction(int function, double arg) {
         break;
     case 6: 
         if (arg > 1 || arg < -1) {
-            cout << "Asin argument is out of range" << endl;
-            return 0;
+            throw  "Asin argument is out of range";
         }
         return asin(arg);
         break;
     case 7:
         if (arg > 1 || arg < -1) {
-            cout << "Acos argument is out of range" << endl;
-            return 0;
+            throw "Acos argument is out of range";
         }
         return acos(arg);
         break;
@@ -199,8 +232,7 @@ double processFunction(int function, double arg) {
         break;
     case 10: 
         if (arg <= 0) {
-            cout << "Log argument is out of range" << endl;
-            return 0;
+            throw  "Log argument is out of range";
         }
         return log10(arg);
         break;
@@ -212,8 +244,7 @@ double processFunction(int function, double arg) {
         break;
     case 13:
         if (arg <= 0) {
-            cout << "Log argument is out of range" << endl;
-            return 0;
+            throw "Log argument is out of range";
         }
         return log(arg);
         break;
@@ -259,6 +290,9 @@ bool isValidFunction(string function) {
 }
 
 double parseElementary(string expression) {
+
+    cout << expression << endl;
+
     double arg1 = 0;
     double arg2 = 0;
     int operatorIndex = -1;
@@ -300,7 +334,7 @@ double parseElementary(string expression) {
     string arg2_string = expression.substr(operatorIndex + 1, expression.length() - 1);
     try
     {
-        arg1 = stold(arg1_string);
+        arg1 = stringToDouble(arg1_string);
     }
     catch (...)
     {
@@ -314,7 +348,7 @@ double parseElementary(string expression) {
 
     try
     {
-        arg2 = stold(arg2_string);
+        arg2 = stringToDouble(arg2_string);
     }
     catch (...)
     {
@@ -366,7 +400,7 @@ string parseComplex(string input, string functionName) {
                     }
                     double parsedValue = processFunction(getFunctionIndex(functionName), parseElementary(toParse));
                     
-                    input.replace(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1, to_string(parsedValue));
+                    input.replace(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1, doubleToString(parsedValue));
                     operatorsLeft--;
                     precedenceLevelOperatorCounts_inExpression[precedenceLevel] --;
                     cout << input << endl;
@@ -385,6 +419,9 @@ void processDeepestExpresion() {
     int firstIndex = 0;
     int lastIndex = current_expression.length() - 1;
     string functionName = "";
+
+    string substr;
+
     for (unsigned int i = 0; i < current_expression.length(); i++) {
         if (current_expression[i] == '(') {
             firstIndex = i;
@@ -392,10 +429,16 @@ void processDeepestExpresion() {
         }
         if (current_expression[i] == ')') {
             lastIndex = i;
+            if (lastIndex - firstIndex == 1) {
+                substr = "(0)";
+            }
+            else {
+                substr = current_expression.substr(firstIndex + 1, lastIndex - firstIndex - 1);
+            }
             break;
         }
     }
-    string value = parseComplex(current_expression.substr(firstIndex + 1, lastIndex - firstIndex - 1), functionName);
+    string value = parseComplex(substr, functionName);
     current_expression.replace(firstIndex - functionName.length(), lastIndex - firstIndex + 1 + functionName.length(), value);
 }
 
@@ -407,7 +450,7 @@ void calculate(string expressionStr) {
         processDeepestExpresion();
         parenthesisPair ++;
     }
-    printResult(stold(current_expression));
+    printResult(stod(current_expression));
 }
 
 int main()
@@ -418,19 +461,19 @@ int main()
     cout << "Parsing..." << endl;
     cout << "Step 1: validity check" << endl;
     if (expression.length() == 0) {
-        cout << "Can't parse expression, length is 0" << endl;
+        cerr << "Can't parse expression, length is 0" << endl;
         return -1;
     }
     if (expression.length() == 1) {
         if (charIsOperator(expression[0])) {
-            cout << "Can't parse expression, expression is an operator" << endl;
+            cerr << "Can't parse expression, expression is an operator" << endl;
             return -2;
         }
     }
 
     for (unsigned int i = 0; i < expression.length(); i++) {
         if (!charIsAllowed(expression[i])) {
-            cout << "Can't parse expression, illegal character " << expression[i] << endl;
+            cerr << "Can't parse expression, illegal character " << expression[i] << endl;
             return -100;
         }
     }
@@ -454,13 +497,13 @@ int main()
         }
     }
     if (!(numberOfLeftParenthesis == numberOfRightParenthesis)) {
-        cout << string("Can't parse expression, ") + string((numberOfLeftParenthesis > numberOfRightParenthesis) ? "parenthesis opened and not closed" : "closed a non-existent parenthesis") << endl;
+        cerr << string("Can't parse expression, ") + string((numberOfLeftParenthesis > numberOfRightParenthesis) ? "parenthesis opened and not closed" : "closed a non-existent parenthesis") << endl;
         return -3;
     }
 
     if (!hasLetters && (operatorCount == 0 || (expression[0] == '-' && operatorCount == 1)) && numberOfLeftParenthesis == 0) {
         try {
-            return printResult(stold(expression));
+            return printResult(stod(expression));
         }
         catch (...) {
             cout << "Expression is not a number, who knew..." << endl;
@@ -475,13 +518,13 @@ int main()
         if (operatorCount > 0) {
             if (i < expression.length() - 1) {
                 if ((charIsDigit(lastChar) || lastChar == ')') && expression[i] == '-' && charIsOperatorExceptMinus(expression[i + 1])) {
-                    cout << "Operator conflict at index " << i << endl;
+                    cerr << "Operator conflict at index " << i << endl;
                     return -5;
                 }
             }
 
             if ((charIsOperator(lastChar) && expression[i] == ')') || (lastChar == '(' && charIsOperator(expression[i]) && !(charIsDigit(expression[i + 1]) || expression[i + 1] == '('))) {
-                cout << "Hanging operator" << endl;
+                cerr << "Hanging operator" << endl;
                 return -8;
             }
         }
@@ -492,10 +535,10 @@ int main()
 
             if (!match) {
                 if (functionName.length() > 0) {
-                    cout << "Unknown function " + functionName << endl;
+                    cerr << "Unknown function " + functionName << endl;
                     return -6;
                 }
-                cout << "Can't parse expression, missing operator at index " + to_string(i) << endl;
+                cerr << "Can't parse expression, missing operator at index " + to_string(i) << endl;
                 return -7;
             }
             
@@ -503,14 +546,24 @@ int main()
         lastChar = expression[i];
     }
 
-    cout << "Step 2: variable detection" << endl;
+    cout << "Step 2: constant initilization" << endl;
+    addConstant("pi", M_PI);
+    addConstant("pi2", M_PI_2);
+    addConstant("pi4", M_PI_4);
+    addConstant("1pi", M_1_PI);
+    addConstant("2pi", M_2_PI);
+    addConstant("e", M_E);
+
+    cout << "Step 3: variable detection" << endl;
     string variableBuffer = "";
     for (unsigned int i = 0; i < expression.length(); i++) {
         if ((charIsOperator(expression[i]) || expression[i] == ')') && variableBuffer.length() != 0) {
-            addUserVariable(variableBuffer);
+            if (containsLetters(variableBuffer)){
+                addUserVariable(variableBuffer);
+            }
             variableBuffer.clear();
         }
-        if (charIsLetter(expression[i])) {
+        if (charIsDigitOrLetter(expression[i])) {
             variableBuffer.push_back(expression[i]);
         }
         else {
@@ -523,13 +576,18 @@ int main()
         variableBuffer.clear();
     }
 
-    cout << "Step 3: variable input" << endl;
-    for (int i = 0; i < variableCount; i++) {
+    cout << "Step 4: variable input" << endl;
+    for (int i = costantCount; i < variableCount; i++) {
         user_variable_values[i] = inputData("Please input value for " + user_variables[i] + " = ");
     }
 
-    cout << "Step 4: actual calculation" << endl;
-    calculate(expression);
+    cout << "Step 5: actual calculation" << endl;
+    try{
+        calculate(expression);
+    }
+    catch(const char* msg){
+        cerr << msg << endl;
+    }
 
     return 0;
 }

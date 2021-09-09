@@ -1,0 +1,2 @@
+13. ((y+cbrt(x-1))^(1/4))/(abs(x-y)*(sin(z)^2+tan(z)))
+16. cbrt(x^6+ln(y)^2)+(e^abs(x-y)*abs(x-y)^(x+y))/(atan(x)+atan(z))
