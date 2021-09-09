@@ -65,7 +65,7 @@ char charToLowerCase(char input) {
 }
 
 void stringToLowerCase(string& input) {
-    for (int i = 0; i < input.length(); i++) {
+    for (unsigned int i = 0; i < input.length(); i++) {
         input[i] = charToLowerCase(input[i]);
     }
 }
@@ -562,12 +562,10 @@ int main()
         }
 
         if (!hasLetters && (operatorCount == 0 || (expression[0] == '-' && operatorCount == 1)) && numberOfLeftParenthesis == 0) {
-            try {
-                printResult(stod(expression));
-            }
-            catch (...) {
-                throw  "Expression is not a number, who knew...";
-            }
+            try { printResult(stod(expression)); 
+            throw " ";}
+            catch (const char* msg) { throw  "\nExpression is just one number... yeah..."; }
+            catch (...) { cout << "Expression is not a number, who knew..."; }
         }
 
         expression.push_back(')');
