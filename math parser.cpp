@@ -1,4 +1,4 @@
-
+﻿
 #include <iostream>
 #include <limits>
 #include <string>
@@ -8,6 +8,7 @@
 #include <math.h>
 using namespace std;
 
+//#define DEBUG
 
 string current_expression;
 
@@ -16,7 +17,8 @@ char precedenceLevelOperatorCounts[precedenceLevels] = { 1, 2, 2 };
 char operators[precedenceLevels][2] = { {'^'}, {'*', '/'}, {'+', '-'} };
 
 const char alphabetChars = 26;
-char alphabet[alphabetChars] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+char alphabet[alphabetChars] =           { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+char alphabet_uppercase[alphabetChars] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
 
 const char digitChars = 10;
 char digits[digitChars] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
@@ -30,21 +32,46 @@ string functions[functionCount] = {
     "log", "exp", "cbrt", "ln"};
 
 int variableCount = 0;
-int costantCount = 0;
 string user_variables[100];
 double user_variable_values[100];
+
+int costantsCount = 0;
+string constants[100];
+double constant_values[100];
+
+unsigned int exceptionCount = 0;
 
 string doubleToString(double value)
 {
     ostringstream out;
-    out.precision(10);
+    out.precision(15);
     out << std::fixed << value;
-    return out.str();
+    string strOut = out.str();
+    char currChar = strOut[strOut.length() - 1];
+    while (currChar == '0' || currChar == '.') {
+        strOut.erase(strOut.length() - 1, 1);
+        currChar = strOut[strOut.length() - 1];
+    }
+    return strOut;
 }
 
-int printResult(long double result) {
-    cout << "\n\tResult is: " + doubleToString(result);
-    return 1;
+char charToLowerCase(char input) {
+    for (int i = 0; i < alphabetChars; i++) {
+        if (input == alphabet_uppercase[i]) {
+            return alphabet[i];
+        }
+    }
+    return input;
+}
+
+void stringToLowerCase(string& input) {
+    for (int i = 0; i < input.length(); i++) {
+        input[i] = charToLowerCase(input[i]);
+    }
+}
+
+void printResult(long double result) {
+    cout << "\n\tResult is " + doubleToString(result);
 }
 
 bool charIsPrecedentOperator(char character, char precedenceLevel) {
@@ -146,10 +173,32 @@ void addUserVariable(string varName) {
 
 void addConstant(string name, double value) {
     cout << "Added costant: " + name << endl;
-    user_variables[variableCount] = name;
-    user_variable_values[variableCount] = value;
-    variableCount++;
-    costantCount++;
+    constants[costantsCount] = name;
+    constant_values[costantsCount] = value;
+    costantsCount++;
+}
+
+double getConstantOrVariableValue(string name) {
+    for (int i = 0; i < costantsCount; i++) {
+        if (constants[i] == name) {
+            return constant_values[i];
+        }
+    }
+    for (int i = 0; i < variableCount; i++) {
+        if (user_variables[i] == name) {
+            return user_variable_values[i];
+        }
+    }
+    return 0;
+}
+
+bool isConstant(string name) {
+    for (int i = 0; i < costantsCount; i++) {
+        if (constants[i] == name) {
+            return true;
+        }
+    }
+    return false;
 }
 
 double inputData(string message) {
@@ -289,10 +338,18 @@ bool isValidFunction(string function) {
     return  function == "" || getFunctionIndex(function) != -1;
 }
 
+void incrementExceptions() {
+    exceptionCount++;
+    if (exceptionCount == 9) {
+        cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\t\t\t >__< please stop \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" << endl;
+        exceptionCount = 0;
+    }
+}
+
 double parseElementary(string expression) {
-
-    cout << expression << endl;
-
+    #ifdef DEBUG
+      cout << "Elementary parsing " + expression << endl;
+    #endif
     double arg1 = 0;
     double arg2 = 0;
     int operatorIndex = -1;
@@ -338,12 +395,7 @@ double parseElementary(string expression) {
     }
     catch (...)
     {
-        for (int i = 0; i < variableCount; i++) {
-            if (user_variables[i] == arg1_string) {
-                arg1 = user_variable_values[i];
-                break;
-            }
-        }
+        arg1 = getConstantOrVariableValue(arg1_string);
     }
 
     try
@@ -352,12 +404,7 @@ double parseElementary(string expression) {
     }
     catch (...)
     {
-        for (int i = 0; i < variableCount; i++) {
-            if (user_variables[i] == arg2_string) {
-                arg2 = user_variable_values[i];
-                break;
-            }
-        }
+        arg2 = getConstantOrVariableValue(arg2_string);
     }
 
     return processOperator(expression[operatorIndex], arg1, arg2);
@@ -383,7 +430,9 @@ string parseComplex(string input, string functionName) {
 
     for (int precedenceLevel = 0; precedenceLevel < precedenceLevels; precedenceLevel++) {
         while (precedenceLevelOperatorCounts_inExpression[precedenceLevel] > 0) {
-            cout << "Calculating precedence level " << precedenceLevel << ", " << precedenceLevelOperatorCounts_inExpression[precedenceLevel] << " left" << endl;
+            #ifdef DEBUG
+                cout << "Calculating precedence level " << precedenceLevel << ", " << precedenceLevelOperatorCounts_inExpression[precedenceLevel] << " left" << endl;
+            #endif // DEBUG
             int lastOperatorIndex = -1;
             for (unsigned int i = 1; i < input.length() - 1; i++) {
                 if (charIsPrecedentOperator(input[i], precedenceLevel) && charIsContextOperator(input, i)) {
@@ -396,7 +445,9 @@ string parseComplex(string input, string functionName) {
                     }
                     string toParse = input.substr(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1);
                     if (functionName.length() > 0) {
+                    #ifdef DEBUG
                         cout << "Using function " << functionName << endl;
+                    #endif
                     }
                     double parsedValue = processFunction(getFunctionIndex(functionName), parseElementary(toParse));
                     
@@ -455,139 +506,145 @@ void calculate(string expressionStr) {
 
 int main()
 {
-    string expression;
-    cout << "Input your expression" << endl;
-    cin >> expression;
-    cout << "Parsing..." << endl;
-    cout << "Step 1: validity check" << endl;
-    if (expression.length() == 0) {
-        cerr << "Can't parse expression, length is 0" << endl;
-        return -1;
-    }
-    if (expression.length() == 1) {
-        if (charIsOperator(expression[0])) {
-            cerr << "Can't parse expression, expression is an operator" << endl;
-            return -2;
-        }
-    }
-
-    for (unsigned int i = 0; i < expression.length(); i++) {
-        if (!charIsAllowed(expression[i])) {
-            cerr << "Can't parse expression, illegal character " << expression[i] << endl;
-            return -100;
-        }
-    }
-
-    int numberOfLeftParenthesis = 0;
-    int numberOfRightParenthesis = 0;
-    bool hasLetters = false;
-    int operatorCount = false;
-    for (unsigned int i = 0; i < expression.length(); i++) {
-        if (expression[i] == '(') {
-            numberOfLeftParenthesis++;
-        }
-        if (expression[i] == ')') {
-            numberOfRightParenthesis++;
-        }
-        if (charIsOperator(expression[i])) {
-            operatorCount++;
-        }
-        if (!hasLetters && charIsLetter(expression[i])) {
-            hasLetters = true;
-        }
-    }
-    if (!(numberOfLeftParenthesis == numberOfRightParenthesis)) {
-        cerr << string("Can't parse expression, ") + string((numberOfLeftParenthesis > numberOfRightParenthesis) ? "parenthesis opened and not closed" : "closed a non-existent parenthesis") << endl;
-        return -3;
-    }
-
-    if (!hasLetters && (operatorCount == 0 || (expression[0] == '-' && operatorCount == 1)) && numberOfLeftParenthesis == 0) {
-        try {
-            return printResult(stod(expression));
-        }
-        catch (...) {
-            cout << "Expression is not a number, who knew..." << endl;
-        }
-    }
-
-    expression.push_back(')');
-    expression.insert(0, "(");
-
-    char lastChar = expression[0];
-    for (unsigned int i = 1; i < expression.length(); i++) {
-        if (operatorCount > 0) {
-            if (i < expression.length() - 1) {
-                if ((charIsDigit(lastChar) || lastChar == ')') && expression[i] == '-' && charIsOperatorExceptMinus(expression[i + 1])) {
-                    cerr << "Operator conflict at index " << i << endl;
-                    return -5;
-                }
-            }
-
-            if ((charIsOperator(lastChar) && expression[i] == ')') || (lastChar == '(' && charIsOperator(expression[i]) && !(charIsDigit(expression[i + 1]) || expression[i + 1] == '('))) {
-                cerr << "Hanging operator" << endl;
-                return -8;
-            }
-        }
-        if (((lastChar == ')' || charIsDigit(lastChar) || charIsLetter(lastChar)) && expression[i] == '(') || (lastChar == ')' && (charIsDigit(expression[i]) || charIsLetter(expression[i])))) {
-
-            string functionName = getFunctionName(expression, i);
-            bool match = isValidFunction(functionName);
-
-            if (!match) {
-                if (functionName.length() > 0) {
-                    cerr << "Unknown function " + functionName << endl;
-                    return -6;
-                }
-                cerr << "Can't parse expression, missing operator at index " + to_string(i) << endl;
-                return -7;
-            }
-            
-        }
-        lastChar = expression[i];
-    }
-
-    cout << "Step 2: constant initilization" << endl;
+    cout << "Adding constants..." << endl;
     addConstant("pi", M_PI);
     addConstant("pi2", M_PI_2);
     addConstant("pi4", M_PI_4);
     addConstant("1pi", M_1_PI);
     addConstant("2pi", M_2_PI);
     addConstant("e", M_E);
-
-    cout << "Step 3: variable detection" << endl;
-    string variableBuffer = "";
-    for (unsigned int i = 0; i < expression.length(); i++) {
-        if ((charIsOperator(expression[i]) || expression[i] == ')') && variableBuffer.length() != 0) {
-            if (containsLetters(variableBuffer)){
-                addUserVariable(variableBuffer);
+    while (true) {
+        try {
+        string expression;
+        variableCount = 0;
+        current_expression = "";
+        cout << "\nInput your expression" << endl;
+        cin >> expression;
+        stringToLowerCase(expression);
+        cout << "Lowercased: " + expression << endl;
+        cout << "Parsing..." << endl;
+        cout << "Step 1: validity check" << endl;
+        if (expression.length() == 0) {
+            throw "Can't parse expression, length is 0";
+        }
+        if (expression.length() == 1) {
+            if (charIsOperator(expression[0])) {
+                throw "Can't parse expression, expression is an operator";
             }
+        }
+
+        for (unsigned int i = 0; i < expression.length(); i++) {
+            if (!charIsAllowed(expression[i])) {
+                throw "Can't parse expression, illegal character";
+            }
+        }
+
+        int numberOfLeftParenthesis = 0;
+        int numberOfRightParenthesis = 0;
+        bool hasLetters = false;
+        int operatorCount = false;
+        for (unsigned int i = 0; i < expression.length(); i++) {
+            if (expression[i] == '(') {
+                numberOfLeftParenthesis++;
+            }
+            if (expression[i] == ')') {
+                numberOfRightParenthesis++;
+            }
+            if (charIsOperator(expression[i])) {
+                operatorCount++;
+            }
+            if (!hasLetters && charIsLetter(expression[i])) {
+                hasLetters = true;
+            }
+        }
+        if (!(numberOfLeftParenthesis == numberOfRightParenthesis)) {
+            throw (string("Can't parse expression, ") + string((numberOfLeftParenthesis > numberOfRightParenthesis) ? "parenthesis opened and not closed" : "closed a non-existent parenthesis"));
+        }
+
+        if (!hasLetters && (operatorCount == 0 || (expression[0] == '-' && operatorCount == 1)) && numberOfLeftParenthesis == 0) {
+            try {
+                printResult(stod(expression));
+            }
+            catch (...) {
+                throw  "Expression is not a number, who knew...";
+            }
+        }
+
+        expression.push_back(')');
+        expression.insert(0, "(");
+
+        char lastChar = expression[0];
+        for (unsigned int i = 1; i < expression.length(); i++) {
+            if (operatorCount > 0) {
+                if (i < expression.length() - 1) {
+                    if ((charIsDigit(lastChar) || lastChar == ')') && expression[i] == '-' && charIsOperatorExceptMinus(expression[i + 1])) {
+                        throw "Operator conflict at index " + to_string(i);
+                    }
+                }
+
+                if ((charIsOperator(lastChar) && expression[i] == ')') || (lastChar == '(' && charIsOperator(expression[i]) && !(charIsDigit(expression[i + 1]) || expression[i + 1] == '('))) {
+                    throw "Hanging operator";
+                }
+            }
+            if (((lastChar == ')' || charIsDigit(lastChar) || charIsLetter(lastChar)) && expression[i] == '(') || (lastChar == ')' && (charIsDigit(expression[i]) || charIsLetter(expression[i])))) {
+
+                string functionName = getFunctionName(expression, i);
+                bool match = isValidFunction(functionName);
+
+                if (!match) {
+                    if (functionName.length() > 0) {
+                        throw "Unknown function " + functionName;
+                    }
+                    throw "Can't parse expression, missing operator at index " + to_string(i);
+                }
+
+            }
+            lastChar = expression[i];
+        }
+
+        
+        cout << "Step 2: variable detection" << endl;
+        string variableBuffer = "";
+        for (unsigned int i = 0; i < expression.length(); i++) {
+            if ((charIsOperator(expression[i]) || expression[i] == ')') && variableBuffer.length() != 0) {
+                if (containsLetters(variableBuffer) && !isConstant(variableBuffer)) {
+                    addUserVariable(variableBuffer);
+                }
+                variableBuffer.clear();
+            }
+            if (charIsDigitOrLetter(expression[i])) {
+                variableBuffer.push_back(expression[i]);
+            }
+            else {
+                variableBuffer.clear();
+            }
+        }
+
+        if (variableBuffer.length() != 0) {
+            addUserVariable(variableBuffer);
             variableBuffer.clear();
         }
-        if (charIsDigitOrLetter(expression[i])) {
-            variableBuffer.push_back(expression[i]);
+
+        cout << "Step 3: variable input" << endl;
+        for (int i = 0; i < variableCount; i++) {
+            user_variable_values[i] = inputData("Please input value for " + user_variables[i] + " = ");
         }
-        else {
-            variableBuffer.clear();
-        }
-    }
 
-    if (variableBuffer.length() != 0) {
-        addUserVariable(variableBuffer);
-        variableBuffer.clear();
-    }
-
-    cout << "Step 4: variable input" << endl;
-    for (int i = costantCount; i < variableCount; i++) {
-        user_variable_values[i] = inputData("Please input value for " + user_variables[i] + " = ");
-    }
-
-    cout << "Step 5: actual calculation" << endl;
-    try{
+        cout << "Step 4: actual calculation" << endl;
         calculate(expression);
+        }
+        catch (const char* msg) {
+            cerr << msg << endl;
+            incrementExceptions();
+        }
+        catch (string msg2) {
+            cerr << msg2 << endl;
+            incrementExceptions();
+        }
+        catch (...) {
+            cerr << "Unhandled exception" << endl;
+            cerr << "\n\n\n\n\nCongratulation! You have caused an unhandled exception, tell the developer))\n\n\n\n\n" << endl;
+            incrementExceptions();
+        }
     }
-    catch(const char* msg){
-        cerr << msg << endl;
-    }
-
-    return 0;
 }
