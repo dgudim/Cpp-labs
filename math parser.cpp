@@ -74,7 +74,7 @@ void stringToLowerCase(string& input) {
 }
 
 void printResult(long double result) {
-    cout << "\n\tResult is " + doubleToString(result);
+    cout << "\n\tResult is " + doubleToString(result) << endl;
 }
 
 bool charIsPrecedentOperator(char character, char precedenceLevel) {
@@ -205,7 +205,7 @@ bool isConstant(string name) {
 }
 
 double inputData(string message) {
-    cout << message;
+    cout << message << flush;
     double toReturn;
     while (!(cin >> toReturn)) {
         cin.clear();
@@ -236,7 +236,7 @@ double processOperator(char operatorChar, double arg1, double arg2) {
         return pow(arg1, arg2);
         break;
     default:
-        cout << "Unknown operator " << operatorChar;
+        cout << "Unknown operator " << operatorChar << endl;
         return 0;
     }
 }
@@ -531,7 +531,7 @@ int main()
         string expression;
         variableCount = 0;
         current_expression = "";
-        cout << "\n\nInput your expression" << endl;
+        cout << "\nInput your expression" << endl;
         cin >> expression;
         stringToLowerCase(expression);
         cout << "Lowercased: " + expression << endl;
@@ -578,7 +578,7 @@ int main()
             try { printResult(stod(expression)); 
             throw "\nExpression is just one number... yeah..."; }
             catch (const char* e) { throw e; }
-            catch (...) { cout << "Expression is not a number, who knew..."; }
+            catch (...) { cout << "Expression is not a number, who knew..." << endl; }
         }
 
         expression.push_back(')');
