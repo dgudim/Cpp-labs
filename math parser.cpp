@@ -1,6 +1,7 @@
 ﻿#pragma comment(lib, "winmm.lib")
 #define NOMINMAX
 #include <windows.h>
+#include <mmsystem.h>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -11,7 +12,7 @@
 using namespace std;
 
 //#define DEBUG
-//#define SANS
+#define SANS
 
 string current_expression;
 
@@ -350,7 +351,7 @@ void incrementExceptions() {
         if (exceptionCount == 20) {
             cout << "\nYou are gona have a bad time" << endl;
             cout << "\n        ##################        \n    ####                  ####    \n  ##                          ##  \n  ##                          ##  \n##                        %%    ##\n##    ######          ###%%#    ##\n##    ######          ##$$##    ##\n##    ######    ##    ######    ##\n  ##          ######          ##  \n####  ##                  ##  ####\n##    ######################    ##\n##      ##  ##  ##  ##  ##      ##\n  ####    ##############    ####  \n      ####              ####      \n          ##############\n" << endl;
-            PlaySound(TEXT("..\\megalovania.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            PlaySound(TEXT("megalovania.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
     #endif // SANS
 }
