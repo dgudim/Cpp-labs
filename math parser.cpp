@@ -48,11 +48,11 @@ unsigned int exceptionCount = 0;
 string doubleToString(double value)
 {
     ostringstream out;
-    out.precision(15);
+    out.precision(35);
     out << std::fixed << value;
     string strOut = out.str();
     char currChar = strOut[strOut.length() - 1];
-    while (currChar == '0' || currChar == '.') {
+    while ((currChar == '0' || currChar == '.') && strOut.length() > 1) {
         strOut.erase(strOut.length() - 1, 1);
         currChar = strOut[strOut.length() - 1];
     }
@@ -76,6 +76,14 @@ void stringToLowerCase(string& input) {
 
 void printResult(long double result) {
     cout << "\n\tResult is " + doubleToString(result) << endl;
+    cout << "Continue?" << endl;
+    string input;
+    cin >> input;
+    if (input == "0" || input == "no") {
+        exit(1);
+    }
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
 bool charIsPrecedentOperator(char character, char precedenceLevel) {
@@ -234,6 +242,12 @@ double processOperator(char operatorChar, double arg1, double arg2) {
         return arg1 * arg2;
         break;
     case '^':
+        if (arg2 < 0) {
+            throw  "Illegal power operation, can't use fractional power on a negative number";
+        }
+        if (arg1 == 0 && arg2 == 2) {
+            throw  "Illegal power operation, can't use 0 power on a 0";
+        }
         return pow(arg1, arg2);
         break;
     default:
@@ -263,6 +277,9 @@ double processFunction(int function, double arg) {
         return tan(arg);
         break;
     case 5:
+        if (tan(arg) == 0) {
+            throw  "Division by zero";
+        }
         return 1.0 / tan(arg);
         break;
     case 6: 
@@ -281,7 +298,10 @@ double processFunction(int function, double arg) {
         return atan(arg);
         break;
     case 9:
-        return atan(1.0/arg);
+        if (arg == 0) {
+            throw  "Division by zero";
+        }
+        return atan(1.0 / arg);
         break;
     case 10: 
         if (arg <= 0) {
@@ -493,7 +513,7 @@ void processDeepestExpresion() {
         if (current_expression[i] == ')') {
             lastIndex = i;
             if (lastIndex - firstIndex == 1) {
-                substr = "(0)";
+                substr = "0+0";
             }
             else {
                 substr = current_expression.substr(firstIndex + 1, lastIndex - firstIndex - 1);
@@ -518,17 +538,8 @@ void calculate(string expressionStr) {
     printResult(stod(current_expression));
 }
 
-int main()
-{
-    cout << "Adding constants..." << endl;
-    addConstant("pi", M_PI);
-    addConstant("pi2", M_PI_2);
-    addConstant("pi4", M_PI_4);
-    addConstant("1pi", M_1_PI);
-    addConstant("2pi", M_2_PI);
-    addConstant("e", M_E);
-    while (true) {
-        try {
+void checkDataAndCalculate() {
+    try {
         string expression;
         variableCount = 0;
         current_expression = "";
@@ -555,8 +566,7 @@ int main()
 
         int numberOfLeftParenthesis = 0;
         int numberOfRightParenthesis = 0;
-        bool hasLetters = false;
-        int operatorCount = false;
+        int operatorCount = 0;
         for (unsigned int i = 0; i < expression.length(); i++) {
             if (expression[i] == '(') {
                 numberOfLeftParenthesis++;
@@ -567,19 +577,9 @@ int main()
             if (charIsOperator(expression[i])) {
                 operatorCount++;
             }
-            if (!hasLetters && charIsLetter(expression[i])) {
-                hasLetters = true;
-            }
         }
         if (!(numberOfLeftParenthesis == numberOfRightParenthesis)) {
             throw (string("Can't parse expression, ") + string((numberOfLeftParenthesis > numberOfRightParenthesis) ? "parenthesis opened and not closed" : "closed a non-existent parenthesis"));
-        }
-
-        if (!hasLetters && (operatorCount == 0 || (expression[0] == '-' && operatorCount == 1)) && numberOfLeftParenthesis == 0) {
-            try { printResult(stod(expression)); 
-            throw "\nExpression is just one number... yeah..."; }
-            catch (const char* e) { throw e; }
-            catch (...) { cout << "Expression is not a number, who knew..." << endl; }
         }
 
         expression.push_back(')');
@@ -614,7 +614,7 @@ int main()
             lastChar = expression[i];
         }
 
-        
+
         cout << "Step 2: variable detection" << endl;
         string variableBuffer = "";
         for (unsigned int i = 0; i < expression.length(); i++) {
@@ -644,19 +644,33 @@ int main()
 
         cout << "Step 4: actual calculation" << endl;
         calculate(expression);
-        }
-        catch (const char* msg) {
-            cerr << msg << endl;
-            incrementExceptions();
-        }
-        catch (string msg2) {
-            cerr << msg2 << endl;
-            incrementExceptions();
-        }
-        catch (...) {
-            cerr << "Unhandled exception" << endl;
-            cerr << "\n\n\n\n\nCongratulation! You have caused an unhandled exception, tell the developer))\n\n\n\n\n" << endl;
-            incrementExceptions();
-        }
     }
+    catch (const char* msg) {
+        cerr << msg << endl;
+        incrementExceptions();
+    }
+    catch (string msg2) {
+        cerr << msg2 << endl;
+        incrementExceptions();
+    }
+    catch (...) {
+        cerr << "Unhandled exception" << endl;
+        cerr << "\n\n\n\n\nCongratulation! You have caused an unhandled exception, tell the developer))\n\n\n\n\n" << endl;
+        incrementExceptions();
+    }
+}
+
+int main()
+{
+    cout << "Adding constants..." << endl;
+    addConstant("pi", M_PI);
+    addConstant("pi2", M_PI_2);
+    addConstant("pi4", M_PI_4);
+    addConstant("1pi", M_1_PI);
+    addConstant("2pi", M_2_PI);
+    addConstant("e", M_E);
+    while (true) {
+        checkDataAndCalculate();
+    }
+    return 0;
 }
