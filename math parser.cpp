@@ -79,11 +79,9 @@ void printResult(long double result) {
     cout << "Continue?" << endl;
     string input;
     cin >> input;
-    if (input == "0" || input == "no") {
+    if (!(input == "1" || input == "yes" || input == "y")) {
         exit(1);
     }
-    cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
 bool charIsPrecedentOperator(char character, char precedenceLevel) {
@@ -242,10 +240,10 @@ double processOperator(char operatorChar, double arg1, double arg2) {
         return arg1 * arg2;
         break;
     case '^':
-        if (arg2 < 0) {
+        if (arg1 < 0 && arg2 < 1 && arg2 > 0) {
             throw  "Illegal power operation, can't use fractional power on a negative number";
         }
-        if (arg1 == 0 && arg2 == 2) {
+        if (arg1 == 0 && arg2 == 0) {
             throw  "Illegal power operation, can't use 0 power on a 0";
         }
         return pow(arg1, arg2);
