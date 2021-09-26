@@ -12,7 +12,7 @@
 using namespace std;
 
 //#define DEBUG
-#define SANS
+#define SANS 
 
 string current_expression;
 
@@ -54,6 +54,9 @@ string doubleToString(double value)
     char currChar = strOut[strOut.length() - 1];
     while ((currChar == '0' || currChar == '.') && strOut.length() > 1) {
         strOut.erase(strOut.length() - 1, 1);
+        if (currChar == '.') {
+            break;
+        }
         currChar = strOut[strOut.length() - 1];
     }
     return strOut;
