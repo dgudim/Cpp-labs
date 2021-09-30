@@ -8,15 +8,15 @@ using namespace std;
 int errCount = 0;
 
 double inputData(string varName) {
-    cout << "Пожалуйста введите " << varName << ". " << varName << " = ";
+    cout << "Please input " << varName << ". " << varName << " = ";
     double toReturn;
     while (!(cin >> toReturn)) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Пожалуйста, используйте числа" << endl;
+        cout << "Please use numbers" << endl;
         errCount++;
         if (errCount == 10) {
-            cout << "Ну хватит, пожалуйста" << endl;
+            cout << "Please stop >_<" << endl;
         }
     }
     return toReturn;
@@ -31,9 +31,8 @@ double calculate(double z, double y, double x) {
 
 int main()
 {
-    setlocale(0, "RU");
     while (true) {
-        cout << "\n\tВаш результат: " << calculate(inputData("z"), inputData("y"), inputData("x")) << ", хорошего дня\n" << endl;
+        cout << "\n\tResult: " << calculate(inputData("z"), inputData("y"), inputData("x")) << ", have a nice day\n" << endl;
         system("pause");
     }
     return 0;

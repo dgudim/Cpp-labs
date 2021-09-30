@@ -1,8 +1,4 @@
-﻿#pragma comment(lib, "winmm.lib")
-#define NOMINMAX
-#include <windows.h>
-#include <mmsystem.h>
-#include <iostream>
+﻿#include <iostream>
 #include <limits>
 #include <string>
 #include <sstream>
@@ -12,7 +8,6 @@
 using namespace std;
 
 //#define DEBUG
-#define SANS 
 
 string current_expression;
 
@@ -368,13 +363,6 @@ void incrementExceptions() {
     if (exceptionCount == 10) {
         cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\t\t\t >__< please stop \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" << endl;
     }
-    #ifdef SANS
-        if (exceptionCount == 20) {
-            cout << "\nYou are gona have a bad time" << endl;
-            cout << "\n        ##################        \n    ####                  ####    \n  ##                          ##  \n  ##                          ##  \n##                        %%    ##\n##    ######          ###%%#    ##\n##    ######          ##$$##    ##\n##    ######    ##    ######    ##\n  ##          ######          ##  \n####  ##                  ##  ####\n##    ######################    ##\n##      ##  ##  ##  ##  ##      ##\n  ####    ##############    ####  \n      ####              ####      \n          ##############\n" << endl;
-            PlaySound(TEXT("megalovania.wav"), NULL, SND_FILENAME | SND_ASYNC);
-    }
-    #endif // SANS
 }
 
 double parseElementary(string expression) {
