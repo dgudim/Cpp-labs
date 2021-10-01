@@ -55,6 +55,11 @@ int displaySelection(string* options, int optionCount) {
     int counter = 0;
     int key = 0;
 
+    for (int i = 0; i < optionCount; i++) {
+        setConsoleCursorPosition(0, offset + i);
+        cout << options[i];
+    }
+
     while (true) {
         if (key == 72){
             counter--;
@@ -69,11 +74,16 @@ int displaySelection(string* options, int optionCount) {
             }
         }
         for (int i = 0; i < optionCount; i++) {
-            setConsoleCursorPosition(0, offset + i);
-            setConsoleColor(counter == i ? 12 : 7);
-            cout << options[i];
+            if (abs(counter - i) <= 1 || i == 0 || i == optionCount - 1) {
+                setConsoleCursorPosition(0, offset + i);
+                setConsoleColor(counter == i ? 12 : 7);
+                cout << options[i];
+            }
         }
         key = _getch();
+        if (key == 224) {
+            key = _getch();
+        }
         if (key == '\r') {
             coutWithColor(8, "\nВы выбрали: " + options[counter] + "\n");
             return counter + 1;
@@ -87,7 +97,7 @@ void fillArray(bool manual) {
             dynamic_array[i] = (int)inputData("");
         }
         else {
-            dynamic_array[i] = rand() % 100 - 49;
+            dynamic_array[i] = rand() % 10 - 4;
             cout << dynamic_array[i] << " ";
         }
     }
@@ -129,16 +139,17 @@ void initializeArray (int size_double) {
     }
 }
 
-int findMinElementIndex() {
+int findMinElementIndex(bool absolute) {
     int minIndex = 0;
     int minElement = dynamic_array[0];
     for (int i = 1; i < dynamic_array_size; i++) {
-        if (dynamic_array[i] < minElement) {
-            minElement = dynamic_array[i];
+        int currElem = absolute ? abs(dynamic_array[i]) : dynamic_array[i];
+        if (currElem < minElement) {
+            minElement = currElem;
             minIndex = i;
         }
     }
-    coutWithColor(3, "Самое маленькое число: " + to_string(minElement) + "(индекс " + to_string(minIndex) + ")\n");
+    coutWithColor(3, "Самое маленькое " + string(absolute ? "по модулю " : "") + "число: " + to_string(minElement) + "(индекс " + to_string(minIndex) + ")\n");
     return minIndex;
 }
 
@@ -151,7 +162,7 @@ int findMaxElementIndex() {
             maxIndex = i;
         }
     }
-    coutWithColor(3, "Самое маленькое число: " + to_string(maxElement) + "(индекс " + to_string(maxIndex) + ")\n");
+    coutWithColor(3, "Самое большое число: " + to_string(maxElement) + "(индекс " + to_string(maxIndex) + ")\n");
     return maxIndex;
 }
 
@@ -192,7 +203,7 @@ int findSecondZeroElementIndex() {
 int findLastPositiveElementIndex() {
     for (int i = dynamic_array_size - 1; i >= 0; i--) {
         if (dynamic_array[i] > 0) {
-            coutWithColor(3, "Индекс последнего положительного элемента: " + to_string(i) + "\n");
+            coutWithColor(3, "Индекс последнего положительного элемента("+ to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
             return i;
         }
     }
@@ -202,8 +213,42 @@ int findLastPositiveElementIndex() {
 int findFirstPositiveElementIndex() {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (dynamic_array[i] > 0) {
-            coutWithColor(3, "Индекс первого положительного элемента: " + to_string(i) + "\n");
+            coutWithColor(3, "Индекс первого положительного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
             return i;
+        }
+    }
+    return -2;
+}
+
+int findFirstNegativeElementIndex() {
+    for (int i = 0; i < dynamic_array_size; i++) {
+        if (dynamic_array[i] < 0) {
+            coutWithColor(3, "Индекс первого отрицательного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+            return i;
+        }
+    }
+    return -2;
+}
+
+int findLastNegativeElementIndex() {
+    for (int i = dynamic_array_size - 1; i >= 0; i--) {
+        if (dynamic_array[i] < 0) {
+            coutWithColor(3, "Индекс последнего отрицательного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+            return i;
+        }
+    }
+    return -2;
+}
+
+int findSecondNegativeElementIndex() {
+    bool secondZeroFound = false;
+    for (int i = 0; i < dynamic_array_size; i++) {
+        if (dynamic_array[i] < 0) {
+            if (secondZeroFound) {
+                coutWithColor(3, "Индекс второго отрицательного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+                return i;
+            }
+            secondZeroFound = true;
         }
     }
     return -2;
@@ -211,7 +256,7 @@ int findFirstPositiveElementIndex() {
 
 void checkIndexes(int& index1, int& index2) {
     if (index1 < -1 || index2 < -1) {
-        throw "Один из индексов отрицательный";
+        throw "Один из индексов отрицательный(нет числа, подходящего под критерии в задании)";
     }
     if (index1 == index2) {
         throw "Нет элементов между заданными индексами, индексы сопадают";
@@ -224,11 +269,11 @@ void checkIndexes(int& index1, int& index2) {
     }
 }
 
-double caclulateSumBetweenTwoIndexes(int index1, int index2) {
+double caclulateSumBetweenTwoIndexes(int index1, int index2, bool absolute) {
     checkIndexes(index1, index2);
     double sum = 0;
     for (int i = index1 + 1; i < index2; i++) {
-        sum += dynamic_array[i];
+        sum += absolute ? abs(dynamic_array[i]) : dynamic_array[i];
     }
     return sum;
 }
@@ -243,9 +288,7 @@ double caclulateProductBetweenTwoIndexes(int index1, int index2) {
 }
 
 void printResult(double result) {
-    setConsoleColor(10);
-    cout << "Результат: " << result << endl;
-    setConsoleColor(7);
+    coutWithColor(10, "Результат: " + to_string(result) + "\n");
 }
 
 int main()
@@ -258,7 +301,7 @@ int main()
         coutWithColor(14, "\nВыберите что вычислить\n");
         try
         {
-            switch (displaySelection(new string[12]{
+            switch (displaySelection(new string[16]{
             " 1. Произведение элементов массива, расположенных между максимальным и минимальным элементами",
             " 2. Сумму элементов массива, расположенных между первым и последним нулевыми элементами",
             " 3. Сумму элементов массива, расположенных до последнего положительного элемента",
@@ -269,42 +312,69 @@ int main()
             " 8. Сумму модулей элементов массива, расположенных после последнего отрицательного элемента",
             " 9. Сумму элементов массива, расположенных после последнего элемента, равного нулю",
             "10. Сумму модулей элементов массива, расположенных после минимального по модулю элемента",
-            "11. Сумму элементов массива, расположенных после минимального элемента" }, 12)) {
+            "11. Сумму элементов массива, расположенных после минимального элемента",
+            "12. Сумму элементов массива, расположенных после первого положительного элемента",
+            "13. Сумму модулей элементов массива, расположенных после первого отрицательного элемента",
+            "14. Сумму модулей элементов массива, расположенных после первого элемента, равного нулю",
+            "15. Сумму положительных элементов массива, расположенных до максимального элемента",
+            "16. Произведение элементов массива, расположенных между первым и последним отрицательными элементами"}, 16)) {
             case 1:
-                printResult(caclulateProductBetweenTwoIndexes(findMaxElementIndex(), findMinElementIndex()));
+                printResult(caclulateProductBetweenTwoIndexes(findMaxElementIndex(), findMinElementIndex(false)));
                 break;
             case 2:
-                printResult(caclulateSumBetweenTwoIndexes(findFirstZeroElementIndex(), findLastZeroElementIndex()));
+                printResult(caclulateSumBetweenTwoIndexes(findFirstZeroElementIndex(), findLastZeroElementIndex(), false));
                 break;
             case 3:
-                printResult(caclulateSumBetweenTwoIndexes(-1, findLastPositiveElementIndex()));
+                printResult(caclulateSumBetweenTwoIndexes(-1, findLastPositiveElementIndex(), false));
                 break;
             case 4:
-                printResult(caclulateSumBetweenTwoIndexes(findFirstPositiveElementIndex(), findLastPositiveElementIndex()));
+                printResult(caclulateSumBetweenTwoIndexes(findFirstPositiveElementIndex(), findLastPositiveElementIndex(), false));
                 break;
             case 5:
                 printResult(caclulateProductBetweenTwoIndexes(findFirstZeroElementIndex(), findSecondZeroElementIndex()));
                 break;
             case 6:
-
+                printResult(caclulateSumBetweenTwoIndexes(findFirstNegativeElementIndex(), findSecondNegativeElementIndex(), false));
                 break;
             case 7:
-
+                printResult(caclulateSumBetweenTwoIndexes(-1, findMinElementIndex(false), false));
                 break;
             case 8:
-
+                printResult(caclulateSumBetweenTwoIndexes(findLastNegativeElementIndex(), dynamic_array_size, true));
                 break;
             case 9:
-
+                printResult(caclulateSumBetweenTwoIndexes(findLastZeroElementIndex(), dynamic_array_size, false));
                 break;
             case 10:
-
+                printResult(caclulateSumBetweenTwoIndexes(findMinElementIndex(true), dynamic_array_size, true));
                 break;
             case 11:
-
+                printResult(caclulateSumBetweenTwoIndexes(findMinElementIndex(false), dynamic_array_size, false));
                 break;
             case 12:
-
+                printResult(caclulateSumBetweenTwoIndexes(findFirstPositiveElementIndex(), dynamic_array_size, false));
+                break;
+            case 13:
+                printResult(caclulateSumBetweenTwoIndexes(findFirstNegativeElementIndex(), dynamic_array_size, true));
+                break;
+            case 14:
+                printResult(caclulateSumBetweenTwoIndexes(findFirstZeroElementIndex(), dynamic_array_size, true));
+                break;
+                case 15:{
+                    int index1 = -1;
+                    int index2 = findMaxElementIndex();
+                    checkIndexes(index1, index2);
+                    double sum = 0;
+                    for (int i = index1 + 1; i < index2; i++) {
+                        if (dynamic_array[i] > 0) {
+                            sum += dynamic_array[i];
+                        }
+                    }
+                    printResult(sum);
+                }
+                break;
+            case 16:
+                printResult(caclulateProductBetweenTwoIndexes(findFirstNegativeElementIndex(), findLastNegativeElementIndex()));
                 break;
             }
         }
