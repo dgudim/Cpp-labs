@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <string>
 #define NOMINMAX
 #include <windows.h>
 using namespace std;
@@ -13,6 +14,14 @@ double inputData(string message) {
         cout << "Пожалуйста, используйте числа" << endl;
     }
     return toReturn;
+}
+
+string addSpaces(string input, int targetLength) {
+    int spaces = targetLength - input.length();
+    for (int i = 0; i < spaces; i++) {
+        input.append(" ");
+    }
+    return input;
 }
 
 long double calculateFunction(double x) {
@@ -65,16 +74,23 @@ int main() {
             cout << "Количество членов в сумме не может быть меньше 0, использую дефолтное количество: 3 члена" << endl;
             n = 3;
         }
-        if ((abs(to) > 700 || abs(from) > 700) && n > 3) {
-            cout << "Начальный или конечный x больше 700, возможно переполнение" << endl;
-            Sleep(4000);
+        if ((abs(to) > 700 || abs(from) > 700) && n >= 5) {
+            cout << "Начальный или конечный x больше 700 при n >= 5, возможно переполнение" << endl;
+            Sleep(2000);
         }
         if (n > 70) {
             cout << "Количество членов в сумме больше 70, возможно переполнение" << endl;
-            Sleep(4000);
+            Sleep(2000);
         }
+        long double current_sum, current_function;
+        int maxFuncLen = 15;
+        int maxSumLen = 15;
         for (double i = from; i <= to; i += step) {
-            cout << "x = " << i << " | Y(x): " << calculateFunction(i) << " | Сумма: " << calculateSum(i, n) << endl;
+            current_sum = calculateSum(i, n);
+            current_function = calculateFunction(i);
+            maxSumLen = max((int)to_string(current_sum).length(), maxSumLen);
+            maxFuncLen = max((int)to_string(current_function).length(), maxFuncLen);
+            cout << "x = " << addSpaces(to_string(i), max(to_string(from).length(), to_string(to).length()) + 3) << "Y(x) = " << addSpaces(to_string(current_function), maxFuncLen) << " S(x) = " << addSpaces(to_string(current_sum), maxSumLen) << " |S(x)-Y(x)| = " << to_string(abs(current_sum - current_function)) << endl;
         }
         cout << "Продолжить?" << endl;
         string input;
