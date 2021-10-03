@@ -2,33 +2,51 @@
 #include <math.h>
 #include <string>
 #include <conio.h>
+#include <sstream>
+#include <iomanip>
 #define NOMINMAX
 #include <windows.h>
 using namespace std;
 
-typedef long double (*CalcFuncPointer)(double);
+typedef long double (*CalcFuncPointer)(long double);
 
-long double defaultFunction(double x) {
+long double defaultFunction(long double x) {
     return (1 - x * x / 2) * cos(x) - x / 2 * sin(x);
 }
 
-long double expFunction(double x) {
+long double expFunction(long double x) {
     return 2 * exp(x);
 }
 
-long double sin2Function(double x) {
+long double sin2Function(long double x) {
     return sin(x) * sin(x);
 }
 
-double inputData(string message) {
+long double inputData(string message) {
     cout << message << flush;
-    double toReturn;
+    long double toReturn;
     while (!(cin >> toReturn)) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Пожалуйста, используйте числа" << endl;
     }
     return toReturn;
+}
+
+string doubleToString(long double value){
+    ostringstream out;
+    out.precision(9);
+    out << std::fixed << value;
+    string strOut = out.str();
+    char currChar = strOut[strOut.length() - 1];
+    while ((currChar == '0' || currChar == '.') && strOut.length() > 1) {
+        strOut.erase(strOut.length() - 1, 1);
+        if (currChar == '.') {
+            break;
+        }
+        currChar = strOut[strOut.length() - 1];
+    }
+    return strOut;
 }
 
 void setConsoleColor(int color) {
@@ -105,7 +123,7 @@ string addSpaces(string input, int targetLength) {
     return input;
 }
 
-long double calculateSum(double x, int n) {
+long double calculateSum(long double x, int n) {
     if (n == 0) {
         return 1;
     }
@@ -135,9 +153,9 @@ int main() {
     setlocale(0, "RU");
 
     while (true) {
-        double from = inputData("Введите начальный x: ");
-        double to = inputData("Введите конечный x: ");
-        double step = inputData("Введите шаг: ");
+        long double from = inputData("Введите начальный x: ");
+        long double to = inputData("Введите конечный x: ");
+        long double step = inputData("Введите шаг: ");
         int n = (int)inputData("Введите n для суммы: ");
         if (from > to && step > 0) {
             cout << "Начальный индекс не может быть меньше конечного, меняю местами" << endl;
@@ -164,7 +182,7 @@ int main() {
 
         coutWithColor(14, "\nВыберите функцию Y(x)\n");
         CalcFuncPointer func;
-        switch (displaySelection(new string[3]{ "1. (1 - x^2 / 2) * cos(x) - x / 2*sin(x)", "2. 2*exp(x)", "3. sin(x)^2" }, 3)) {
+        switch (displaySelection(new string[6]{ "1. (1 - x^2 / 2) * cos(x) - x / 2*sin(x)", "2. 2*exp(x)", "3. sin(x)^2", "4. sin(x)" , "5. cos(x)" , "6. Кубический корень из x" }, 6)) {
             case(1):
             default:
                 func = defaultFunction;
@@ -175,17 +193,26 @@ int main() {
             case(3):
                 func = sin2Function;
                 break;
+            case(4):
+                func = sin;
+                break;
+            case(5):
+                func = cos;
+                break;
+            case(6):
+                func = cbrt;
+                break;
         }
 
         long double current_sum, current_function;
         int maxFuncLen = 15;
         int maxSumLen = 15;
-        for (double i = from; i *(step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
+        for (long double i = from; i *(step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
             current_sum = calculateSum(i, n);
             current_function = func(i);
-            maxSumLen = max((int)to_string(current_sum).length(), maxSumLen);
-            maxFuncLen = max((int)to_string(current_function).length(), maxFuncLen);
-            cout << "x = " << addSpaces(to_string(i), max(to_string(from).length(), to_string(to).length()) + 3) << "Y(x) = " << addSpaces(to_string(current_function), maxFuncLen) << " S(x) = " << addSpaces(to_string(current_sum), maxSumLen) << " |S(x)-Y(x)| = " << to_string(abs(current_sum - current_function)) << endl;
+            maxSumLen = max((int)doubleToString(current_sum).length(), maxSumLen);
+            maxFuncLen = max((int)doubleToString(current_function).length(), maxFuncLen);
+            cout << "x = " << addSpaces(doubleToString(i), max(doubleToString(from).length(), doubleToString(to).length()) + 3) << "Y(x) = " << addSpaces(doubleToString(current_function), maxFuncLen) << " S(x) = " << addSpaces(doubleToString(current_sum), maxSumLen) << " |S(x)-Y(x)| = " << doubleToString(abs(current_sum - current_function)) << endl;
         }
         cout << "Продолжить?" << endl;
         string input;
