@@ -8,6 +8,8 @@
 #include <windows.h>
 using namespace std;
 
+#pragma execution_character_set( "utf-8" )
+
 typedef long double (*CalcFuncPointer)(long double);
 
 long double defaultFunction(long double x) {
@@ -28,7 +30,7 @@ long double inputData(string message) {
     while (!(cin >> toReturn)) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Пожалуйста, используйте числа" << endl;
+        cout << "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РёСЃРїРѕР»СЊР·СѓР№С‚Рµ С‡РёСЃР»Р°" << endl;
     }
     return toReturn;
 }
@@ -109,7 +111,7 @@ int displaySelection(string* options, int optionCount) {
             key = _getch();
         }
         if (key == '\r') {
-            coutWithColor(8, "\nВы выбрали: " + options[counter] + "\n");
+            coutWithColor(8, "\nР’С‹ РІС‹Р±СЂР°Р»Рё: " + options[counter] + "\n");
             return counter + 1;
         }
     }
@@ -150,39 +152,39 @@ long double calculateSum(long double x, int n) {
 
 int main() {
 
-    setlocale(0, "RU");
+    SetConsoleOutputCP(65001);
 
     while (true) {
-        long double from = inputData("Введите начальный x: ");
-        long double to = inputData("Введите конечный x: ");
-        long double step = inputData("Введите шаг: ");
-        int n = (int)inputData("Введите n для суммы: ");
+        long double from = inputData("Р’РІРµРґРёС‚Рµ РЅР°С‡Р°Р»СЊРЅС‹Р№ x: ");
+        long double to = inputData("Р’РІРµРґРёС‚Рµ РєРѕРЅРµС‡РЅС‹Р№ x: ");
+        long double step = inputData("Р’РІРµРґРёС‚Рµ С€Р°Рі: ");
+        int n = (int)inputData("Р’РІРµРґРёС‚Рµ n РґР»СЏ СЃСѓРјРјС‹: ");
         if (from > to && step > 0) {
-            cout << "Начальный индекс не может быть меньше конечного, меняю местами" << endl;
+            cout << "РќР°С‡Р°Р»СЊРЅС‹Р№ РёРЅРґРµРєСЃ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РјРµРЅСЊС€Рµ РєРѕРЅРµС‡РЅРѕРіРѕ, РјРµРЅСЏСЋ РјРµСЃС‚Р°РјРё" << endl;
             swap(from, to);
         }
         if (step == 0) {
-            cout << "Шаг равен 0, вычисление никогда не закончится, теперь шаг = 0.1" << endl;
+            cout << "РЁР°Рі СЂР°РІРµРЅ 0, РІС‹С‡РёСЃР»РµРЅРёРµ РЅРёРєРѕРіРґР° РЅРµ Р·Р°РєРѕРЅС‡РёС‚СЃСЏ, С‚РµРїРµСЂСЊ С€Р°Рі = 0.1" << endl;
             step = 0.1;
         }
         if (from == to) {
-            cout << "Начальный индекс равен конечному, устанавливаю конечный индекс на 1 больше начального" << endl;
+            cout << "РќР°С‡Р°Р»СЊРЅС‹Р№ РёРЅРґРµРєСЃ СЂР°РІРµРЅ РєРѕРЅРµС‡РЅРѕРјСѓ, СѓСЃС‚Р°РЅР°РІР»РёРІР°СЋ РєРѕРЅРµС‡РЅС‹Р№ РёРЅРґРµРєСЃ РЅР° 1 Р±РѕР»СЊС€Рµ РЅР°С‡Р°Р»СЊРЅРѕРіРѕ" << endl;
             to++;
         }
         if (n < 0) {
-            cout << "Количество членов в сумме не может быть меньше 0, использую дефолтное количество: 3 члена" << endl;
+            cout << "РљРѕР»РёС‡РµСЃС‚РІРѕ С‡Р»РµРЅРѕРІ РІ СЃСѓРјРјРµ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РјРµРЅСЊС€Рµ 0, РёСЃРїРѕР»СЊР·СѓСЋ РґРµС„РѕР»С‚РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ : 3 С‡Р»РµРЅР°" << endl;
             n = 3;
         }
         if ((abs(to) > 700 || abs(from) > 700) && n >= 5) {
-            coutWithColor(4, "Начальный или конечный x больше 700 по модулю при n >= 5, возможно переполнение\n");
+            coutWithColor(4, "РќР°С‡Р°Р»СЊРЅС‹Р№ РёР»Рё РєРѕРЅРµС‡РЅС‹Р№ x Р±РѕР»СЊС€Рµ 700 РїРѕ РјРѕРґСѓР»СЋ РїСЂРё n >= 5, РІРѕР·РјРѕР¶РЅРѕ РїРµСЂРµРїРѕР»РЅРµРЅРёРµ\n");
         }
         if (n > 70) {
-            coutWithColor(4, "Количество членов в сумме больше 70, возможно переполнение или очень долгое вычисление\n");
+            coutWithColor(4, "РљРѕР»РёС‡РµСЃС‚РІРѕ С‡Р»РµРЅРѕРІ РІ СЃСѓРјРјРµ Р±РѕР»СЊС€Рµ 70, РІРѕР·РјРѕР¶РЅРѕ РїРµСЂРµРїРѕР»РЅРµРЅРёРµ РёР»Рё РѕС‡РµРЅСЊ РґРѕР»РіРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ\n");
         }
 
-        coutWithColor(14, "\nВыберите функцию Y(x)\n");
+        coutWithColor(14, "\nР’С‹Р±РµСЂРёС‚Рµ С„СѓРЅРєС†РёСЋ Y(x)\n");
         CalcFuncPointer func;
-        switch (displaySelection(new string[6]{ "1. (1 - x^2 / 2) * cos(x) - x / 2*sin(x)", "2. 2*exp(x)", "3. sin(x)^2", "4. sin(x)" , "5. cos(x)" , "6. Кубический корень из x" }, 6)) {
+        switch (displaySelection(new string[6]{ "1. (1 - x^2 / 2) * cos(x) - x / 2*sin(x)", "2. 2*exp(x)", "3. sin(x)^2", "4. sin(x)" , "5. cos(x)" , "6. РљСѓР±РёС‡РµСЃРєРёР№ РєРѕСЂРµРЅСЊ РёР· x" }, 6)) {
             case(1):
             default:
                 func = defaultFunction;
@@ -205,8 +207,8 @@ int main() {
         }
 
         long double current_sum, current_function;
-        int maxFuncLen = 15;
-        int maxSumLen = 15;
+        int maxFuncLen = 25;
+        int maxSumLen = 25;
         for (long double i = from; i *(step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
             current_sum = calculateSum(i, n);
             current_function = func(i);
@@ -214,7 +216,7 @@ int main() {
             maxFuncLen = max((int)doubleToString(current_function).length(), maxFuncLen);
             cout << "x = " << addSpaces(doubleToString(i), max(doubleToString(from).length(), doubleToString(to).length()) + 3) << "Y(x) = " << addSpaces(doubleToString(current_function), maxFuncLen) << " S(x) = " << addSpaces(doubleToString(current_sum), maxSumLen) << " |S(x)-Y(x)| = " << doubleToString(abs(current_sum - current_function)) << endl;
         }
-        cout << "Продолжить?" << endl;
+        cout << "РџСЂРѕРґРѕР»Р¶РёС‚СЊ?" << endl;
         string input;
         cin >> input;
         if (!(input == "yes" || input == "y" || input == "1")) {
