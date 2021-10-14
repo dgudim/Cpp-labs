@@ -116,12 +116,10 @@ void initializeArray (double size_double) {
     if (size_double == 1) {
         cout << "Размер равен 1, мы так ничего не вычислим, надо хотя-бы 3" << endl;
         size = 3;
-    }
-    if (size_double <= 0) {
+    }else if (size_double <= 0) {
         cout << "Размер отрицательный или равен нулю, использую размер 10" << endl;
         size = 10;
-    }
-    if (size_double > 1000000) {
+    }else if (size_double > 1000000) {
         cout << "Размер массива слишком большой, использую размер 1000000" << endl;
         size = 1000000;
     }
@@ -163,7 +161,7 @@ int findMaxElementIndex() {
             maxIndex = i;
         }
     }
-    coutWithColor(3, "Самое большое число: " + to_string(maxElement) + "(������ " + to_string(maxIndex) + ")\n");
+    coutWithColor(3, "Самое большое число: " + to_string(maxElement) + "(индекс " + to_string(maxIndex) + ")\n");
     return maxIndex;
 }
 

@@ -133,19 +133,13 @@ long double calculateSum(long double x, int n) {
     if (n == 1) {
         return sum;
     }
-    long double intermediate_top = 0;
-    char curr_sign = -1;
     long double curr_bottom = 2;
-    long curr_bottom_fact_index = 2;
+    long curr_fact_index = 2;
     long double curr_x = x;
     for (int i = 2; i <= n; i++) {
-        intermediate_top = 2 * i * i + 1;
-        for (int f = curr_bottom_fact_index + 1; f <= i * 2; f++) {
-            curr_bottom *= f;
-        }
-        curr_sign *= -1;
+        curr_bottom *= (curr_fact_index + 1) * (curr_fact_index + 2);
         curr_x *= x;
-        sum += curr_sign * intermediate_top * curr_x * curr_x / curr_bottom;
+        sum += ((i % 2 == 0) ? 1 : -1 ) * (2 * i * i + 1) * curr_x * curr_x / curr_bottom;
     }
     return sum;
 }
@@ -187,7 +181,7 @@ int main() {
 
         coutWithColor(14, "\nВыберите функцию Y(x)\n");
         CalcFuncPointer func;
-        switch (displaySelection(new string[6]{ "1. (1 - x^2 / 2) * cos(x) - x / 2*sin(x)", "2. 2*exp(x)", "3. sin(x)^2", "4. sin(x)" , "5. cos(x)" , "6. Кубический корень из x" }, 6)) {
+        switch (displaySelection(new string[6]{ "1. (1 - x^2 / 2) * cos(x) - x / 2*sin(x)", "2. 2*exp(x) (функция из 3ей лабы)", "3. sin(x)^2", "4. sin(x)" , "5. cos(x)" , "6. Кубический корень из x" }, 6)) {
             case(1):
             default:
                 func = defaultFunction;
