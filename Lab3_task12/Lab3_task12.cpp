@@ -10,20 +10,6 @@ using namespace std;
 
 #pragma execution_character_set( "utf-8" )
 
-typedef long double (*CalcFuncPointer)(long double);
-
-long double defaultFunction(long double x) {
-    return (1 - x * x / 2) * cos(x) - x / 2 * sin(x);
-}
-
-long double expFunction(long double x) {
-    return 2 * exp(x);
-}
-
-long double sin2Function(long double x) {
-    return sin(x) * sin(x);
-}
-
 long double inputData(string message) {
     cout << message << flush;
     long double toReturn;
@@ -172,35 +158,11 @@ int main() {
             cout << "Количество членов в сумме не может быть меньше 0, использую дефолтное количество : 3 члена" << endl;
             n = 3;
         }
-        if ((abs(to) > 700 || abs(from) > 700) && n >= 5) {
-            coutWithColor(4, "Начальный или конечный x больше 700 по модулю при n >= 5, возможно переполнение\n");
+        if ((abs(to) > 70 || abs(from) > 70) && n >= 50) {
+            coutWithColor(4, "Начальный или конечный x больше 70 по модулю при n >= 50, возможно переполнение\n");
         }
         if (n > 70) {
-            coutWithColor(4, "Количество членов в сумме больше 70, возможно переполнение или очень долгое вычисление\n");
-        }
-
-        coutWithColor(14, "\nВыберите функцию Y(x)\n");
-        CalcFuncPointer func;
-        switch (displaySelection(new string[6]{ "1. (1 - x^2 / 2) * cos(x) - x / 2*sin(x)", "2. 2*exp(x) (функция из 3ей лабы)", "3. sin(x)^2", "4. sin(x)" , "5. cos(x)" , "6. Кубический корень из x" }, 6)) {
-            case(1):
-            default:
-                func = defaultFunction;
-                break;
-            case(2):
-                func = expFunction;
-                break;
-            case(3):
-                func = sin2Function;
-                break;
-            case(4):
-                func = sin;
-                break;
-            case(5):
-                func = cos;
-                break;
-            case(6):
-                func = cbrt;
-                break;
+            coutWithColor(4, "Количество членов в сумме больше 70, возможно переполнение\n");
         }
 
         long double current_sum, current_function;
@@ -208,7 +170,7 @@ int main() {
         int maxSumLen = 25;
         for (long double i = from; i *(step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
             current_sum = calculateSum(i, n);
-            current_function = func(i);
+            current_function = (1 - i * i / 2) * cos(i) - i / 2 * sin(i);
             maxSumLen = max((int)doubleToString(current_sum).length(), maxSumLen);
             maxFuncLen = max((int)doubleToString(current_function).length(), maxFuncLen);
             cout << "x = " << addSpaces(doubleToString(i), max(doubleToString(from).length(), doubleToString(to).length()) + 3) << "Y(x) = " << addSpaces(doubleToString(current_function), maxFuncLen) << " S(x) = " << addSpaces(doubleToString(current_sum), maxSumLen) << " |S(x)-Y(x)| = " << doubleToString(abs(current_sum - current_function)) << endl;
