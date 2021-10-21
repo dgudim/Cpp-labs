@@ -196,7 +196,7 @@ int main()
             }
         }
 
-        delete selectedFunctions;
+        delete[] selectedFunctions;
 
         cout << "\nПродолжить?" << endl;
         string input;
