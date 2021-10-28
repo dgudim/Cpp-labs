@@ -96,7 +96,7 @@ void fillArray(bool manual) {
             dynamic_array[i] = (int)inputData("");
         }
         else {
-            dynamic_array[i] = rand() % 10 - 4;
+            dynamic_array[i] = rand() % 100 - 49;
             cout << dynamic_array[i] << " ";
         }
     }
@@ -179,66 +179,76 @@ void searchAndOutput() {
 int main()
 {
     SetConsoleOutputCP(65001);
-    initializeArray(inputData("Введите размер массива: "));
-    quickSort(dynamic_array, 0, dynamic_array_size-1);
-    
-    cout << "Сортированный массив: " << endl;
-    for (int i = 0; i < dynamic_array_size; i++) {
-        cout << dynamic_array[i] << " " << flush;
-    }
-    cout << endl;
+    while (true) {
+        initializeArray(inputData("Введите размер массива: "));
+        quickSort(dynamic_array, 0, dynamic_array_size - 1);
 
-    int differentNumbers = 1;
-    for (int i = 0; i < dynamic_array_size - 1; i++) {
-        if (dynamic_array[i] != dynamic_array[i + 1]) {
-            differentNumbers++;
+        cout << "Сортированный массив: " << endl;
+        for (int i = 0; i < dynamic_array_size; i++) {
+            cout << dynamic_array[i] << " " << flush;
+        }
+        cout << endl;
+
+        int differentNumbers = 1;
+        for (int i = 0; i < dynamic_array_size - 1; i++) {
+            if (dynamic_array[i] != dynamic_array[i + 1]) {
+                differentNumbers++;
+            }
+        }
+        int* numbers_counter = (int*)malloc(differentNumbers * 4 + 1);
+        int* numbers_unique = (int*)malloc(differentNumbers * 4 + 1);
+        int* numbers_precedence = (int*)malloc(differentNumbers * 4 + 1);
+
+        int currentIndex = 0;
+        int currentNumberCount = 0;
+        for (int i = 1; i < dynamic_array_size + 1; i++) {
+            currentNumberCount++;
+            if ((dynamic_array[i] != dynamic_array[i - 1]) || i == dynamic_array_size) {
+                numbers_unique[currentIndex] = dynamic_array[i - 1];
+                numbers_counter[currentIndex] = currentNumberCount;
+                numbers_precedence[currentIndex] = (differentNumbers - currentIndex) * currentNumberCount;
+                currentNumberCount = 0;
+                currentIndex++;
+            }
+        }
+
+        cout << "\nУникальные числа: " << endl;
+        for (int i = 0; i < differentNumbers; i++) {
+            cout << numbers_unique[i] << " " << flush;
+        }
+
+        cout << "\nИх количества: " << endl;
+        for (int i = 0; i < differentNumbers; i++) {
+            cout << numbers_counter[i] << " " << flush;
+        }
+
+        cout << "\nИх преимущества: " << endl;
+        for (int i = 0; i < differentNumbers; i++) {
+            cout << numbers_precedence[i] << " " << flush;
+        }
+
+        int maxPrecedence = 1;
+        int maxPrecedenceIndex = 0;
+        for (int i = 0; i < differentNumbers; i++) {
+            if (numbers_precedence[i] > maxPrecedence) {
+                maxPrecedenceIndex = i;
+                maxPrecedence = numbers_precedence[i];
+            }
+        }
+
+        cout << "\nМинимальное число, встречающееся максимальное количество раз: " << numbers_unique[maxPrecedenceIndex] << endl;
+
+        free(dynamic_array);
+        free(numbers_counter);
+        free(numbers_unique);
+        free(numbers_precedence);
+
+        cout << "Продолжить?" << endl;
+        string input;
+        cin >> input;
+        if (!(input == "yes" || input == "y" || input == "1")) {
+            break;
         }
     }
-    int* numbers_counter = (int*)malloc(differentNumbers * 4 + 1);
-    int* numbers_unique = (int*)malloc(differentNumbers * 4 + 1);
-    int* numbers_precedence = (int*)malloc(differentNumbers * 4 + 1);
-    
-    int currentIndex = 0;
-    int currentNumberCount = 0;
-    for (int i = 1; i < dynamic_array_size + 1; i++) {
-        currentNumberCount++;
-        if ((dynamic_array[i] != dynamic_array[i - 1]) || i == dynamic_array_size) {
-            numbers_unique[currentIndex] = dynamic_array[i - 1];
-            numbers_counter[currentIndex] = currentNumberCount;
-            numbers_precedence[currentIndex] = (differentNumbers - currentIndex) * currentNumberCount;
-            currentNumberCount = 0;
-            currentIndex++;
-        }
-    }
-
-    cout << "\nУникальные числа: " << endl;
-    for (int i = 0; i < differentNumbers; i++) {
-        cout << numbers_unique[i] << " " << flush;
-    }
-   
-    cout << "\nИх количества: " << endl;
-    for (int i = 0; i < differentNumbers; i++) {
-        cout << numbers_counter[i] << " " << flush;
-    }
-    
-    cout << "\nИх преимущества: " << endl;
-    for (int i = 0; i < differentNumbers; i++) {
-        cout << numbers_precedence[i] << " " << flush;
-    }
-    
-    int maxPrecedence = 1;
-    int maxPrecedenceIndex = 0;
-    for (int i = 0; i < differentNumbers; i++) {
-        if (numbers_precedence[i] > maxPrecedence) {
-            maxPrecedenceIndex = i;
-            maxPrecedence = numbers_precedence[i];
-        }
-    }
-
-    cout << "\nМинимальное число, встречающееся максимальное количество раз: " << numbers_unique[maxPrecedenceIndex] << endl;
-
-    free(dynamic_array);
-    free(numbers_counter);
-    free(numbers_unique);
-    free(numbers_precedence);
+    return 1;
 }
