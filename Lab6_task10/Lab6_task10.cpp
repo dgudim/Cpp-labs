@@ -1,5 +1,6 @@
 #include "Lab6_task10.h"
 using namespace std;
+
 int main()
 {
     SetConsoleOutputCP(65001);
@@ -9,7 +10,7 @@ int main()
         size = (int)inputData("Введите размер матрицы: ");
         matrix = inputMatrix(size);
         printMatrix(size, matrix);
-        cout << (isSkewSymmetric(size, matrix) ? string("Матрица симметрична относительно побочной диагонали") : string("Матрица не симметрична относительно побочной диагонали")) << endl;
+        cout << (isSymmetric(size, matrix) ? string("Матрица симметрична относительно побочной диагонали") : string("Матрица не симметрична относительно побочной диагонали")) << endl;
         for (int i = 0; i < size; ++i) {
             delete[] matrix[i];
         }
@@ -46,7 +47,6 @@ double** inputMatrix(int size){
     return matrix;
 }
 
-
 void printMatrix(int size, double** matrix)
 {
     cout << "\n";
@@ -59,7 +59,7 @@ void printMatrix(int size, double** matrix)
     }
 }
 
-bool isSkewSymmetric(int size, double** matrix)
+bool isSymmetric(int size, double** matrix)
 {
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
