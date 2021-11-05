@@ -32,6 +32,32 @@ double inputData(string message) {
     return toReturn;
 }
 
+void setConsoleColor(int color) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
+void coutWithColor(int color, string message) {
+    setConsoleColor(color);
+    cout << message << flush;
+    setConsoleColor(7);
+}
+
+string doubleToString(double value) {
+    ostringstream out;
+    out.precision(9);
+    out << std::fixed << value;
+    string strOut = out.str();
+    char currChar = strOut[strOut.length() - 1];
+    while ((currChar == '0' || currChar == '.') && strOut.length() > 1) {
+        strOut.erase(strOut.length() - 1, 1);
+        if (currChar == '.') {
+            break;
+        }
+        currChar = strOut[strOut.length() - 1];
+    }
+    return strOut;
+}
+
 double** inputMatrix(int size){
     double** matrix;
     matrix = new double* [size];
@@ -53,7 +79,7 @@ void printMatrix(int size, double** matrix)
     for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size; j++) {
-            cout << matrix[i][j] << " ";
+            coutWithColor((int)(matrix[i][j]) % 11 + 1, doubleToString(matrix[i][j]) + " ");
         }
         cout << "\n";
     }

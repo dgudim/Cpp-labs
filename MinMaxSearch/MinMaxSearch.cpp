@@ -172,10 +172,6 @@ void quickSort(int arr[], int low, int high)
     }
 }
 
-void searchAndOutput() {
-
-}
-
 int main()
 {
     SetConsoleOutputCP(65001);
