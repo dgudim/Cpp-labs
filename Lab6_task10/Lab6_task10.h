@@ -6,7 +6,7 @@
 
 #pragma execution_character_set( "utf-8" )
 
-bool isSkewSymmetric(int size, double** matrix);
+bool isSymmetric(int size, double** matrix);
 double inputData(std::string message);
 void setConsoleColor(int color);
 void coutWithColor(int color, std::string message);
