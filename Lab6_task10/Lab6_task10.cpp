@@ -41,11 +41,19 @@ double** inputMatrix(int size){
 
 void printMatrix(int size, double** matrix)
 {
+    int maxLen = 0;
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++) {
+            maxLen = max((int)doubleToString(matrix[i][j]).length(), maxLen);
+        }
+    }
+
     cout << "\n";
     for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size; j++) {
-            coutWithColor((int)(matrix[i][j]) % 11 + 1, doubleToString(matrix[i][j]) + " ");
+            coutWithColor((int)(matrix[i][j]) % 11 + 1, addSpaces(doubleToString(matrix[i][j]), maxLen) + " ");
         }
         cout << "\n";
     }
