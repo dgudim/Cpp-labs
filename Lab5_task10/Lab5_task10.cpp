@@ -1,97 +1,8 @@
-#define NOMINMAX
-#include <windows.h>
-#include <iostream>
-#include <conio.h>
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <limits>
-#include <string>
-#include <time.h>
+#include "../genericFunctions.h"
 using namespace std;
 
 int *dynamic_array;
 int dynamic_array_size;
-
-#pragma execution_character_set( "utf-8" )
-
-double inputData(string message) {
-    cout << message << flush;
-    double toReturn;
-    while (!(cin >> toReturn)) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        while (cin.get() != '\n');
-        cout << "Пожалуйста, используйте числа" << endl;
-    }
-    return toReturn;
-}
-
-void setConsoleColor(int color) {
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
-}
-
-void coutWithColor(int color, string message) {
-    setConsoleColor(color);
-    cout << message << flush;
-    setConsoleColor(7);
-}
-
-void setConsoleCursorPosition(int x, int y) {
-    COORD c;
-    c.X = x;
-    c.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-}
-
-COORD getConsoleCursorPosition()
-{
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    return csbi.dwCursorPosition;
-}
-
-int displaySelection(string* options, int optionCount) {
-
-    int offset = getConsoleCursorPosition().Y;
-    int counter = 0;
-    int key = 0;
-
-    for (int i = 0; i < optionCount; i++) {
-        setConsoleCursorPosition(0, offset + i);
-        cout << options[i];
-    }
-
-    while (true) {
-        if (key == 72){
-            counter--;
-            if (counter < 0) {
-                counter = optionCount - 1;
-            }
-        }
-        if (key == 80){
-            counter++;
-            if (counter > optionCount - 1) {
-                counter = 0;
-            }
-        }
-        for (int i = 0; i < optionCount; i++) {
-            if (abs(counter - i) <= 1 || i == 0 || i == optionCount - 1) {
-                setConsoleCursorPosition(0, offset + i);
-                setConsoleColor(counter == i ? 12 : 7);
-                cout << options[i];
-            }
-        }
-        key = _getch();
-        if (key == 224) {
-            key = _getch();
-        }
-        if (key == '\r') {
-            coutWithColor(8, "\nВы выбрали: " + options[counter] + "\n");
-            return counter + 1;
-        }
-    }
-}
 
 void fillArray(bool manual) {
     for (int i = 0; i < dynamic_array_size; i++) {
@@ -256,13 +167,13 @@ int findSecondNegativeElementIndex() {
 
 void checkIndexes(int& index1, int& index2) {
     if (index1 < -1 || index2 < -1) {
-        throw "Один из индексов отрицательный(нет числа, подходящего под критерии в задании)";
+        throw "Один из индексов отрицательный(нет числа, подходящего под критерии в задании)\n";
     }
     if (index1 == index2) {
-        throw "Нет элементов между заданными индексами, индексы сопадают";
+        throw "Нет элементов между заданными индексами, индексы сопадают\n";
     }
     if (abs(index2 - index1) == 1) {
-        throw "Нет элементов между заданными индексами, индексы рядом";
+        throw "Нет элементов между заданными индексами, индексы рядом\n";
     }
     if (index1 > index2) {
         swap(index1, index2);
@@ -288,7 +199,7 @@ double caclulateProductBetweenTwoIndexes(int index1, int index2) {
 }
 
 void printResult(double result) {
-    coutWithColor(10, "Результат: " + to_string(result) + "\n");
+    coutWithColor(10, "Результат: " + doubleToString(result) + "\n");
 }
 
 int main()
@@ -380,19 +291,11 @@ int main()
         }
         catch (const char* message)
         {
-            setConsoleColor(4);
-            cerr << message << endl;
-            setConsoleColor(7);
+            coutWithColor(4, message);
         }
 
         free(dynamic_array);
-
-        cout << "Продолжить?" << endl;
-        string input;
-        cin >> input;
-        if (!(input == "yes" || input == "y" || input == "1")) {
-            break;
-        }
+        continueOrExit();
     }
     return 1;
 }

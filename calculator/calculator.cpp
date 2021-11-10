@@ -1,10 +1,6 @@
-#include <iostream>
-#include <limits>
-#include <string>
-#include <sstream>
-#include <iomanip>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "../genericFunctions.h"
 using namespace std;
 
 //#define DEBUG
@@ -40,23 +36,6 @@ double constant_values[100];
 
 unsigned int exceptionCount = 0;
 
-string doubleToString(double value)
-{
-    ostringstream out;
-    out.precision(35);
-    out << std::fixed << value;
-    string strOut = out.str();
-    char currChar = strOut[strOut.length() - 1];
-    while ((currChar == '0' || currChar == '.') && strOut.length() > 1) {
-        strOut.erase(strOut.length() - 1, 1);
-        if (currChar == '.') {
-            break;
-        }
-        currChar = strOut[strOut.length() - 1];
-    }
-    return strOut;
-}
-
 char charToLowerCase(char input) {
     for (int i = 0; i < alphabetChars; i++) {
         if (input == alphabet_uppercase[i]) {
@@ -73,13 +52,8 @@ void stringToLowerCase(string& input) {
 }
 
 void printResult(long double result) {
-    cout << "\n\tResult is " + doubleToString(result) << endl;
-    cout << "Continue?" << endl;
-    string input;
-    cin >> input;
-    if (!(input == "1" || input == "yes" || input == "y")) {
-        exit(1);
-    }
+    cout << "\n\tResult is " + doubleToString(result, 35) << endl;
+    continueOrExit();
 }
 
 bool charIsPrecedentOperator(char character, char precedenceLevel) {
@@ -207,17 +181,6 @@ bool isConstant(string name) {
         }
     }
     return false;
-}
-
-double inputData(string message) {
-    cout << message << flush;
-    double toReturn;
-    while (!(cin >> toReturn)) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Please use numbers" << endl;
-    }
-    return toReturn;
 }
 
 double processOperator(char operatorChar, double arg1, double arg2) {
@@ -470,7 +433,7 @@ string parseComplex(string input, string functionName) {
                     }
                     double parsedValue = processFunction(getFunctionIndex(functionName), parseElementary(toParse));
 
-                    input.replace(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1, doubleToString(parsedValue));
+                    input.replace(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1, doubleToString(parsedValue, 35));
                     operatorsLeft--;
                     precedenceLevelOperatorCounts_inExpression[precedenceLevel] --;
 #ifdef DEBUG
@@ -528,6 +491,9 @@ void calculate(string expressionStr) {
 }
 
 void checkDataAndCalculate() {
+
+    SetConsoleOutputCP(65001);
+
     try {
         string expression;
         variableCount = 0;

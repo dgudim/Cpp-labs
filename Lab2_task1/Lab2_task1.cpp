@@ -1,25 +1,5 @@
-#include <iostream>
-#include <limits>
-#include <string>
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include "../genericFunctions.h"
 using namespace std;
-
-double inputDataRaw(string message) {
-    cout << message;
-    double toReturn;
-    while (!(cin >> toReturn)) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        while (cin.get() != '\n');
-        cout << "Please use numbers" << endl;
-    }
-    return toReturn;
-}
-
-double inputData(string varName) {
-    return inputDataRaw("Please input " + varName + ". " + varName + " = ");
-}
 
 int main()
 {
@@ -30,8 +10,8 @@ int main()
 
     while (true) {
 
-        a = inputData("a");
-        z = inputData("z");
+        a = inputData("Please, input a = ");
+        z = inputData("Please, input z = ");
 
         if (z < 1) {
             x = z * z;
@@ -44,7 +24,7 @@ int main()
         cout << "1 - 2x (default)" << endl;
         cout << "2 - x^2" << endl;
         cout << "3 - x/3" << endl;
-        int func = (int)floor(inputDataRaw("Function: "));
+        int func = (int)floor(inputData("Function: "));
 
         string selectedFunc = "";
 
@@ -71,12 +51,6 @@ int main()
         cout << "You chose " << selectedFunc << endl;
 
         cout << "Result: " << a * log(1 + pow(x, 1.0 / 5.0)) + pow(cos(func_tempVar + 1), 2) << ", have a nice day" << endl;
-
-        cout << "Continue?" << endl;
-        string input;
-        cin >> input;
-        if (!(input == "yes" || input == "y" || input == "1")) {
-            break;
-        }
+        continueOrExit();
     }
 }
