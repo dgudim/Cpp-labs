@@ -11,6 +11,7 @@ double inputDataRaw(string message) {
     while (!(cin >> toReturn)) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        while (cin.get() != '\n');
         cout << "Please use numbers" << endl;
     }
     return toReturn;

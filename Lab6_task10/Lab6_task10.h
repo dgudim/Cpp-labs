@@ -1,6 +1,6 @@
-#include<iostream>
-#include<string>
-#include<sstream>
+#include <iostream>
+#include <string>
+#include <sstream>
 #define NOMINMAX
 #include <windows.h>
 

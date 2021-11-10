@@ -14,6 +14,7 @@ double inputData(string varName) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Please use numbers" << endl;
+        while (cin.get() != '\n');
         errCount++;
         if (errCount == 10) {
             cout << "Please stop >_<" << endl;
