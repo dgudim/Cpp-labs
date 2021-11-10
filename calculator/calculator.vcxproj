@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{025fc36c-4ba9-4259-88aa-422e41f32fc8}</ProjectGuid>
-    <RootNamespace>mathparser</RootNamespace>
+    <ProjectGuid>{705d2160-c6d5-4f64-a590-5cee3497f73b}</ProjectGuid>
+    <RootNamespace>calculator</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,7 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="math-parser.cpp" />
+    <ClCompile Include="calculator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

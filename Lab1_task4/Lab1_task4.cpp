@@ -1,27 +1,10 @@
 #include <iostream>
-#include <limits>
-#include <string>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#define NOMINMAX
+#include <windows.h>
 using namespace std;
-
-int errCount = 0;
-
-double inputData(string varName) {
-    cout << "Please input " << varName << ". " << varName << " = ";
-    double toReturn;
-    while (!(cin >> toReturn)) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Please use numbers" << endl;
-        while (cin.get() != '\n');
-        errCount++;
-        if (errCount == 10) {
-            cout << "Please stop >_<" << endl;
-        }
-    }
-    return toReturn;
-}
+#include "../genericFunctions.h"
 
 double calculate(double z, double y, double x) {
     double firstHalf = abs(cos(x) - cos(y));
@@ -32,9 +15,12 @@ double calculate(double z, double y, double x) {
 
 int main()
 {
+    SetConsoleOutputCP(65001);
     while (true) {
-        cout << "\n\tResult: " << calculate(inputData("z"), inputData("y"), inputData("x")) << ", have a nice day\n" << endl;
-        system("pause");
+        cout << "\n\tОтвет: " << calculate(inputData("Пожалуйста, введите z = "), inputData("Пожалуйста, введите y = "), inputData("Пожалуйста, введите x = ")) << ", хорошего дня\n" << endl;
+        if (!continueOrExit()) {
+            break;
+        }
     }
     return 0;
 }

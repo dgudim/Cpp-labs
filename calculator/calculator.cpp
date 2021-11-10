@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <limits>
 #include <string>
 #include <sstream>
@@ -16,7 +16,7 @@ char precedenceLevelOperatorCounts[precedenceLevels] = { 1, 2, 2 };
 char operators[precedenceLevels][2] = { {'^'}, {'*', '/'}, {'+', '-'} };
 
 const char alphabetChars = 26;
-char alphabet[alphabetChars] =           { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+char alphabet[alphabetChars] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
 char alphabet_uppercase[alphabetChars] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
 
 const char digitChars = 10;
@@ -28,7 +28,7 @@ string functions[functionCount] = {
     "abs", "sqrt",
     "sin", "cos", "tan", "ctg",
     "asin", "acos", "atan", "actg",
-    "log", "exp", "cbrt", "ln"};
+    "log", "exp", "cbrt", "ln" };
 
 int variableCount = 0;
 string user_variables[100];
@@ -254,7 +254,7 @@ double processOperator(char operatorChar, double arg1, double arg2) {
 
 double processFunction(int function, double arg) {
     switch (function) {
-    case 0: 
+    case 0:
         return abs(arg);
         break;
     case 1:
@@ -263,13 +263,13 @@ double processFunction(int function, double arg) {
         }
         return sqrt(arg);
         break;
-    case 2: 
+    case 2:
         return sin(arg);
         break;
-    case 3: 
+    case 3:
         return cos(arg);
         break;
-    case 4: 
+    case 4:
         return tan(arg);
         break;
     case 5:
@@ -278,7 +278,7 @@ double processFunction(int function, double arg) {
         }
         return 1.0 / tan(arg);
         break;
-    case 6: 
+    case 6:
         if (arg > 1 || arg < -1) {
             throw  "Asin argument is out of range";
         }
@@ -290,7 +290,7 @@ double processFunction(int function, double arg) {
         }
         return acos(arg);
         break;
-    case 8: 
+    case 8:
         return atan(arg);
         break;
     case 9:
@@ -299,13 +299,13 @@ double processFunction(int function, double arg) {
         }
         return atan(1.0 / arg);
         break;
-    case 10: 
+    case 10:
         if (arg <= 0) {
             throw  "Log argument is out of range";
         }
         return log10(arg);
         break;
-    case 11: 
+    case 11:
         return exp(arg);
         break;
     case 12:
@@ -366,9 +366,9 @@ void incrementExceptions() {
 }
 
 double parseElementary(string expression) {
-    #ifdef DEBUG
-      cout << "Elementary parsing " + expression << endl;
-    #endif
+#ifdef DEBUG
+    cout << "Elementary parsing " + expression << endl;
+#endif
     double arg1 = 0;
     double arg2 = 0;
     int operatorIndex = -1;
@@ -430,7 +430,7 @@ double parseElementary(string expression) {
 }
 
 string parseComplex(string input, string functionName) {
-    int precedenceLevelOperatorCounts_inExpression[3] = {0, 0, 0};
+    int precedenceLevelOperatorCounts_inExpression[3] = { 0, 0, 0 };
     int operatorsLeft = 0;
     for (unsigned int i = 1; i < input.length() - 1; i++) {
         for (int i2 = 0; i2 < precedenceLevels; i2++) {
@@ -449,9 +449,9 @@ string parseComplex(string input, string functionName) {
 
     for (int precedenceLevel = 0; precedenceLevel < precedenceLevels; precedenceLevel++) {
         while (precedenceLevelOperatorCounts_inExpression[precedenceLevel] > 0) {
-            #ifdef DEBUG
-                cout << "Calculating precedence level " << precedenceLevel << ", " << precedenceLevelOperatorCounts_inExpression[precedenceLevel] << " left" << endl;
-            #endif // DEBUG
+#ifdef DEBUG
+            cout << "Calculating precedence level " << precedenceLevel << ", " << precedenceLevelOperatorCounts_inExpression[precedenceLevel] << " left" << endl;
+#endif // DEBUG
             int lastOperatorIndex = -1;
             for (unsigned int i = 1; i < input.length() - 1; i++) {
                 if (charIsPrecedentOperator(input[i], precedenceLevel) && charIsContextOperator(input, i)) {
@@ -464,18 +464,18 @@ string parseComplex(string input, string functionName) {
                     }
                     string toParse = input.substr(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1);
                     if (functionName.length() > 0) {
-                    #ifdef DEBUG
+#ifdef DEBUG
                         cout << "Using function " << functionName << endl;
-                    #endif
+#endif
                     }
                     double parsedValue = processFunction(getFunctionIndex(functionName), parseElementary(toParse));
-                    
+
                     input.replace(lastOperatorIndex + 1, lastIndex - lastOperatorIndex - 1, doubleToString(parsedValue));
                     operatorsLeft--;
                     precedenceLevelOperatorCounts_inExpression[precedenceLevel] --;
-                    #ifdef DEBUG
-                        cout << input << endl;
-                    #endif // DEBUG
+#ifdef DEBUG
+                    cout << input << endl;
+#endif // DEBUG
                     break;
                 }
                 if (charIsOperator(input[i]) && charIsContextOperator(input, i)) {
@@ -518,11 +518,11 @@ void calculate(string expressionStr) {
     current_expression = expressionStr;
     unsigned int parenthesisPair = 0;
     while (hasParenthesis(current_expression)) {
-        #ifdef DEBUG
-            cout << "Parenthesis level: " << parenthesisPair << endl;
-        #endif // DEBUG
+#ifdef DEBUG
+        cout << "Parenthesis level: " << parenthesisPair << endl;
+#endif // DEBUG
         processDeepestExpresion();
-        parenthesisPair ++;
+        parenthesisPair++;
     }
     printResult(stod(current_expression));
 }
