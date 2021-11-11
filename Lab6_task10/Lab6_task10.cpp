@@ -2,8 +2,7 @@
 #include "../genericFunctions.h"
 using namespace std;
 
-int main()
-{
+int main() {
     SetConsoleOutputCP(65001);
     double** matrix;
     int size;
@@ -15,7 +14,7 @@ int main()
         }
         matrix = inputMatrix(size);
         printMatrix(size, matrix);
-        cout << (isSymmetric(size, matrix) ? string("Матрица симметрична относительно побочной диагонали") : string("Матрица не симметрична относительно побочной диагонали")) << endl;
+        cout << "Матрица " << (isSymmetric(size, matrix) ? "":"не ") << "симметрична относительно побочной диагонали" << endl;
         for (int i = 0; i < size; ++i) {
             delete[] matrix[i];
         }
