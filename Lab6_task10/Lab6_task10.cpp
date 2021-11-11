@@ -7,7 +7,7 @@ int main() {
     double** matrix;
     int size;
     while (true) {
-        size = (int)inputData("Введите размер матрицы: ");
+        size = (int)inputData("Введите размер матрицы: ", false);
         if (size <= 0) {
             coutWithColor(4, "Размер не может быть меньше иле или равен 0, устанавливаю размер 2\n");
             size = 2;

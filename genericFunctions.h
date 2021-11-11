@@ -8,15 +8,19 @@
 
 #pragma execution_character_set( "utf-8" )
 
-double inputData(std::string message) {
+double inputData(std::string message, bool allowWhiteSpaces) {
     std::cout << message << std::flush;
     double toReturn;
-    while (!(std::cin >> toReturn)) {
+    while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
         std::cin.clear();
         while (std::cin.get() != '\n');
         std::cout << "Пожалуйста, используйте числа" << std::endl;
     }
     return toReturn;
+}
+
+double inputData(std::string message) {
+    return inputData(message, true);
 }
 
 std::string doubleToString(double value, int precision)
