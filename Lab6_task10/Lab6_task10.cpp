@@ -7,10 +7,10 @@ int main() {
     double** matrix;
     int size;
     while (true) {
-        size = (int)inputData("Введите размер матрицы: ", false);
+        size = (int)inputData("Введите размер квадратной матрицы: ", false);
         if (size <= 0) {
-            coutWithColor(4, "Размер не может быть меньше иле или равен 0, устанавливаю размер 2\n");
-            size = 2;
+            coutWithColor(4, "Размер не может быть меньше иле или равен 0, устанавливаю размер 3\n");
+            size = 3;
         }
         matrix = inputMatrix(size);
         printMatrix(size, matrix);
@@ -29,7 +29,7 @@ double** inputMatrix(int size){
     matrix = new double* [size];
     for (int i = 0; i < size; i++) {
         matrix[i] = new double[size];
-    };
+    }
 
     cout << "Введите элементы матрицы:\n";
     for (int i = 0; i < size; i++)
@@ -61,7 +61,7 @@ void printMatrix(int size, double** matrix)
 bool isSymmetric(int size, double** matrix)
 {
     for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
+        for (int j = 0; j < size - i - 1; j++) {
             if (matrix[i][j] != matrix[size - j - 1][size - i - 1]) {
                 return false;
             }
