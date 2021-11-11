@@ -13,7 +13,6 @@ double inputData(std::string message) {
     double toReturn;
     while (!(std::cin >> toReturn)) {
         std::cin.clear();
-        std::cin.ignore(1000, '\n');
         while (std::cin.get() != '\n');
         std::cout << "Пожалуйста, используйте числа" << std::endl;
     }
