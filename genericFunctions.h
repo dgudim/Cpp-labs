@@ -10,6 +10,30 @@
 
 #pragma execution_character_set( "utf-8" )
 
+void setConsoleColor(int color) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
+void coutWithColor(int color, std::string message) {
+    setConsoleColor(color);
+    std::cout << message << std::flush;
+    setConsoleColor(7);
+}
+
+void setConsoleCursorPosition(int x, int y) {
+    COORD c;
+    c.X = x;
+    c.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
+
+COORD getConsoleCursorPosition()
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.dwCursorPosition;
+}
+
 double inputData(std::string message, bool allowWhiteSpaces) {
     std::cout << message << std::flush;
     double toReturn;
@@ -35,6 +59,13 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
         bool addToBuffer = false;
         if (currChar == '\r') {
             break;
+        }
+        if (currChar == '\b') {
+            unsigned int bufLen = buffer.length();
+            if (bufLen > 0) {
+                printf("%s", "\b \b");
+                buffer.erase(bufLen - 1, bufLen);
+            }
         }
         if (currChar >= minCharCodePoint && currChar <= maxCharCodePoint) {
             for (int i = 0; i < allowedChars_size; i++) {
@@ -105,30 +136,6 @@ void continueOrExit() {
     if (!(input == "yes" || input == "y" || input == "1")) {
         exit(-15);
     }
-}
-
-void setConsoleColor(int color) {
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
-}
-
-void coutWithColor(int color, std::string message) {
-    setConsoleColor(color);
-    std::cout << message << std::flush;
-    setConsoleColor(7);
-}
-
-void setConsoleCursorPosition(int x, int y) {
-    COORD c;
-    c.X = x;
-    c.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-}
-
-COORD getConsoleCursorPosition()
-{
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    return csbi.dwCursorPosition;
 }
 
 int displaySelection(std::string* options, int optionCount) {
