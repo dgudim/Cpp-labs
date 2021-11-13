@@ -1,6 +1,8 @@
 #include <sstream>
 #include <string>
+#include <regex>
 #include <iostream>
+#include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #define NOMINMAX
@@ -17,6 +19,37 @@ double inputData(std::string message, bool allowWhiteSpaces) {
         std::cout << "Пожалуйста, используйте числа" << std::endl;
     }
     return toReturn;
+}
+
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size) {
+    printf("%s", message.c_str());
+    std::string buffer = "";
+    char maxCharCodePoint = allowedChars[0];
+    char minCharCodePoint = allowedChars[0];
+    for (int i = 0; i < allowedChars_size; i++) {
+        maxCharCodePoint = std::max(maxCharCodePoint, allowedChars[i]);
+        minCharCodePoint = std::min(minCharCodePoint, allowedChars[i]);
+    }
+    while (true) {
+        char currChar = _getch();
+        bool addToBuffer = false;
+        if (currChar == '\r') {
+            break;
+        }
+        if (currChar >= minCharCodePoint && currChar <= maxCharCodePoint) {
+            for (int i = 0; i < allowedChars_size; i++) {
+                if (allowedChars[i] == currChar) {
+                    addToBuffer = true;
+                    putchar(currChar);
+                }
+            }
+        }
+        if (addToBuffer) {
+            buffer += currChar;
+            addToBuffer = false;
+        }
+    }
+    return buffer;
 }
 
 double inputData(std::string message) {
@@ -51,6 +84,18 @@ std::string addSpaces(std::string input, int targetLength) {
         input.append(" ");
     }
     return input;
+}
+
+std::string ltrim(const std::string s) {
+    return std::regex_replace(s, std::regex("^\\s+"), std::string(""));
+}
+
+std::string rtrim(const std::string s) {
+    return std::regex_replace(s, std::regex("\\s+$"), std::string(""));
+}
+
+std::string trim(const std::string s) {
+    return ltrim(rtrim(s));
 }
 
 void continueOrExit() {
