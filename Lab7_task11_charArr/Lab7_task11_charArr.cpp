@@ -76,15 +76,7 @@ int main()
 }
 
 bool compare2Words(char* word1, char* word2) {
-    size_t len1 = strlen(word1);
-    size_t len2 = strlen(word2);
-    size_t min_len = min(len1, len2);
-    for (size_t i = 0; i < min_len; i++) {
-        if (word1[i] >= word2[i] && word1[i] != ' ' && word2[i] != ' ' && word1[i] != '\0' && word2[i] != '\0') {
-            return true;
-        }
-    }
-    return len2 < len1;
+    return (word1 && word2) ? 0 > strcmp(word1, word2) : word1 < word2;
 }
 
 void alphabeticSort_char(char** words, unsigned int numberOfWords) {
@@ -97,7 +89,7 @@ void alphabeticSort_char(char** words, unsigned int numberOfWords) {
         j++;
         for (unsigned int l = 0; l < numberOfWords - j; l++)
         {
-            if (compare2Words(words[l], words[l + 1]))
+            if (!compare2Words(words[l], words[l + 1]))
             {
                 temp = words[l];
                 words[l] = words[l + 1];
