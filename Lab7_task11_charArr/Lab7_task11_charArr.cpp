@@ -2,13 +2,6 @@
 #include "../genericFunctions.h"
 using namespace std;
 
-char* substr(char* str, unsigned int start, unsigned int end) {
-    char* sub = new char[end - start + 1];
-    memcpy(sub, str + start, end - start);
-    sub[end - start] = '\0';
-    return sub;
-}
-
 int main()
 {
     SetConsoleOutputCP(65001);
@@ -73,6 +66,13 @@ int main()
     }
 
     return 0;
+}
+
+char* substr(char* str, unsigned int start, unsigned int end) {
+    char* sub = new char[end - start + 1];
+    memcpy(sub, str + start, end - start);
+    sub[end - start] = '\0';
+    return sub;
 }
 
 bool compare2Words(char* word1, char* word2) {
