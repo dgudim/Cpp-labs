@@ -12,26 +12,8 @@ int main()
             coutWithColor(4, "Ошибка ввода: пустая строка или только пробелы, повторите ввод\n");
             continue;
         }
-        unsigned int numberOfWords = 0;
-        unsigned int strLen = input.length();
-        for (unsigned int i = 0; i < strLen; i++) {
-            if (input[i] == ' ' && input[i - 1] != ' ') {
-                numberOfWords++;
-            }
-        }
-        coutWithColor(3, "Количество слов: " + to_string(numberOfWords));
-
-        string* words = new string[numberOfWords];
-        int pos = 0;
-        unsigned int index = 0;
-
-        while ((pos = input.find(' ')) != string::npos) {
-            if (pos > 0) {
-                words[index] = input.substr(0, pos);
-                index++;
-            }
-            input.erase(0, pos + 1);
-        }
+        unsigned int numberOfWords;
+        string* words = split(&input, true, &numberOfWords);
 
         coutWithColor(6, "\nСортировка по алфавиту: \n");
         alphabeticSort(words, numberOfWords);

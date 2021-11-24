@@ -34,6 +34,35 @@ COORD getConsoleCursorPosition()
     return csbi.dwCursorPosition;
 }
 
+std::string* split(std::string *input, bool print_count,unsigned int *len) {
+    unsigned int numberOfWords = 0;
+    unsigned int strLen = (*input).length();
+    for (unsigned int i = 0; i < strLen; i++) {
+        if ((*input)[i] == ' ' && (*input)[i - 1] != ' ') {
+            numberOfWords++;
+        }
+    }
+   
+    if (print_count) {
+        coutWithColor(3, "Количество слов: " + std::to_string(numberOfWords));
+    }
+
+    (*len) = numberOfWords;
+
+    std::string* words = new std::string[numberOfWords];
+    int pos = 0;
+    unsigned int index = 0;
+
+    while ((pos = (*input).find(' ')) != std::string::npos) {
+        if (pos > 0) {
+            words[index] = (*input).substr(0, pos);
+            index++;
+        }
+        (*input).erase(0, pos + 1);
+    }
+    return words;
+}
+
 double inputData(std::string message, bool allowWhiteSpaces) {
     std::cout << message << std::flush;
     double toReturn;
@@ -80,6 +109,7 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
             addToBuffer = false;
         }
     }
+    putchar('\n');
     return buffer;
 }
 
