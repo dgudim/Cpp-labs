@@ -122,7 +122,7 @@ void printEntries(student_entry* students, unsigned int size) {
         coutWithColor(7, "\nНомер группы: " + to_string(students[i].group));
         
         for (unsigned int g = 0; g < lessons_size; g++) {
-            unsigned int grades_size = students[i].grades.size();
+            unsigned int grades_size = students[i].grades[(lessons)g].size();
             cout << "\nОтметки по " << lessons_map_case[g] << ": " << endl;
             for (unsigned int v = 0; v < grades_size; v++) {
                 cout << students[i].grades[(lessons)g].at(v);
