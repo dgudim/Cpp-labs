@@ -1,17 +1,8 @@
 #include "Lab8.h"
 #include "../genericFunctions.h"
-#include <iostream>
-#include <io.h>
-#include <stdio.h>
-#include <map>
-#include <fstream>
-using namespace std;
-#include <filesystem>
-#include <algorithm>
-namespace fs = std::filesystem;
 
-string workingDir = "../student_files/";
-string currentFile = "";
+using namespace std;
+namespace fs = std::filesystem;
 
 enum lessons {
     PHYSICS = 0,
@@ -19,6 +10,10 @@ enum lessons {
     INFORMATICS = 2,
     CHEMISTRY = 3
 };
+
+string workingDir = "../student_files/";
+string currentFile = "";
+
 unsigned int lessons_size = 4;
 const char* lessons_map[] = { "Физика", "Математика", "Информатика", "Химия" };
 const char* lessons_map_case[] = { "физике", "математике", "информатике", "химии" };
@@ -41,7 +36,47 @@ struct student_entry {
     bool valid;
 };
 
-void inputEntry(student_entry *entry) {
+int main()
+{
+    SetConsoleOutputCP(65001);
+
+    vector<student_entry> entries;
+
+    while (true) {
+        listFiles();
+        coutWithColor(11, "\n_________Меню (Выбор стрелками и Enter)_________\n");
+        coutWithColor(3, "Текущий файл: " + currentFile + "\n\n");
+        switch (displaySelection(new string[4]{ "1.Создать файл", "2.Открыть файл", "3.Редактировать/просмотреть текущий файл", "4.Выйти" }, 4)) {
+            case 1:
+                createFile();
+                break;
+            case 2:
+                loadFromFile(&entries);
+                break;
+            case 3:
+                reset();
+                if (currentFile != "") {
+                    edit(&entries);
+                }
+                else {
+                    coutWithColor(6, "Файл не выбран, выберите файл или создайте новый\n");
+                }
+                break;
+            case 4:
+                string input = displayWarningWithInput(6, "Вы уверены, что хотите выйти?\n");
+                if (input == "yes" || input == "y" || input == "1") {
+                    exit(-15);
+                }
+                break;
+        }
+    }
+}
+
+void reset() {
+    system("CLS");
+}
+
+void inputEntry(student_entry* entry) {
     entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."));
     entry->year_of_birth = stoi(inputData("Введите год рождения: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9]")));
     entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
@@ -119,7 +154,7 @@ void write_entries(vector<student_entry>* entries, string fileName) {
 
         file.write(reinterpret_cast<char*>(&(entries->at(i).year_of_birth)), sizeof(unsigned int));
         file.write(reinterpret_cast<char*>(&(entries->at(i).group)), sizeof(unsigned int));
-        
+
         for (unsigned int e = 0; e < lessons_size; e++) {
             unsigned int vector_size = entries->at(i).grades[(lessons)e].size();
             file.write(reinterpret_cast<char*>(&vector_size), sizeof(unsigned int));
@@ -129,7 +164,8 @@ void write_entries(vector<student_entry>* entries, string fileName) {
         }
         file.write(reinterpret_cast<char*>(&(entries->at(i).grades_average)), sizeof(float));
     }
-    coutWithColor(10, "\nСохранил изменения\n");
+    reset();
+    coutWithColor(10, "Сохранил изменения\n");
     file.flush();
     file.close();
 }
@@ -140,6 +176,7 @@ void read_entries(vector<student_entry>* entries, string fileName) {
     ifstream file(workingDir + fileName, ios::binary);
     if (!file.read(reinterpret_cast<char*>(&size), sizeof(unsigned int))) {
         file.close();
+        reset();
         coutWithColor(6, "Файл пустой\n");
         currentFile = fileName;
         return;
@@ -174,6 +211,7 @@ void read_entries(vector<student_entry>* entries, string fileName) {
     file.close();
 
     currentFile = fileName;
+    reset();
     coutWithColor(10, "Успешно загрузил " + to_string(size) + " записей\n");
 }
 
@@ -206,7 +244,7 @@ void printEntry(student_entry* entry) {
 
 void printSummary(vector<student_entry>* entries) {
     unsigned int size = entries->size();
-    coutWithColor(11, "\nЗаписи:");
+    coutWithColor(11, "Записи:");
     coutWithColor(3, "\nКоличество студентов: " + to_string(size) + "\n");
     if (size == 0) {
         return;
@@ -263,7 +301,7 @@ void gradeSort(vector<student_entry>* entries) {
 void createFile() {
     bool exit;
     string fileName;
-    while(true){
+    while (true) {
         exit = true;
 
         fileName = inputData("Введите название файла: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
@@ -283,6 +321,7 @@ void createFile() {
         if (exit) {
             ofstream file(workingDir + fileName + ".dat", ios::out | ios::binary);
             file.close();
+            reset();
             coutWithColor(10, "Файл был успешно создан\n");
             break;
         }
@@ -380,6 +419,7 @@ void edit(vector<student_entry>* entries) {
             addEntries(entries);
             break;
         case 2:
+            reset();
             viewEntries(entries);
             save = false;
             break;
@@ -400,49 +440,12 @@ void edit(vector<student_entry>* entries) {
             break;
         }
         if (exit) {
+            reset();
             break;
         }
         if (save) {
             write_entries(entries, currentFile);
             save = false;
-        }
-    }
-}
-
-int main()
-{
-    SetConsoleOutputCP(65001);
-    listFiles();
-
-    vector<student_entry> entries;
-
-    while (true) {
-        coutWithColor(11, "\n_________Меню (Выбор стрелками и Enter)_________\n");
-        coutWithColor(3, "Текущий файл: " + currentFile + "\n\n");
-        switch (displaySelection(new string[5]{ "1.Создать файл", "2.Открыть файл", "3.Просмотреть файлы", "4.Редактировать/просмотреть текущий файл", "5.Выйти" }, 5)) {
-            case 1:
-                createFile();
-                break;
-            case 2:
-                loadFromFile(&entries);
-                break;
-            case 3:
-                listFiles();
-                break;
-            case 4:
-                if (currentFile != "") {
-                    edit(&entries);
-                }
-                else {
-                    coutWithColor(6, "Файл не выбран, выберите файл или создайте новый\n");
-                }
-                break;
-            case 5:
-                string input = displayWarningWithInput(6, "Вы уверены, что хотите выйти?\n");
-                if (input == "yes" || input == "y" || input == "1") {
-                    exit(-15);
-                }
-                break;
         }
     }
 }
