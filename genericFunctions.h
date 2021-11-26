@@ -81,20 +81,20 @@ double inputData(std::string message, bool allowWhiteSpaces) {
     return toReturn;
 }
 
-std::string inputData(std::string message, char* allowedChars, int allowedChars_size) {
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
     printf("%s", message.c_str());
     std::string buffer = "";
-    char maxCharCodePoint = allowedChars[0];
-    char minCharCodePoint = allowedChars[0];
-    for (int i = 0; i < allowedChars_size; i++) {
-        maxCharCodePoint = std::max(maxCharCodePoint, allowedChars[i]);
-        minCharCodePoint = std::min(minCharCodePoint, allowedChars[i]);
-    }
     while (true) {
         char currChar = _getch();
         bool addToBuffer = false;
         if (currChar == '\r') {
-            break;
+            if (!std::regex_match(buffer, pattern)) {
+                coutWithColor(6, "\nВведеные данные не соответствуют шаблону\n");
+                std::cout << buffer;
+            }
+            else {
+                break;
+            }
         }
         if (currChar == '\b') {
             unsigned int bufLen = buffer.length();
@@ -103,14 +103,14 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
                 buffer.erase(bufLen - 1, bufLen);
             }
         }
-        if (currChar >= minCharCodePoint && currChar <= maxCharCodePoint) {
-            for (int i = 0; i < allowedChars_size; i++) {
-                if (allowedChars[i] == currChar) {
-                    addToBuffer = true;
-                    putchar(currChar);
-                }
+        
+        for (int i = 0; i < allowedChars_size; i++) {
+            if (allowedChars[i] == currChar) {
+                addToBuffer = true;
+                putchar(currChar);
             }
         }
+        
         if (addToBuffer) {
             buffer += currChar;
             addToBuffer = false;
@@ -118,6 +118,11 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
     }
     putchar('\n');
     return buffer;
+}
+
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size) {
+    std::regex str_expr(".*");
+    return inputData(message, allowedChars, allowedChars_size, str_expr);
 }
 
 double inputData(std::string message) {
