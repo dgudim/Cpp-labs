@@ -63,6 +63,13 @@ std::string* split(std::string *input, bool print_count,unsigned int *len) {
     return words;
 }
 
+std::string displayWarningWithInput(int color, std::string message) {
+    coutWithColor(color, message);
+    std::string input;
+    std::cin >> input;
+    return input;
+}
+
 double inputData(std::string message, bool allowWhiteSpaces) {
     std::cout << message << std::flush;
     double toReturn;
@@ -139,7 +146,7 @@ std::string doubleToString(double value)
     return doubleToString(value, 5);
 }
 
-std::string addSpaces(std::string input, int targetLength) {
+std::string addSpaces(std::string input, unsigned int targetLength) {
     int spaces = targetLength - input.length();
     for (int i = 0; i < spaces; i++) {
         input.append(" ");
@@ -160,9 +167,7 @@ std::string trim(const std::string s) {
 }
 
 void continueOrExit() {
-    std::cout << "Продолжить?" << std::endl;
-    std::string input;
-    std::cin >> input;
+    std::string input = displayWarningWithInput(7, "Продолжить?\n");
     if (!(input == "yes" || input == "y" || input == "1")) {
         exit(-15);
     }
