@@ -46,7 +46,7 @@ int main()
         listFiles();
         coutWithColor(11, "\nМеню (Выбор стрелками и Enter)\n");
         coutWithColor(3, "Текущий файл: " + currentFile + "\n\n");
-        switch (displaySelection(new string[4]{ "1.Открыть файл", "2.Создать файл", "3.Редактировать/просмотреть текущий файл", "4.Выйти" }, 4)) {
+        switch (displaySelection(new string[5]{ "1.Открыть файл", "2.Создать файл", "3.Удалить файлы", "4.Редактировать/просмотреть текущий файл", "5.Выйти" }, 5)) {
             case 1:
                 loadFromFile(&entries);
                 break;
@@ -54,6 +54,9 @@ int main()
                 createFile();
                 break;
             case 3:
+                deleteFiles();
+                break;
+            case 4:
                 reset();
                 if (currentFile != "") {
                     edit(&entries);
@@ -62,12 +65,53 @@ int main()
                     coutWithColor(6, "Файл не открыт, откройте файл или создайте новый\n");
                 }
                 break;
-            case 4:
+            case 5:
                 string input = displayWarningWithInput(6, "Вы уверены, что хотите выйти?\n");
                 if (input == "yes" || input == "y" || input == "1") {
                     exit(-15);
                 }
                 break;
+        }
+    }
+}
+
+void edit(vector<student_entry>* entries) {
+    bool exit = false;
+    bool save = false;
+    while (true) {
+        printSummary(entries);
+        bool save = true;
+        switch (displaySelection(new string[7]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по алфавиту", "6.Сортировать по среднему баллу", "7.Назад" }, 7)) {
+        case 1:
+            addEntries(entries);
+            break;
+        case 2:
+            viewEntries(entries);
+            save = false;
+            break;
+        case 3:
+            deleteEntries(entries);
+            break;
+        case 4:
+            editEntries(entries);
+            break;
+        case 5:
+            alphabeticSort(entries);
+            break;
+        case 6:
+            gradeSort(entries);
+            break;
+        case 7:
+            exit = true;
+            break;
+        }
+        if (exit) {
+            reset();
+            break;
+        }
+        if (save) {
+            write_entries(entries, currentFile);
+            save = false;
         }
     }
 }
@@ -173,7 +217,7 @@ void write_entries(vector<student_entry>* entries, string fileName) {
 void read_entries(vector<student_entry>* entries, string fileName) {
     unsigned int size = 0;
     entries->clear();
-    ifstream file(workingDir + fileName, ios::binary);
+    ifstream file(workingDir + fileName, ios::in | ios::binary);
     if (!file.read(reinterpret_cast<char*>(&size), sizeof(unsigned int))) {
         file.close();
         reset();
@@ -244,7 +288,7 @@ void printEntry(student_entry* entry) {
 
 void printSummary(vector<student_entry>* entries) {
     unsigned int size = entries->size();
-    coutWithColor(11, "Записи:");
+    coutWithColor(11, "\nЗаписи:");
     coutWithColor(3, "\nКоличество студентов: " + to_string(size) + "\n");
     if (size == 0) {
         return;
@@ -306,7 +350,7 @@ void createFile() {
 
         fileName = inputData("Введите название файла: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
 
-        ifstream file_read(workingDir + fileName + ".dat", ios::out | ios::binary);
+        ifstream file_read(workingDir + fileName + ".dat", ios::in | ios::binary);
 
         if (file_read.is_open()) {
             unsigned int success_bytes = 0;
@@ -344,10 +388,75 @@ void loadFromFile(vector<student_entry>* entries) {
     delete[] file_names;
 }
 
+void deleteFiles() {
+    unsigned int files = 0;
+    for (const auto& entry : fs::directory_iterator(workingDir)) {
+        files++;
+    }
+    string* file_names = new string[files];
+    unsigned int i = 0;
+    for (const auto& entry : fs::directory_iterator(workingDir)) {
+        file_names[i] = entry.path().filename().u8string();
+        i++;
+    }
+    coutWithColor(14, "Выберите файлы (backspace - выбрать/отменить), (enter - подтвердить)\n");
+    bool* files_chosen = displayMultiSelection(file_names, files);
+    unsigned int deleted_files = 0;
+    unsigned int files_to_delete = 0;
+
+    for (unsigned int i = 0; i < files; i++) {
+        if (files_chosen[i]) {
+            files_to_delete++;
+        }
+    }
+
+    if (files_to_delete > 0) {
+        string input = displayWarningWithInput(6, "Вы уверены, что хотите удалить?\n");
+        if (input == "yes" || input == "y" || input == "1") {
+            for (unsigned int i = 0; i < files; i++) {
+                if (files_chosen[i]) {
+                    if (file_names[i] == currentFile) {
+                        currentFile = "";
+                    }
+                    deleted_files += (remove((workingDir + file_names[i]).c_str()) == 0 ? 1 : 0);
+                }
+            }
+            reset();
+            coutWithColor(10, "Удалил " + to_string(deleted_files) + " файлов\n");
+        }
+        else {
+            reset();
+        }
+    }
+    else {
+        reset();
+    }
+    delete[] file_names;
+}
+
+unsigned int getStats(string path) {
+    ifstream file_read(workingDir + path, ios::in | ios::binary);
+    if (file_read.is_open()) {
+        unsigned int size = 0;
+        if (file_read.read(reinterpret_cast<char*>(&size), sizeof(unsigned int))) {
+            return size;
+        }
+        file_read.close();
+    }
+    return 0;
+}
+
 void listFiles() {
     coutWithColor(11, "Список файлов:\n");
+    unsigned int maxLen = 0;
     for (const auto& entry : fs::directory_iterator(workingDir)) {
-        cout << entry.path().filename().u8string() << endl;
+        maxLen = max(entry.path().filename().u8string().length(), maxLen);
+    }
+    for (const auto& entry : fs::directory_iterator(workingDir)) {
+        string name = entry.path().filename().u8string();
+        bool current = name == currentFile;
+        coutWithColor(current ? 10 : 7, addSpaces(name, maxLen + 1));
+        cout << "(" << getStats(name) << " записей)" << (current ? " -- текущий" : "") << endl;
     }
 }
 
@@ -408,45 +517,4 @@ void editEntries(vector<student_entry>* entries) {
     }
     coutWithColor(14, "Выберите студента\n");
     editEntry(&(entries->at(displaySelection(selection, size) - 1)));
-}
-
-void edit(vector<student_entry>* entries) {
-    bool exit = false;
-    bool save = false;
-    while (true) {
-        printSummary(entries);
-        bool save = true;
-        switch (displaySelection(new string[7]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по алфавиту", "6.Сортировать по среднему баллу", "7.Назад" }, 7)) {
-        case 1:
-            addEntries(entries);
-            break;
-        case 2:
-            viewEntries(entries);
-            save = false;
-            break;
-        case 3:
-            deleteEntries(entries);
-            break;
-        case 4:
-            editEntries(entries);
-            break;
-        case 5:
-            alphabeticSort(entries);
-            break;
-        case 6:
-            gradeSort(entries);
-            break;
-        case 7:
-            exit = true;
-            break;
-        }
-        if (exit) {
-            reset();
-            break;
-        }
-        if (save) {
-            write_entries(entries, currentFile);
-            save = false;
-        }
-    }
 }

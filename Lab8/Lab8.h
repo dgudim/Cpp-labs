@@ -22,6 +22,8 @@ void gradeSort(std::vector<student_entry>* entries);
 
 void createFile();
 void loadFromFile(std::vector<student_entry>* entries);
+unsigned int getStats(std::string path);
+void deleteFiles();
 void listFiles();
 
 bool isInvalid(student_entry entry);
