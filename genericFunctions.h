@@ -81,9 +81,13 @@ double inputData(std::string message, bool allowWhiteSpaces) {
     return toReturn;
 }
 
-std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
-    printf("%s", message.c_str());
-    std::string buffer = "";
+double inputData(std::string message) {
+    return inputData(message, true);
+}
+
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern, std::string previousBuffer) {
+    printf("%s", (message + previousBuffer).c_str());
+    std::string buffer = previousBuffer;
     while (true) {
         char currChar = _getch();
         bool addToBuffer = false;
@@ -103,14 +107,14 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
                 buffer.erase(bufLen - 1, bufLen);
             }
         }
-        
+
         for (int i = 0; i < allowedChars_size; i++) {
             if (allowedChars[i] == currChar) {
                 addToBuffer = true;
                 putchar(currChar);
             }
         }
-        
+
         if (addToBuffer) {
             buffer += currChar;
             addToBuffer = false;
@@ -120,13 +124,13 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
     return buffer;
 }
 
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
+    return inputData(message, allowedChars, allowedChars_size, pattern, "");
+}
+
 std::string inputData(std::string message, char* allowedChars, int allowedChars_size) {
     std::regex str_expr(".*");
     return inputData(message, allowedChars, allowedChars_size, str_expr);
-}
-
-double inputData(std::string message) {
-    return inputData(message, true);
 }
 
 std::string doubleToString(double value, int precision)
