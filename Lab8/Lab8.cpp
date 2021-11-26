@@ -185,23 +185,23 @@ unsigned int findMaxNameLength(vector<student_entry>* entries, unsigned int size
     return maxLength;
 }
 
-void printEntry(student_entry entry) {
+void printEntry(student_entry* entry) {
     cout << "\n";
     setConsoleColor(10);
-    cout << "Ф.И.О: " << entry.fio << endl;
+    cout << "Ф.И.О: " << entry->fio << endl;
     setConsoleColor(7);
-    cout << "Год рождения: " << entry.year_of_birth << endl;
-    cout << "Номер группы: " << entry.group << endl;
+    cout << "Год рождения: " << entry->year_of_birth << endl;
+    cout << "Номер группы: " << entry->group << endl;
     cout << "Отметки: " << endl;
     for (unsigned int g = 0; g < lessons_size; g++) {
-        unsigned int grades_size = entry.grades[(lessons)g].size();
+        unsigned int grades_size = entry->grades[(lessons)g].size();
         cout << lessons_map[g] << ": ";
         for (unsigned int v = 0; v < grades_size; v++) {
-            cout << entry.grades[(lessons)g].at(v) << " ";
+            cout << entry->grades[(lessons)g].at(v) << " ";
         }
         cout << endl;
     }
-    cout << "Средний балл: " << entry.grades_average << endl;
+    cout << "Средний балл: " << entry->grades_average << endl;
 }
 
 void printSummary(vector<student_entry>* entries) {
@@ -322,7 +322,7 @@ void viewEntries(vector<student_entry>* entries) {
     bool* selected = displayMultiSelection(selection, size);
     for (unsigned int i = 0; i < size; i++) {
         if (selected[i]) {
-            printEntry(entries->at(i));
+            printEntry(&(entries->at(i)));
         }
     }
 }
