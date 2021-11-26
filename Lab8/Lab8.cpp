@@ -7,6 +7,7 @@
 #include <fstream>
 using namespace std;
 #include <filesystem>
+#include <algorithm>
 namespace fs = std::filesystem;
 
 string workingDir = "../student_files/";
@@ -30,12 +31,14 @@ struct student_entry {
         year_of_birth = 2000;
         group = 0;
         grades_average = 0;
+        valid = true;
     }
     string fio;
     unsigned int year_of_birth;
     unsigned int group;
     map<lessons, vector<unsigned int>> grades;
     float grades_average;
+    bool valid;
 };
 
 void inputEntry(student_entry *entry) {
@@ -47,7 +50,7 @@ void inputEntry(student_entry *entry) {
     for (unsigned int i = 0; i < lessons_size; i++) {
         cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
         string input = trim(inputData("", new char[12]{ "1234567890 " }, 11)) + ' ';
-        if (input.length() != 0) {
+        if (input.length() != 1) {
             unsigned int numberOfGrades;
             string* words = split(&input, false, &numberOfGrades);
             for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
@@ -147,27 +150,36 @@ unsigned int findMaxNameLength(vector<student_entry>* entries, unsigned int size
     return maxLength;
 }
 
-void printEntries(vector<student_entry>* entries) {
+void printEntry(student_entry entry) {
+    cout << "\n";
+    setConsoleColor(10);
+    cout << "Ф.И.О: " << entry.fio << endl;
+    setConsoleColor(7);
+    cout << "Год рождения: " << entry.year_of_birth << endl;
+    cout << "Номер группы: " << entry.group << endl;
+    cout << "Отметки: " << endl;
+    for (unsigned int g = 0; g < lessons_size; g++) {
+        unsigned int grades_size = entry.grades[(lessons)g].size();
+        cout << lessons_map[g] << ": ";
+        for (unsigned int v = 0; v < grades_size; v++) {
+            cout << entry.grades[(lessons)g].at(v) << " ";
+        }
+        cout << endl;
+    }
+    cout << "Средний балл: " << entry.grades_average << endl;
+}
+
+void printSummary(vector<student_entry>* entries) {
     unsigned int size = entries->size();
     coutWithColor(3, "\nКоличество студентов: " + to_string(size) + "\n");
     if (size == 0) {
         return;
     }
     unsigned int maxNameLength = max(findMaxNameLength(entries, size), (unsigned int)7);
-    //"Студент".length() is 14 for some reason, investigate
     cout << "Студент" << addSpaces("", maxNameLength - 7) << "|" << "Год рождения|" << "Номер группы|" << "Средний балл" << endl;
     for (unsigned int i = 0; i < size; i++) {
-
         cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).year_of_birth), 12) << "|";
         cout << addSpaces(to_string(entries->at(i).group), 12) << "|" << entries->at(i).grades_average << endl;
-
-        /*for (unsigned int g = 0; g < lessons_size; g++) {
-            unsigned int grades_size = students[i].grades[(lessons)g].size();
-            cout << "\nОтметки по " << lessons_map_case[g] << ": " << endl;
-            for (unsigned int v = 0; v < grades_size; v++) {
-                cout << students[i].grades[(lessons)g].at(v);
-            }
-        }*/
     }
     cout << endl;
 }
@@ -224,6 +236,43 @@ void listFiles() {
     }
 }
 
+void viewEntries(vector<student_entry>* entries) {
+    unsigned int size = entries->size();
+    string* selection = new string[size];
+    for (unsigned int i = 0; i < size; i++) {
+        selection[i] = entries->at(i).fio;
+    }
+    coutWithColor(14, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
+    bool* selected = displayMultiSelection(selection, size);
+    for (unsigned int i = 0; i < size; i++) {
+        if (selected[i]) {
+            printEntry(entries->at(i));
+        }
+    }
+}
+
+bool isInvalid(student_entry entry) {
+    return !entry.valid;
+}
+
+void deleteEntries(vector<student_entry>* entries) {
+    unsigned int size = entries->size();
+    string* selection = new string[size];
+    for (unsigned int i = 0; i < size; i++) {
+        selection[i] = entries->at(i).fio;
+    }
+    coutWithColor(14, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
+    bool* selected = displayMultiSelection(selection, size);
+
+    string input = displayWarningWithInput(6, "Вы уверены, что хотите удалить?\n");
+    if (input == "yes" || input == "y" || input == "1") {
+        for (unsigned int i = 0; i < size; i++) {
+            entries->at(i).valid = !selected[i];
+        }
+        entries->erase(remove_if(entries->begin(), entries->end(), isInvalid), entries->end());
+    }
+}
+
 void addEntries(vector<student_entry>* entries) {
     unsigned int entries_to_add = (unsigned int)inputData("Сколько записей добавить?\n");
     unsigned int newSize = entries_to_add + entries->size();
@@ -235,26 +284,42 @@ void addEntries(vector<student_entry>* entries) {
 }
 
 void edit(vector<student_entry>* entries) {
-    coutWithColor(11, "Записи:\n");
-    printEntries(entries);
-    switch (displaySelection(new string[5]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить запись", "4.Редактировать запись", "5.Сортировать по среднему баллу" }, 5)) {
-    case 1:
-        addEntries(entries);
-        break;
-    case 2:
-        
-        break;
-    case 3:
-        
-        break;
-    case 4:
+    bool exit = false;
+    bool save = false;
+    while (true) {
+        coutWithColor(11, "Записи:");
+        printSummary(entries);
+        bool save = false;
+        switch (displaySelection(new string[6]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по среднему баллу", "6.Назад" }, 6)) {
+        case 1:
+            addEntries(entries);
+            save = true;
+            break;
+        case 2:
+            viewEntries(entries);
+            break;
+        case 3:
+            deleteEntries(entries);
+            save = true;
+            break;
+        case 4:
 
-        break;
-    case 5:
-        
-        break;
+            break;
+        case 5:
+
+            break;
+        case 6:
+            exit = true;
+            break;
+        }
+        if (exit) {
+            break;
+        }
+        if (save) {
+            write_entries(entries, currentFile);
+            save = false;
+        }
     }
-    write_entries(entries, currentFile);
 }
 
 int main()
