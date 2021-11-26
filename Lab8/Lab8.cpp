@@ -69,6 +69,41 @@ void inputEntry(student_entry *entry) {
     }
 }
 
+void editEntry(student_entry* entry) {
+    entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."), entry->fio);
+    entry->year_of_birth = stoi(inputData("Введите год рождения: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9]"), to_string(entry->year_of_birth)));
+    entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]"), to_string(entry->group)));
+    unsigned int grades_sum = 0;
+    unsigned int grades_count = 0;
+    for (unsigned int i = 0; i < lessons_size; i++) {
+        cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
+
+        unsigned int previous_grades_len = entry->grades[(lessons)i].size();
+        string previous_grades;
+        for (unsigned int gr = 0; gr < previous_grades_len; gr++) {
+            previous_grades.append(to_string(entry->grades[(lessons)i].at(gr)) + " ");
+        }
+
+        string input = trim(inputData("", new char[12]{ "1234567890 " }, 11, regex(".*"), previous_grades)) + ' ';
+        if (input.length() != 1) {
+            unsigned int numberOfGrades;
+            string* words = split(&input, false, &numberOfGrades);
+            for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
+                unsigned int grade = stoi(words[i2]);
+                grades_sum += grade;
+                entry->grades[(lessons)i].push_back(grade);
+            }
+            grades_count += numberOfGrades;
+        }
+    }
+    if (grades_count == 0) {
+        entry->grades_average = 0;
+    }
+    else {
+        entry->grades_average = grades_sum / (float)grades_count;
+    }
+}
+
 void write_entries(vector<student_entry>* entries, string fileName) {
     ofstream file(workingDir + fileName, ios::out | ios::binary);
     unsigned int size = entries->size();
@@ -171,6 +206,7 @@ void printEntry(student_entry entry) {
 
 void printSummary(vector<student_entry>* entries) {
     unsigned int size = entries->size();
+    coutWithColor(11, "\nЗаписи:");
     coutWithColor(3, "\nКоличество студентов: " + to_string(size) + "\n");
     if (size == 0) {
         return;
@@ -182,6 +218,46 @@ void printSummary(vector<student_entry>* entries) {
         cout << addSpaces(to_string(entries->at(i).group), 12) << "|" << entries->at(i).grades_average << endl;
     }
     cout << endl;
+}
+
+void alphabeticSort(vector<student_entry>* entries) {
+    int j = 0;
+    bool swap = true;
+    string temp;
+    unsigned int size = entries->size();
+    while (swap)
+    {
+        swap = false;
+        j++;
+        for (unsigned int l = 0; l < size - j; l++)
+        {
+            if (entries->at(l).fio > entries->at(l + 1).fio)
+            {
+                iter_swap(entries->begin() + l, entries->begin() + l + 1);
+                swap = true;
+            }
+        }
+    }
+}
+
+void gradeSort(vector<student_entry>* entries) {
+    int j = 0;
+    bool swap = true;
+    string temp;
+    unsigned int size = entries->size();
+    while (swap)
+    {
+        swap = false;
+        j++;
+        for (unsigned int l = 0; l < size - j; l++)
+        {
+            if (entries->at(l).grades_average < entries->at(l + 1).grades_average)
+            {
+                iter_swap(entries->begin() + l, entries->begin() + l + 1);
+                swap = true;
+            }
+        }
+    }
 }
 
 void createFile() {
@@ -283,32 +359,43 @@ void addEntries(vector<student_entry>* entries) {
     }
 }
 
+void editEntries(vector<student_entry>* entries) {
+    unsigned int size = entries->size();
+    string* selection = new string[size];
+    for (unsigned int i = 0; i < size; i++) {
+        selection[i] = entries->at(i).fio;
+    }
+    coutWithColor(14, "Выберите студента\n");
+    editEntry(&(entries->at(displaySelection(selection, size) - 1)));
+}
+
 void edit(vector<student_entry>* entries) {
     bool exit = false;
     bool save = false;
     while (true) {
-        coutWithColor(11, "Записи:");
         printSummary(entries);
-        bool save = false;
-        switch (displaySelection(new string[6]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по среднему баллу", "6.Назад" }, 6)) {
+        bool save = true;
+        switch (displaySelection(new string[7]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по алфавиту", "6.Сортировать по среднему баллу", "7.Назад" }, 7)) {
         case 1:
             addEntries(entries);
-            save = true;
             break;
         case 2:
             viewEntries(entries);
+            save = false;
             break;
         case 3:
             deleteEntries(entries);
-            save = true;
             break;
         case 4:
-
+            editEntries(entries);
             break;
         case 5:
-
+            alphabeticSort(entries);
             break;
         case 6:
+            gradeSort(entries);
+            break;
+        case 7:
             exit = true;
             break;
         }
