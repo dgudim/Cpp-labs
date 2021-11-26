@@ -44,14 +44,14 @@ int main()
 
     while (true) {
         listFiles();
-        coutWithColor(11, "\n_________Меню (Выбор стрелками и Enter)_________\n");
+        coutWithColor(11, "\nМеню (Выбор стрелками и Enter)\n");
         coutWithColor(3, "Текущий файл: " + currentFile + "\n\n");
-        switch (displaySelection(new string[4]{ "1.Создать файл", "2.Открыть файл", "3.Редактировать/просмотреть текущий файл", "4.Выйти" }, 4)) {
+        switch (displaySelection(new string[4]{ "1.Открыть файл", "2.Создать файл", "3.Редактировать/просмотреть текущий файл", "4.Выйти" }, 4)) {
             case 1:
-                createFile();
+                loadFromFile(&entries);
                 break;
             case 2:
-                loadFromFile(&entries);
+                createFile();
                 break;
             case 3:
                 reset();
@@ -59,7 +59,7 @@ int main()
                     edit(&entries);
                 }
                 else {
-                    coutWithColor(6, "Файл не выбран, выберите файл или создайте новый\n");
+                    coutWithColor(6, "Файл не открыт, откройте файл или создайте новый\n");
                 }
                 break;
             case 4:
@@ -359,11 +359,13 @@ void viewEntries(vector<student_entry>* entries) {
     }
     coutWithColor(14, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
     bool* selected = displayMultiSelection(selection, size);
+    reset();
     for (unsigned int i = 0; i < size; i++) {
         if (selected[i]) {
             printEntry(&(entries->at(i)));
         }
     }
+    cout << endl;
 }
 
 bool isInvalid(student_entry entry) {
@@ -419,7 +421,6 @@ void edit(vector<student_entry>* entries) {
             addEntries(entries);
             break;
         case 2:
-            reset();
             viewEntries(entries);
             save = false;
             break;
