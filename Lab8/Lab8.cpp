@@ -60,47 +60,45 @@ void inputEntry(student_entry *entry) {
     //TODO Add limitations to prevent crashes
 }
 
-void write_entries(student_entry** entries , unsigned int size, string fileName) {
+void write_entries(vector<student_entry>* entries, string fileName) {
     ofstream file(workingDir + fileName, ios::out | ios::binary);
+    unsigned int size = entries->size();
     file.write(reinterpret_cast<char*>(&size), sizeof(unsigned int));
     file.write(reinterpret_cast<char*>(&lessons_size), sizeof(unsigned int));
     for (unsigned int i = 0; i < size; i++) {
         // determine the size of the string
-        unsigned int fio_length = (*entries[i]).fio.length();
+        unsigned int fio_length = entries->at(i).fio.length();
         // write string size
         file.write(reinterpret_cast<char*>(&fio_length), sizeof(unsigned int));
         // and actual string
-        file.write((*entries[i]).fio.data(), fio_length);
+        file.write(entries->at(i).fio.data(), fio_length);
 
-        file.write(reinterpret_cast<char*>(&(*entries[i]).year_of_birth), sizeof(unsigned int));
-        file.write(reinterpret_cast<char*>(&(*entries[i]).group), sizeof(unsigned int));
+        file.write(reinterpret_cast<char*>(&(entries->at(i).year_of_birth)), sizeof(unsigned int));
+        file.write(reinterpret_cast<char*>(&(entries->at(i).group)), sizeof(unsigned int));
         
         for (unsigned int e = 0; e < lessons_size; e++) {
-            unsigned int vector_size = (*entries[i]).grades[(lessons)e].size();
+            unsigned int vector_size = entries->at(i).grades[(lessons)e].size();
             file.write(reinterpret_cast<char*>(&vector_size), sizeof(unsigned int));
             for (unsigned int m = 0; m < vector_size; m++) {
-                file.write(reinterpret_cast<char*>(&(*entries[i]).grades[(lessons)e].at(m)), sizeof(unsigned int));
+                file.write(reinterpret_cast<char*>(&(entries->at(i).grades[(lessons)e].at(m))), sizeof(unsigned int));
             }
         }
-        file.write(reinterpret_cast<char*>(&(*entries[i]).grades_average), sizeof(float));
+        file.write(reinterpret_cast<char*>(&(entries->at(i).grades_average)), sizeof(float));
     }
     file.flush();
     file.close();
 }
 
-student_entry* read_entries(string fileName, unsigned int *size_out) {
+void read_entries(vector<student_entry>* entries, string fileName) {
     unsigned int size = 0;
-    student_entry* students;
+    entries->clear();
     ifstream file(workingDir + fileName, ios::binary);
     if (!file.read(reinterpret_cast<char*>(&size), sizeof(unsigned int))) {
         file.close();
         coutWithColor(6, "Файл пустой\n");
         currentFile = fileName;
-        *size_out = 0;
-        return NULL;
+        return;
     }
-    *size_out = size;
-    students = new student_entry[size];
     unsigned int lessons_count = 0;
     file.read(reinterpret_cast<char*>(&lessons_count), sizeof(unsigned int));
 
@@ -126,36 +124,35 @@ student_entry* read_entries(string fileName, unsigned int *size_out) {
 
         file.read(reinterpret_cast<char*>(&student.grades_average), sizeof(float));
 
-        students[i] = student;
+        entries->push_back(student);
     }
     file.close();
 
     currentFile = fileName;
     coutWithColor(10, "Успешно загрузил " + to_string(size) + " записей\n");
-
-    return students;
 }
 
-unsigned int findMaxNameLength(student_entry* students, unsigned int size) {
+unsigned int findMaxNameLength(vector<student_entry>* entries, unsigned int size) {
     unsigned int maxLength = 0;
     for (unsigned int i = 0; i < size; i++) {
-        maxLength = max(maxLength, students[i].fio.length());
+        maxLength = max(maxLength, entries->at(i).fio.length());
     }
     return maxLength;
 }
 
-void printEntries(student_entry* students, unsigned int size) {
+void printEntries(vector<student_entry>* entries) {
+    unsigned int size = entries->size();
     coutWithColor(3, "Количество студентов: " + to_string(size) + "\n");
     if (size == 0) {
         return;
     }
-    unsigned int maxNameLength = max(findMaxNameLength(students, size), (unsigned int)7);
+    unsigned int maxNameLength = max(findMaxNameLength(entries, size), (unsigned int)7);
     //"Студент".length() is 14 for some reason, investigate
     cout << addSpaces("Студент|", maxNameLength) << "Год рождения|" << "Номер группы|" << "Средний балл" << endl;
     for (unsigned int i = 0; i < size; i++) {
 
-        cout << addSpaces(students[i].fio, maxNameLength) << "|" << addSpaces(to_string(students[i].year_of_birth), 12) << "|";
-        cout << addSpaces(to_string(students[i].group), 12) << "|" << students[i].grades_average << endl;
+        cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).year_of_birth), 12) << "|";
+        cout << addSpaces(to_string(entries->at(i).group), 12) << "|" << entries->at(i).grades_average << endl;
 
         /*for (unsigned int g = 0; g < lessons_size; g++) {
             unsigned int grades_size = students[i].grades[(lessons)g].size();
@@ -196,7 +193,7 @@ void createFile() {
     }
 }
 
-void loadFromFile(student_entry** entries, unsigned int* size) {
+void loadFromFile(vector<student_entry>* entries) {
     unsigned int files = 0;
     for (const auto& entry : fs::directory_iterator(workingDir)) {
         files++;
@@ -208,10 +205,8 @@ void loadFromFile(student_entry** entries, unsigned int* size) {
         i++;
     }
     int file_chosen = displaySelection(file_names, files);
-    student_entry* read_entries_ = read_entries(file_names[file_chosen - 1], size);
+    read_entries(entries, file_names[file_chosen - 1]);
     delete[] file_names;
-    delete[] *entries;
-    *entries = read_entries_;
 }
 
 void listFiles() {
@@ -221,29 +216,22 @@ void listFiles() {
     }
 }
 
-void addEntries(student_entry** entries, unsigned int *size) {
+void addEntries(vector<student_entry>* entries) {
     unsigned int entries_to_add = (unsigned int)inputData("Сколько записей добавить?\n");
-    unsigned int newSize = entries_to_add + *size;
-    student_entry* newEntries = new student_entry[newSize];
-    for (unsigned int i = 0; i < *size; i++) {
-        newEntries[i] = *entries[i];
-    }
-    for (unsigned int i = *size; i < newSize; i++) {
+    unsigned int newSize = entries_to_add + entries->size();
+    for (unsigned int i = 0; i < entries_to_add; i++) {
         student_entry entry;
         inputEntry(&entry);
-        newEntries[i] = entry;
+        entries->push_back(entry);
     }
-    *size = newSize;
-    delete[] *entries;
-    *entries = newEntries;
 }
 
-void edit(student_entry** entries, unsigned int *size) {
+void edit(vector<student_entry>* entries) {
     coutWithColor(11, "Записи:\n");
-    printEntries(*entries, *size);
+    printEntries(entries);
     switch (displaySelection(new string[5]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить запись", "4.Редактировать запись", "5.Сортировать по среднему баллу" }, 5)) {
     case 1:
-        addEntries(entries, size);
+        addEntries(entries);
         break;
     case 2:
         
@@ -258,7 +246,7 @@ void edit(student_entry** entries, unsigned int *size) {
         
         break;
     }
-    write_entries(entries, *size, currentFile);
+    write_entries(entries, currentFile);
 }
 
 int main()
@@ -266,8 +254,7 @@ int main()
     SetConsoleOutputCP(65001);
     listFiles();
 
-    student_entry* entries = new student_entry[0];
-    unsigned int entries_size;
+    vector<student_entry> entries;
 
     while (true) {
         coutWithColor(11, "\n_________Меню (Выбор стрелками и Enter)_________\n");
@@ -277,14 +264,14 @@ int main()
                 createFile();
                 break;
             case 2:
-                loadFromFile(&entries, &entries_size);
+                loadFromFile(&entries);
                 break;
             case 3:
                 listFiles();
                 break;
             case 4:
                 if (currentFile != "") {
-                    edit(&entries, &entries_size);
+                    edit(&entries);
                 }
                 else {
                     coutWithColor(6, "Файл не выбран, выберите файл или создайте новый\n");
