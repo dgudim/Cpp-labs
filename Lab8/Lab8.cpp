@@ -39,25 +39,31 @@ struct student_entry {
 };
 
 void inputEntry(student_entry *entry) {
-    entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53);
-    entry->year_of_birth = (unsigned int)inputData("Введите год рождения: ");
-    entry->group = (unsigned int)inputData("Введите номер группы: ");
+    entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."));
+    entry->year_of_birth = stoi(inputData("Введите год рождения: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9]")));
+    entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
     unsigned int grades_sum = 0;
     unsigned int grades_count = 0;
     for (unsigned int i = 0; i < lessons_size; i++) {
-        cout << "Введите отметки по " << lessons_map_case[i] << " через пробел" << endl;
+        cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
         string input = trim(inputData("", new char[12]{ "1234567890 " }, 11)) + ' ';
-        unsigned int numberOfGrades;
-        string* words = split(&input, false, &numberOfGrades);
-        for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
-            unsigned int grade = stoi(words[i2]);
-            grades_sum += grade;
-            entry->grades[(lessons)i].push_back(grade);
+        if (input.length() != 0) {
+            unsigned int numberOfGrades;
+            string* words = split(&input, false, &numberOfGrades);
+            for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
+                unsigned int grade = stoi(words[i2]);
+                grades_sum += grade;
+                entry->grades[(lessons)i].push_back(grade);
+            }
+            grades_count += numberOfGrades;
         }
-        grades_count += numberOfGrades;
     }
-    entry->grades_average = grades_sum / (float)grades_count;
-    //TODO Add limitations to prevent crashes
+    if (grades_count == 0) {
+        entry->grades_average = 0;
+    }
+    else {
+        entry->grades_average = grades_sum / (float)grades_count;
+    }
 }
 
 void write_entries(vector<student_entry>* entries, string fileName) {
@@ -85,6 +91,7 @@ void write_entries(vector<student_entry>* entries, string fileName) {
         }
         file.write(reinterpret_cast<char*>(&(entries->at(i).grades_average)), sizeof(float));
     }
+    coutWithColor(10, "\nСохранил изменения\n");
     file.flush();
     file.close();
 }
@@ -142,13 +149,13 @@ unsigned int findMaxNameLength(vector<student_entry>* entries, unsigned int size
 
 void printEntries(vector<student_entry>* entries) {
     unsigned int size = entries->size();
-    coutWithColor(3, "Количество студентов: " + to_string(size) + "\n");
+    coutWithColor(3, "\nКоличество студентов: " + to_string(size) + "\n");
     if (size == 0) {
         return;
     }
     unsigned int maxNameLength = max(findMaxNameLength(entries, size), (unsigned int)7);
     //"Студент".length() is 14 for some reason, investigate
-    cout << addSpaces("Студент|", maxNameLength) << "Год рождения|" << "Номер группы|" << "Средний балл" << endl;
+    cout << "Студент" << addSpaces("", maxNameLength - 7) << "|" << "Год рождения|" << "Номер группы|" << "Средний балл" << endl;
     for (unsigned int i = 0; i < size; i++) {
 
         cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).year_of_birth), 12) << "|";
@@ -162,6 +169,7 @@ void printEntries(vector<student_entry>* entries) {
             }
         }*/
     }
+    cout << endl;
 }
 
 void createFile() {
@@ -286,5 +294,3 @@ int main()
         }
     }
 }
-
-
