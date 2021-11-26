@@ -57,7 +57,7 @@ int main()
                 deleteFiles();
                 break;
             case 4:
-                reset();
+                clearScreen();
                 if (currentFile != "") {
                     edit(&entries);
                 }
@@ -69,6 +69,9 @@ int main()
                 string input = displayWarningWithInput(6, "Вы уверены, что хотите выйти?\n");
                 if (input == "yes" || input == "y" || input == "1") {
                     exit(-15);
+                }
+                else {
+                    clearScreen();
                 }
                 break;
         }
@@ -83,7 +86,7 @@ void edit(vector<student_entry>* entries) {
         bool save = true;
         switch (displaySelection(new string[7]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по алфавиту", "6.Сортировать по среднему баллу", "7.Назад" }, 7)) {
         case 1:
-            addEntries(entries);
+            save = addEntries(entries);
             break;
         case 2:
             viewEntries(entries);
@@ -106,7 +109,7 @@ void edit(vector<student_entry>* entries) {
             break;
         }
         if (exit) {
-            reset();
+            clearScreen();
             break;
         }
         if (save) {
@@ -116,7 +119,7 @@ void edit(vector<student_entry>* entries) {
     }
 }
 
-void reset() {
+void clearScreen() {
     system("CLS");
 }
 
@@ -134,6 +137,7 @@ void inputEntry(student_entry* entry) {
             string* words = split(&input, false, &numberOfGrades);
             for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
                 unsigned int grade = stoi(words[i2]);
+                //check for range (0 - 10)
                 grades_sum += grade;
                 entry->grades[(lessons)i].push_back(grade);
             }
@@ -208,7 +212,7 @@ void write_entries(vector<student_entry>* entries, string fileName) {
         }
         file.write(reinterpret_cast<char*>(&(entries->at(i).grades_average)), sizeof(float));
     }
-    reset();
+    clearScreen();
     coutWithColor(10, "Сохранил изменения\n");
     file.flush();
     file.close();
@@ -220,7 +224,7 @@ void read_entries(vector<student_entry>* entries, string fileName) {
     ifstream file(workingDir + fileName, ios::in | ios::binary);
     if (!file.read(reinterpret_cast<char*>(&size), sizeof(unsigned int))) {
         file.close();
-        reset();
+        clearScreen();
         coutWithColor(6, "Файл пустой\n");
         currentFile = fileName;
         return;
@@ -255,7 +259,7 @@ void read_entries(vector<student_entry>* entries, string fileName) {
     file.close();
 
     currentFile = fileName;
-    reset();
+    clearScreen();
     coutWithColor(10, "Успешно загрузил " + to_string(size) + " записей\n");
 }
 
@@ -365,7 +369,7 @@ void createFile() {
         if (exit) {
             ofstream file(workingDir + fileName + ".dat", ios::out | ios::binary);
             file.close();
-            reset();
+            clearScreen();
             coutWithColor(10, "Файл был успешно создан\n");
             break;
         }
@@ -421,15 +425,15 @@ void deleteFiles() {
                     deleted_files += (remove((workingDir + file_names[i]).c_str()) == 0 ? 1 : 0);
                 }
             }
-            reset();
+            clearScreen();
             coutWithColor(10, "Удалил " + to_string(deleted_files) + " файлов\n");
         }
         else {
-            reset();
+            clearScreen();
         }
     }
     else {
-        reset();
+        clearScreen();
     }
     delete[] file_names;
 }
@@ -468,7 +472,7 @@ void viewEntries(vector<student_entry>* entries) {
     }
     coutWithColor(14, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
     bool* selected = displayMultiSelection(selection, size);
-    reset();
+    clearScreen();
     for (unsigned int i = 0; i < size; i++) {
         if (selected[i]) {
             printEntry(&(entries->at(i)));
@@ -499,14 +503,15 @@ void deleteEntries(vector<student_entry>* entries) {
     }
 }
 
-void addEntries(vector<student_entry>* entries) {
-    unsigned int entries_to_add = (unsigned int)inputData("Сколько записей добавить?\n");
-    unsigned int newSize = entries_to_add + entries->size();
+bool addEntries(vector<student_entry>* entries) {
+    unsigned int entries_to_add = (unsigned int)max(inputData("Сколько записей добавить?\n"), 0.0);
+    
     for (unsigned int i = 0; i < entries_to_add; i++) {
         student_entry entry;
         inputEntry(&entry);
         entries->push_back(entry);
     }
+    return entries_to_add > 0;
 }
 
 void editEntries(vector<student_entry>* entries) {

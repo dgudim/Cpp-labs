@@ -4,7 +4,7 @@
 
 struct student_entry;
 
-void reset();
+void clearScreen();
 
 void inputEntry(student_entry* entry);
 void editEntry(student_entry* entry);
@@ -30,6 +30,6 @@ bool isInvalid(student_entry entry);
 
 void viewEntries(std::vector<student_entry>* entries);
 void deleteEntries(std::vector<student_entry>* entries);
-void addEntries(std::vector<student_entry>* entries);
+bool addEntries(std::vector<student_entry>* entries);
 void editEntries(std::vector<student_entry>* entries);
 void edit(std::vector<student_entry>* entries);
