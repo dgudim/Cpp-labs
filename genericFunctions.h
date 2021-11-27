@@ -124,6 +124,12 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
     return buffer;
 }
 
+
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::string previousBuffer) {
+    std::regex str_expr(".*");
+    return inputData(message, allowedChars, allowedChars_size, str_expr, previousBuffer);
+}
+
 std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
     return inputData(message, allowedChars, allowedChars_size, pattern, "");
 }

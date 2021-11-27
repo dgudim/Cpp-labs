@@ -129,17 +129,29 @@ void inputEntry(student_entry* entry) {
     entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
     unsigned int grades_sum = 0;
     unsigned int grades_count = 0;
+    string failureBuffer = "";
+    string lastInput = "";
     for (unsigned int i = 0; i < lessons_size; i++) {
         cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
-        string input = trim(inputData("", new char[12]{ "1234567890 " }, 11)) + ' ';
+        string input = trim(inputData("", new char[12]{ "1234567890 " }, 11, failureBuffer)) + ' ';
+        lastInput = input;
+        failureBuffer = "";
         if (input.length() != 1) {
             unsigned int numberOfGrades;
+            unsigned int numberOfOutOfBoundsGrades = 0;
             string* words = split(&input, false, &numberOfGrades);
             for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
-                unsigned int grade = stoi(words[i2]);
-                //check for range (0 - 10)
+                double grade_signed = stod(words[i2]);
+                numberOfOutOfBoundsGrades += (grade_signed < 0 || grade_signed > 10);
+                unsigned int grade = (unsigned int)min(max(grade_signed, 0.0), 10.0);
                 grades_sum += grade;
                 entry->grades[(lessons)i].push_back(grade);
+            }
+            delete[] words;
+            if (numberOfOutOfBoundsGrades > 0) {
+                coutWithColor(6, "Некоторые введенные отметки(" +to_string(numberOfOutOfBoundsGrades)+ ") выходят за границы допустимого диапазона(0 - 10)\n");
+                failureBuffer = lastInput;
+                i--;
             }
             grades_count += numberOfGrades;
         }
@@ -158,23 +170,43 @@ void editEntry(student_entry* entry) {
     entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]"), to_string(entry->group)));
     unsigned int grades_sum = 0;
     unsigned int grades_count = 0;
+    string failureBuffer = "";
+    string lastInput = "";
     for (unsigned int i = 0; i < lessons_size; i++) {
         cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
+        string input;
 
-        unsigned int previous_grades_len = entry->grades[(lessons)i].size();
-        string previous_grades;
-        for (unsigned int gr = 0; gr < previous_grades_len; gr++) {
-            previous_grades.append(to_string(entry->grades[(lessons)i].at(gr)) + " ");
+        if (failureBuffer == "") {
+            unsigned int previous_grades_len = entry->grades[(lessons)i].size();
+            string previous_grades;
+            for (unsigned int gr = 0; gr < previous_grades_len; gr++) {
+                previous_grades.append(to_string(entry->grades[(lessons)i].at(gr)) + " ");
+            }
+            input = trim(inputData("", new char[12]{ "1234567890 " }, 11, previous_grades)) + ' ';
+        }
+        else {
+            input = trim(inputData("", new char[12]{ "1234567890 " }, 11, failureBuffer)) + ' ';
+            failureBuffer = "";
         }
 
-        string input = trim(inputData("", new char[12]{ "1234567890 " }, 11, regex(".*"), previous_grades)) + ' ';
+        lastInput = input;
+
         if (input.length() != 1) {
             unsigned int numberOfGrades;
+            unsigned int numberOfOutOfBoundsGrades = 0;
             string* words = split(&input, false, &numberOfGrades);
             for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
-                unsigned int grade = stoi(words[i2]);
+                double grade_signed = stod(words[i2]);
+                numberOfOutOfBoundsGrades += (grade_signed < 0 || grade_signed > 10);
+                unsigned int grade = (unsigned int)min(max(grade_signed, 0.0), 10.0);
                 grades_sum += grade;
                 entry->grades[(lessons)i].push_back(grade);
+            }
+            delete[] words;
+            if (numberOfOutOfBoundsGrades > 0) {
+                coutWithColor(6, "Некоторые введенные отметки(" + to_string(numberOfOutOfBoundsGrades) + ") выходят за границы допустимого диапазона(0 - 10)\n");
+                failureBuffer = lastInput;
+                i--;
             }
             grades_count += numberOfGrades;
         }
