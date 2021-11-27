@@ -468,6 +468,7 @@ void deleteFiles() {
         clearScreen();
     }
     delete[] file_names;
+    delete[] files_chosen;
 }
 
 unsigned int getStats(string path) {
@@ -511,6 +512,7 @@ void viewEntries(vector<student_entry>* entries) {
         }
     }
     cout << endl;
+    delete[] selected;
 }
 
 bool isInvalid(student_entry entry) {
@@ -533,6 +535,8 @@ void deleteEntries(vector<student_entry>* entries) {
         }
         entries->erase(remove_if(entries->begin(), entries->end(), isInvalid), entries->end());
     }
+
+    delete[] selected;
 }
 
 bool addEntries(vector<student_entry>* entries) {
