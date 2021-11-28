@@ -4,6 +4,8 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+#pragma execution_character_set( "utf-8" )
+
 enum lessons {
     PHYSICS = 0,
     MATH = 1,
