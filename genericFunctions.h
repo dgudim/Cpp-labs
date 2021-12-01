@@ -10,6 +10,30 @@
 
 #pragma execution_character_set( "utf-8" )
 
+enum class colors {
+    DEFAULT = 7,
+    WHITE = 15,
+    GRAY = 8,
+    BLACK = 0,
+
+    BLUE = 1,
+    LIGHT_BLUE = 9,
+    LIGHTER_BLUE = 3,
+    CYAN = 11,
+
+    LIGHT_RED = 12,
+    RED = 4,
+
+    LIGHT_YELLOW = 15,
+    YELLOW = 6,
+
+    LIGHT_GREEN = 10,
+    GREEN = 2,
+
+    LIGHT_PURPLE = 13,
+    PURPLE = 5
+};
+
 void setConsoleColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
@@ -18,6 +42,10 @@ void coutWithColor(int color, std::string message) {
     setConsoleColor(color);
     std::cout << message << std::flush;
     setConsoleColor(7);
+}
+
+void coutWithColor(colors color, std::string message) {
+    coutWithColor((int)color, message);
 }
 
 void setConsoleCursorPosition(int x, int y) {
