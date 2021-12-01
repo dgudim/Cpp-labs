@@ -4,6 +4,8 @@
 
 struct student_entry;
 
+typedef bool(*SortFunction)(student_entry, student_entry);
+
 void clearScreen();
 
 void inputEntry(student_entry* entry);
@@ -17,10 +19,15 @@ unsigned int findMaxNameLength(std::vector<student_entry>* entries, unsigned int
 void printEntry(student_entry* entry);
 void printSummary(std::vector<student_entry>* entries);
 
-void alphabeticSort(std::vector<student_entry>* entries);
-void gradeSort(std::vector<student_entry>* entries);
+bool avg_grade_compare(student_entry entry1, student_entry entry2);
+bool group_compare(student_entry entry1, student_entry entry2);
+bool fio_compare(student_entry entry1, student_entry entry2);
+bool year_compare(student_entry entry1, student_entry entry2);
 
-void createFile();
+void sort(std::vector<student_entry>* entries);
+void entrySort(std::vector<student_entry>* entries, SortFunction sortFunction);
+
+std::string createFile();
 void loadFromFile(std::vector<student_entry>* entries);
 unsigned int getStats(std::string path);
 void deleteFiles();
