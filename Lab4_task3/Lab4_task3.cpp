@@ -16,6 +16,7 @@ int main()
         long double from = inputData("Введите начальный x: ");
         long double to = inputData("Введите конечный x: ");
         long double step = inputData("Введите шаг: ");
+        int n = (int)inputData("Введите n для суммы: ");
         if (from > to && step > 0) {
             cout << "Начальный индекс не может быть меньше конечного, меняю местами" << endl;
             swap(from, to);
@@ -31,6 +32,16 @@ int main()
         if (abs(to - from) < abs(step)) {
             cout << "Шаг больше, чем промежуток, будет взят только начальный x" << endl;
         }
+        if (n < 0) {
+            cout << "Количество членов в сумме не может быть меньше 0, использую дефолтное количество : 3 члена" << endl;
+            n = 3;
+        }
+        if ((abs(to) > 70 || abs(from) > 70) && n >= 50) {
+            coutWithColor(4, "Начальный или конечный x больше 70 по модулю при n >= 50, возможно переполнение\n");
+        }
+        if (n > 150) {
+            coutWithColor(4, "Количество членов в сумме больше 150, возможно переполнение\n");
+        }
        
         coutWithColor(14, "\nВыберите функции (backspace - выбрать/отменить), (enter - подтвердить)\n");
 
@@ -38,7 +49,7 @@ int main()
 
         string functions[functions_len] = { "1. (exp(x) + exp(-x)) / 2", "2. exp(x * cos(PI / 4)) * cos(x * sin(PI / 4))", "3. 2 * (cos(x) * cos(x) - 1)"};
         FunctionPointer pArray[functions_len] = {expXexpX, expXcosX, cosXcosX};
-        FunctionPointer pArray_sum[functions_len] = {expXexpX_sum, expXcosX_sum, cosXcosX_sum};
+        SumFunctionPointer pArray_sum[functions_len] = {expXexpX_sum, expXcosX_sum, cosXcosX_sum};
 
         bool* selectedFunctions = displayMultiSelection(functions, functions_len);
 
@@ -58,7 +69,7 @@ int main()
         for (int i = 0; i < functions_len; i++) {
             if (selectedFunctions[i]) {
                 coutWithColor(10, "\nФункция: "+functions[i]+"\n");
-                printTable(pArray[i], pArray_sum[i], from, to, step, selectedOptions[0], selectedOptions[1], selectedOptions[2]);
+                printTable(pArray[i], pArray_sum[i], from, to, step, n, selectedOptions[0], selectedOptions[1], selectedOptions[2]);
             }
         }
 
@@ -72,10 +83,10 @@ double cosXcosX(double x) {
     return 2 * (cos(x) * cos(x) - 1);
 }
 
-double cosXcosX_sum(double x) {
+double cosXcosX_sum(double x, int n) {
     double r, s = 0, y = 2, t, z = 1;
     r = (-1) * (4 * x * x) / 2;
-    for (int k = 1; k <= 30; k += 1)
+    for (int k = 1; k <= n; k += 1)
     {
         s += r;
         t = (-1) * (4 * x * x) / ((z += 2) * (y += 2));
@@ -88,10 +99,10 @@ double expXcosX(double x) {
     return exp(x * cos(M_PI / 4)) * cos(x * sin(M_PI / 4));
 }
 
-double expXcosX_sum(double x) {
+double expXcosX_sum(double x, int n) {
     double p, s;
     p = s = 1;
-    for (int k = 1; k <= 30; k++)
+    for (int k = 1; k <= n; k++)
     {
         p *= x / k;
         s += cos(k * M_PI / 4) * p;
@@ -104,11 +115,11 @@ double expXexpX(double x) {
     return (exp(x) + exp(-x)) / 2;
 }
 
-double expXexpX_sum(double x) {
+double expXexpX_sum(double x, int n) {
     double t, y = 1, z = 2, r, s = 1;;
     r = (x * x / 2);
 
-    for (int k = 2; k <= 30; k++)
+    for (int k = 2; k <= n; k++)
     {
         s += r;
         t = (x * x) / ((y += 2) * (z += 2));
@@ -194,13 +205,13 @@ void printGraph(FunctionPointer func, double from, double to, double step) {
     delete[] field;
 }
 
-void printTable(FunctionPointer func, FunctionPointer func_sum, double from, double to, double step, bool print_sum, bool print_abs, bool print_graph) {
+void printTable(FunctionPointer func, SumFunctionPointer func_sum, double from, double to, double step, int n, bool print_sum, bool print_abs, bool print_graph) {
     int maxX = doubleToString(to).length() + 4;
     double y = 0, sum = 0;
     for (long double i = from; i * (step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
         y = func(i);
         if (print_sum || print_abs) {
-            sum = func_sum(i);
+            sum = func_sum(i, n);
         }
         cout << "x = " << addSpaces(doubleToString(i), maxX) << "Y(x) = " << addSpaces(doubleToString(y), 13);
         if (print_sum) {
