@@ -13,10 +13,53 @@ int main()
 
     while (true) {
         system("CLS");
-        long double from = inputData("Введите начальный x: ");
-        long double to = inputData("Введите конечный x: ");
-        long double step = inputData("Введите шаг: ");
-        int n = (int)inputData("Введите n для суммы: ");
+
+        double from;
+        double to;
+        double step;
+        int n;
+
+        coutWithColor(14, "\nВыберите промежуток, шаг и n для суммы\n");
+        switch (displaySelection(new string[5]{ 
+            "1. начальный x = 0, конечный x = 10, шаг = 0.1, n = 50", 
+            "2. начальный x = 0, конечный x = 1, шаг = 0.05, n = 50",
+            "3. начальный x = 10, конечный x = 20, шаг = 0.2, n = 100",
+            "4. начальный x = -10, конечный x = 10, шаг = 1, n = 100",
+            "5. Ввести вручную"}, 5)) {
+        
+        case 1:
+            from = 0;
+            to = 10;
+            step = 0.1;
+            n = 50;
+            break;
+        case 2:
+            from = 0;
+            to = 1;
+            step = 0.05;
+            n = 50;
+            break;
+        case 3:
+            from = 10;
+            to = 20;
+            step = 0.2;
+            n = 100;
+            break;
+        case 4:
+            from = -10;
+            to = 10;
+            step = 1;
+            n = 100;
+            break;
+        case 5:
+            from = inputData("Введите начальный x: ");
+            to = inputData("Введите конечный x: ");
+            step = inputData("Введите шаг: ");
+            n = (int)inputData("Введите n для суммы: ");
+            break;
+        }
+
+        
         if (from > to && step > 0) {
             cout << "Начальный индекс не может быть меньше конечного, меняю местами" << endl;
             swap(from, to);
