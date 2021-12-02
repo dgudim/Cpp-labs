@@ -86,7 +86,7 @@ void edit(vector<student_entry>* entries) {
     while (true) {
         printSummary(entries);
         bool save = true;
-        switch (displaySelection(new string[7]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по выбранному полю", "6.Назад" }, 7)) {
+        switch (displaySelection(new string[6]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по выбранному полю", "6.Назад" }, 6)) {
         case 1:
             save = addEntries(entries);
             break;

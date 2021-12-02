@@ -24,7 +24,7 @@ enum class colors {
     LIGHT_RED = 12,
     RED = 4,
 
-    LIGHT_YELLOW = 15,
+    LIGHT_YELLOW = 14,
     YELLOW = 6,
 
     LIGHT_GREEN = 10,
