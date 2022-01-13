@@ -75,8 +75,16 @@ char* substr(char* str, unsigned int start, unsigned int end) {
     return sub;
 }
 
+int myStrcmp(char* s1, char* s2) {
+    if (*s1 == *s2)
+        return *s1 == '\0' ? 0 : myStrcmp(s1 + 1, s2 + 1);
+
+    return (*s1 > *s2) ? 1 : -1;
+    //myStrcmp(s1+i, s2+i)
+}
+
 bool compare2Words(char* word1, char* word2) {
-    return (word1 && word2) ? 0 > strcmp(word1, word2) : word1 < word2;
+    return (word1 && word2) ? 0 > myStrcmp(word1, word2) : word1 < word2;
 }
 
 void alphabeticSort_char(char** words, unsigned int numberOfWords) {
