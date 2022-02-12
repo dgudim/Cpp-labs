@@ -4,9 +4,81 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <conio.h>
-#define NOMINMAX
-#include <windows.h>
+#ifdef __linux__ 
+    #include <termios.h>
+    #include <unistd.h>
+int _getch(void)
+{
+struct termios oldattr, newattr;
+int ch;
+
+tcgetattr( STDIN_FILENO, &oldattr );
+newattr = oldattr;
+newattr.c_lflag &= ~( ICANON | ECHO );
+tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+ch = getchar();
+tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+return ch;
+}
+
+int get_pos(int *y, int *x) {
+
+ char buf[30]={0};
+ int ret, i, pow;
+ char ch;
+
+*y = 0; *x = 0;
+
+ struct termios term, restore;
+
+ tcgetattr(0, &term);
+ tcgetattr(0, &restore);
+ term.c_lflag &= ~(ICANON|ECHO);
+ tcsetattr(0, TCSANOW, &term);
+
+ write(1, "\033[6n", 4);
+
+ for( i = 0, ch = 0; ch != 'R'; i++ )
+ {
+    ret = read(0, &ch, 1);
+    if ( !ret ) {
+       tcsetattr(0, TCSANOW, &restore);
+       fprintf(stderr, "getpos: error reading response!\n");
+       return 1;
+    }
+    buf[i] = ch;
+    printf("buf[%d]: \t%c \t%d\n", i, ch, ch);
+ }
+
+ if (i < 2) {
+    tcsetattr(0, TCSANOW, &restore);
+    printf("i < 2\n");
+    return(1);
+ }
+
+ for( i -= 2, pow = 1; buf[i] != ';'; i--, pow *= 10)
+     *x = *x + ( buf[i] - '0' ) * pow;
+
+ for( i-- , pow = 1; buf[i] != '['; i--, pow *= 10)
+     *y = *y + ( buf[i] - '0' ) * pow;
+
+ tcsetattr(0, TCSANOW, &restore);
+ return 0;
+}
+
+struct COORD{
+    int X, Y;
+    COORD(int x, int y){
+        X = x;
+        Y = y;
+    }
+};
+
+#elif _WIN32
+    #include <conio.h>
+    #define NOMINMAX
+    #include <windows.h>
+#endif
 
 #pragma execution_character_set( "utf-8" )
 
@@ -35,7 +107,9 @@ enum class colors {
 };
 
 void setConsoleColor(int color) {
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+    #ifdef _WIN32
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+    #endif
 }
 
 void coutWithColor(int color, std::string message) {
@@ -49,17 +123,28 @@ void coutWithColor(colors color, std::string message) {
 }
 
 void setConsoleCursorPosition(int x, int y) {
-    COORD c;
-    c.X = x;
-    c.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+    #ifdef __linux__ 
+        std::cout << "\033[" << x << ";" << y << "H";
+    #elif _WIN32
+        COORD c;
+        c.X = x;
+        c.Y = y;
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+    #endif
 }
 
 COORD getConsoleCursorPosition()
 {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    return csbi.dwCursorPosition;
+    #ifdef __linux__ 
+        int x = 0;
+        int y = 0;
+        get_pos(&y, &x);
+        return {x, y};
+    #elif _WIN32
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+        return csbi.dwCursorPosition;
+    #endif
 }
 
 std::string* split(std::string *input, bool print_count,unsigned int *len) {
