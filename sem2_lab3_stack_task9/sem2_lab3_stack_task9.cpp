@@ -16,7 +16,7 @@ StackNode* add(StackNode* root, int data) {
 
 void view(StackNode* node) {
     StackNode* curr_node = node;
-    while (curr_node != NULL) {
+    while (curr_node) {
         cout << curr_node->data << endl;
         curr_node = curr_node->next;
     }
@@ -36,12 +36,13 @@ void view_rec_reverse(StackNode* node) {
     }
 }
 
-void del_all(StackNode** p) {
+void del(StackNode** p, int n) {
     StackNode* curr_node = *p;
-    while (*p) {
+    while (*p && n > 0) {
         curr_node = *p;
         *p = (*p)->next;
         delete curr_node;
+        n--;
     }
 }
 
@@ -104,10 +105,10 @@ int main()
         }
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        switch (displaySelection(new string[5]{ "1.Добавить данные в стек", "2.Очистить стек", "3.Удалить элементы между максимальным и минимальным элементами", "4.Выйти"}, 4)) {
+        switch (displaySelection(new string[5]{ "1.Добавить данные в стек", "2.Удалить n элементов", "3.Удалить элементы между максимальным и минимальным элементами", "4.Выйти"}, 4)) {
         case 1: 
             n = (int)inputData("Сколько элементов добавить? : ", false);
-            if (n < 0) {
+            if (n <= 0) {
                 system("CLS");
                 coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество элементов\n");
                 break;
@@ -127,14 +128,20 @@ int main()
             coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
             break;
         case 2:
-            system("CLS");
             if (root) {
-                del_all(&root);
-                size = 0;
-                coutWithColor(colors::LIGHTER_BLUE, "Очистил стек\n");
+                n = (int)inputData("Сколько элементов удалить? : ", false);
+                system("CLS");
+                if (n <= 0) {
+                    coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");
+                    break;
+                }
+                del(&root, n);
+                size -= n;
+                coutWithColor(colors::LIGHTER_BLUE, "Удалил " + to_string(min(size, n)) + " элементов");
             }
             else {
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего очищаить, стек пустой\n");
+                system("CLS");
+                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
             }
             break;
         case 3:
@@ -148,7 +155,7 @@ int main()
             break;
         case 4: 
             if (root)
-                del_all(&root);
+                del(&root, size);
             return 0;
         }
     }
