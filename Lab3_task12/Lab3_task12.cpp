@@ -22,8 +22,6 @@ double calculateSum(double x, int n) {
 
 int main() {
 
-    SetConsoleOutputCP(65001);
-
     while (true) {
         double from = inputData("Введите начальный x: ");
         double to = inputData("Введите конечный x: ");

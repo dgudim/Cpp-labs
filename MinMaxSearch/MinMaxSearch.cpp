@@ -88,7 +88,7 @@ void quickSort(int arr[], int low, int high)
 
 int main()
 {
-    SetConsoleOutputCP(65001);
+   
     while (true) {
         initializeArray(inputData("Введите размер массива: "));
         quickSort(dynamic_array, 0, dynamic_array_size - 1);

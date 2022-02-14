@@ -9,7 +9,6 @@ using namespace std;
 
 int main()
 {
-    SetConsoleOutputCP(65001);
 
     while (true) {
         system("CLS");
