@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <vector>
 
 struct student_entry;
 

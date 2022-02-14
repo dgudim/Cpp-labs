@@ -40,7 +40,6 @@ struct student_entry {
 
 int main()
 {
-    SetConsoleOutputCP(65001);
 
     vector<student_entry> entries;
 
@@ -68,7 +67,7 @@ int main()
                 }
                 break;
             case 5:
-                string input = displayWarningWithInput(6, "Вы уверены, что хотите выйти?\n");
+                string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите выйти?\n");
                 if (input == "yes" || input == "y" || input == "1") {
                     exit(-15);
                 }
@@ -157,10 +156,6 @@ void sort(vector<student_entry>* entries) {
             break;
         }
     }
-}
-
-void clearScreen() {
-    system("CLS");
 }
 
 void inputEntry(student_entry* entry) {
@@ -336,7 +331,7 @@ void read_entries(vector<student_entry>* entries, string fileName) {
 }
 
 unsigned int findMaxNameLength(vector<student_entry>* entries, unsigned int size) {
-    unsigned int maxLength = 0;
+    size_t maxLength = 0;
     for (unsigned int i = 0; i < size; i++) {
         maxLength = max(maxLength, entries->at(i).fio.length());
     }
@@ -428,7 +423,7 @@ string createFile() {
         if (file_read.is_open()) {
             unsigned int success_bytes = 0;
             if (file_read.read(reinterpret_cast<char*>(&success_bytes), sizeof(unsigned int))) {
-                string input = displayWarningWithInput(6, "Файл существует и в нем есть данные, перезаписать?\n");
+                string input = displayWarningWithInput(colors::YELLOW, "Файл существует и в нем есть данные, перезаписать?\n");
                 if (!(input == "yes" || input == "y" || input == "1")) {
                     exit = false;
                 }
@@ -484,7 +479,7 @@ void deleteFiles() {
     }
 
     if (files_to_delete > 0) {
-        string input = displayWarningWithInput(6, "Вы уверены, что хотите удалить?\n");
+        string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
         if (input == "yes" || input == "y" || input == "1") {
             for (unsigned int i = 0; i < files; i++) {
                 if (files_chosen[i]) {
@@ -522,7 +517,7 @@ unsigned int getStats(string path) {
 
 void listFiles() {
     coutWithColor(colors::CYAN, "Список файлов:\n");
-    unsigned int maxLen = 0;
+    size_t maxLen = 0;
     for (const auto& entry : fs::directory_iterator(workingDir)) {
         maxLen = max(entry.path().filename().u8string().length(), maxLen);
     }
@@ -565,7 +560,7 @@ void deleteEntries(vector<student_entry>* entries) {
     coutWithColor(colors::LIGHT_YELLOW, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
     bool* selected = displayMultiSelection(selection, size);
 
-    string input = displayWarningWithInput(6, "Вы уверены, что хотите удалить?\n");
+    string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
     if (input == "yes" || input == "y" || input == "1") {
         for (unsigned int i = 0; i < size; i++) {
             entries->at(i).valid = !selected[i];

@@ -109,7 +109,7 @@ int main()
         case 1: 
             n = (int)inputData("Сколько элементов добавить? : ", false);
             if (n <= 0) {
-                system("CLS");
+                clearScreen();
                 coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество элементов\n");
                 break;
             }
@@ -124,13 +124,13 @@ int main()
                     root = add(root, rand() % 100 / 2 - 25);
                 }
             }
-            system("CLS");
+            clearScreen();
             coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
             break;
         case 2:
             if (root) {
                 n = (int)inputData("Сколько элементов удалить? : ", false);
-                system("CLS");
+                clearScreen();
                 if (n <= 0) {
                     coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");
                     break;
@@ -140,12 +140,12 @@ int main()
                 coutWithColor(colors::LIGHTER_BLUE, "Удалил " + to_string(min(size, n)) + " элементов");
             }
             else {
-                system("CLS");
+                clearScreen();
                 coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
             }
             break;
         case 3:
-            system("CLS");
+            clearScreen();
             if (root) {
                 size -= remove_between_min_max(root);
             }

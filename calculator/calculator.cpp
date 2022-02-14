@@ -491,9 +491,7 @@ void calculate(string expressionStr) {
 }
 
 void checkDataAndCalculate() {
-
-    SetConsoleOutputCP(65001);
-
+    
     try {
         string expression;
         variableCount = 0;
