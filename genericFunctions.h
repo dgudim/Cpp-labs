@@ -125,7 +125,7 @@ enum class keys
 {
     ARROW_UP = 72,
     ARROW_DOWN = 80,
-    ENTER = '\n',
+    ENTER = 13,
     BACKSPACE = '\b'
 };
 enum class colors

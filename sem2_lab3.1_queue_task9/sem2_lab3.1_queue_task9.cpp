@@ -2,64 +2,89 @@
 #include "../genericFunctions.h"
 using namespace std;
 
-struct StackNode {
+struct QueueNode {
     int data;
-    StackNode* next;
+    QueueNode* next;
+    QueueNode* prev;
 };
 
-StackNode* add(StackNode* root, int data) {
-    StackNode* node = new StackNode;
+void add(QueueNode*& root, QueueNode*& tail, int data, bool back) {
+    QueueNode* node = new QueueNode;
     node->data = data;
-    node->next = root;
-    return node;
+    if (back) {
+        node->next = nullptr;
+        node->prev = tail;
+        if (tail) {
+            tail->next = node;
+        }
+    } else {
+        node->next = root;
+        node->prev = nullptr;
+        if (root) {
+            root->prev = node;
+        }
+    }
+    if (!root && !tail) {
+        root = node;
+        tail = node;
+        return;
+    }
+    if (back) {
+        tail = node;
+    } else {
+        root = node;
+    }
 }
 
-void view(StackNode* node) {
-    StackNode* curr_node = node;
+void view(QueueNode* end_node, bool from_back) {
+    QueueNode* curr_node = end_node;
     while (curr_node) {
-        cout << curr_node->data << endl;
-        curr_node = curr_node->next;
+        cout << curr_node->data << " ";
+        curr_node = from_back ? curr_node->prev : curr_node->next;
     }
+    cout << endl;
 }
 
-void view_rec(StackNode* node) {
-    if (node) {
-        cout << node->data << endl;
-        view_rec(node->next);
-    }
-}
-
-void view_rec_reverse(StackNode* node) {
-    if (node) {
-        view_rec_reverse(node->next);
-        cout << node->data << endl;
-    }
-}
-
-void del(StackNode*& p, int n) {
-    StackNode* curr_node = p;
+void del(QueueNode*& root, QueueNode*& tail, int n, bool from_back) {
+    QueueNode* p = from_back ? tail : root;
+    QueueNode* curr_node = p;
     while (p && n > 0) {
         curr_node = p;
-        p = p->next;
+        p = from_back ? p->prev : p->next;;
         delete curr_node;
         n--;
     }
+    if (p) {
+        if (from_back) {
+            tail = p;
+            tail->next = nullptr;
+        }
+        else {
+            root = p;
+            root->prev = nullptr;
+        }
+    }
+    else {
+        tail = nullptr;
+        root = nullptr;
+    }
 }
 
-int remove_between_min_max(StackNode* node) {
-    StackNode* min = node;
-    StackNode* max = node;
-    StackNode* curr_node = node;
+int remove_between_min_max(QueueNode* node) {
+    QueueNode* min = node;
+    QueueNode* max = node;
+    QueueNode* curr_node = node;
     bool minFirst = false;
     while (curr_node) {
-        if (curr_node-> data < min->data) {
+        if (curr_node->data < min->data) {
             min = curr_node;
             minFirst = false;
-        }else
-        if (curr_node->data > max->data) {
-            max = curr_node;
-            minFirst = true;
         }
+        else
+            if (curr_node->data > max->data) {
+                max = curr_node;
+                minFirst = true;
+            }
         curr_node = curr_node->next;
     }
     if (min == max || min->next == max || max->next == min) {
@@ -67,13 +92,14 @@ int remove_between_min_max(StackNode* node) {
         return 0;
     }
     if (!minFirst) {
-        StackNode* temp = min;
+        QueueNode* temp = min;
         min = max;
         max = temp;
     }
     int deletedElems = 0;
-    StackNode* next_node = min->next;
+    QueueNode* next_node = min->next;
     min->next = max;
+    max->prev = min;
     while (next_node != max) {
         deletedElems++;
         curr_node = next_node;
@@ -87,26 +113,33 @@ int remove_between_min_max(StackNode* node) {
 
 int main()
 {
-    StackNode* root = nullptr;
+    QueueNode* root = nullptr;
+    QueueNode* tail = nullptr;
     int n, size = 0;
     bool manual;
     while (true) {
         if (!root) {
-            coutWithColor(colors::LIGHT_RED, "Стек пустой\n");
+            coutWithColor(colors::LIGHT_RED, "Очередь пустая\n");
         }
         else {
-            coutWithColor(colors::LIGHT_BLUE, "--- Стек --- (" + to_string(size) + ")\n");
+            coutWithColor(colors::LIGHT_BLUE, "--- Очередь --- (" + to_string(size) + ")\n");
             coutWithColor(colors::LIGHT_GREEN, "Обычный вывод ---\n");
-            view(root);
-            coutWithColor(colors::LIGHT_GREEN, "Наоборот рекурсивно ---\n");
-            view_rec_reverse(root);
-            coutWithColor(colors::LIGHT_GREEN, "Рекурсивно ---\n");
-            view_rec(root);
+            view(root, false);
+            coutWithColor(colors::LIGHT_GREEN, "Наоборот ---\n");
+            view(tail, true);
         }
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        switch (displaySelection(new string[4]{ "1.Добавить данные в стек", "2.Удалить n элементов", "3.Удалить элементы между максимальным и минимальным элементами", "4.Выйти"}, 4)) {
-        case 1: 
+        int choise = displaySelection(new string[6]{
+            "1.Добавить данные в очередь с начала",
+            "2.Добавить данные в очередь с конца",
+            "3.Удалить n элементов с начала",
+            "4.Удалить n элементов с конца",
+            "5.Удалить элементы между максимальным и минимальным элементами",
+            "6.Выйти" }, 6);
+        switch (choise) {
+        case 1:
+        case 2:
             n = (int)inputData("Сколько элементов добавить? : ", false);
             if (n <= 0) {
                 clearScreen();
@@ -118,16 +151,17 @@ int main()
             manual = displaySelection(new string[2]{ "1.Случайно", "2.Вручную" }, 2) == 2;
             for (int i = 0; i < n; i++) {
                 if (manual) {
-                    root = add(root, inputData(""));
+                    add(root, tail, (int)inputData(""), choise == 2);
                 }
                 else {
-                    root = add(root, rand() % 100 / 2 - 25);
+                    add(root, tail, rand() % 100 / 2 - 25, choise == 2);
                 }
             }
             clearScreen();
             coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
             break;
-        case 2:
+        case 3:
+        case 4:
             if (root) {
                 n = (int)inputData("Сколько элементов удалить? : ", false);
                 clearScreen();
@@ -135,28 +169,28 @@ int main()
                     coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");
                     break;
                 }
-                del(root, n);
+                del(root, tail, n, choise == 4);
                 n = min(n, size);
                 size -= n;
                 coutWithColor(colors::LIGHTER_BLUE, "Удалил " + to_string(n) + " элементов\n");
             }
             else {
                 clearScreen();
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
+                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
             }
             break;
-        case 3:
+        case 5:
             clearScreen();
             if (root) {
                 size -= remove_between_min_max(root);
             }
             else {
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
-            }    
+                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
+            }
             break;
-        case 4: 
+        case 6:
             if (root)
-                del(root, size);
+                del(root, tail, size, false);
             return 0;
         }
     }
