@@ -2,7 +2,6 @@
 #include <string>
 #include <sstream>
 #define NOMINMAX
-#include <windows.h>
 
 #pragma execution_character_set( "utf-8" )
 

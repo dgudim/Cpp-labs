@@ -4,7 +4,7 @@ using namespace std;
 
 int main()
 {
-    SetConsoleOutputCP(65001);
+    
     while(true){
         string input = trim(inputData("Введите английские слова, разделенные пробелом: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM " }, 53)) + ' ';
         cout << endl;

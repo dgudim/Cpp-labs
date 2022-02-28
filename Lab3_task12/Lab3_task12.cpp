@@ -1,4 +1,5 @@
 #include "../genericFunctions.h"
+#include <math.h>
 using namespace std;
 
 double calculateSum(double x, int n) {

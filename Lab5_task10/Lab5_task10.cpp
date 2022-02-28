@@ -204,8 +204,7 @@ void printResult(double result) {
 
 int main()
 {
-    srand((UINT)time(NULL));
-    SetConsoleOutputCP(65001);
+    srand((size_t)time(NULL));
 
     while (true) {
         initializeArray(inputData("Введите размер массива: "));

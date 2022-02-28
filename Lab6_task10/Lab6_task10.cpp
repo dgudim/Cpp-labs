@@ -3,7 +3,6 @@
 using namespace std;
 
 int main() {
-    SetConsoleOutputCP(65001);
     double** matrix;
     int size;
     while (true) {

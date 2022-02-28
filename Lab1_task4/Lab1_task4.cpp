@@ -1,5 +1,6 @@
 using namespace std;
 #include "../genericFunctions.h"
+#include <math.h>
 
 double calculate(double z, double y, double x) {
     double zSquared = z * z;
