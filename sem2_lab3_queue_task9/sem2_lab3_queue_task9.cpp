@@ -36,11 +36,18 @@ void add(QueueNode*& root, QueueNode*& tail, int data, bool back) {
     }
 }
 
-void view(QueueNode* end_node, bool from_back) {
+void view(QueueNode* end_node) {
     QueueNode* curr_node = end_node;
-    while (curr_node) {
-        cout << curr_node->data << " ";
-        curr_node = from_back ? curr_node->prev : curr_node->next;
+    if(curr_node->next){
+        while (curr_node) {
+            cout << curr_node->data << " ";
+            curr_node = curr_node->next;
+        }
+    } else {
+        while (curr_node) {
+            cout << curr_node->data << " ";
+            curr_node = curr_node->prev;
+        }
     }
     cout << endl;
 }
@@ -111,6 +118,19 @@ int remove_between_min_max(QueueNode* node) {
     return deletedElems;
 }
 
+void printQueue(QueueNode*& root, QueueNode*& tail, int size){
+    if (!root) {
+        coutWithColor(colors::LIGHT_RED, "Очередь пустая\n");
+    }
+    else {
+        coutWithColor(colors::LIGHT_BLUE, "--- Очередь --- (" + to_string(size) + ")\n");
+        coutWithColor(colors::LIGHT_GREEN, "Обычный вывод ---\n");
+        view(root);
+        coutWithColor(colors::LIGHT_GREEN, "Наоборот ---\n");
+        view(tail);
+    }
+}
+
 int main()
 {
     QueueNode* root = nullptr;
@@ -118,16 +138,7 @@ int main()
     int n, size = 0;
     bool manual;
     while (true) {
-        if (!root) {
-            coutWithColor(colors::LIGHT_RED, "Очередь пустая\n");
-        }
-        else {
-            coutWithColor(colors::LIGHT_BLUE, "--- Очередь --- (" + to_string(size) + ")\n");
-            coutWithColor(colors::LIGHT_GREEN, "Обычный вывод ---\n");
-            view(root, false);
-            coutWithColor(colors::LIGHT_GREEN, "Наоборот ---\n");
-            view(tail, true);
-        }
+        printQueue(root, tail, size);
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
         int choise = displaySelection(new string[6]{

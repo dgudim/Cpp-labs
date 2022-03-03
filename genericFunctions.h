@@ -263,8 +263,7 @@ double inputData(std::string message, bool allowWhiteSpaces)
     while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces))
     {
         std::cin.clear();
-        while (std::cin.get() != '\n')
-            ;
+        while (std::cin.get() != '\n');
         std::cout << "Пожалуйста, используйте числа" << std::endl;
     }
     return toReturn;
