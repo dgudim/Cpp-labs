@@ -160,6 +160,16 @@ int main()
             size += n;
             coutWithColor(14, "\nКак бы вы хотели ввести элементы?\n");
             manual = displaySelection(new string[2]{ "1.Случайно", "2.Вручную" }, 2) == 2;
+
+            clearScreen();
+            coutWithColor(colors::BLUE, "Старый список\n");
+            printQueue(root, tail, size);
+            cout << "\n";
+
+            if (manual){
+                 coutWithColor(colors::BLUE, "Введите элементы(" + to_string(n) + "): ");
+            }
+
             for (int i = 0; i < n; i++) {
                 if (manual) {
                     add(root, tail, (int)inputData(""), choise == 2);
@@ -168,7 +178,7 @@ int main()
                     add(root, tail, rand() % 100 / 2 - 25, choise == 2);
                 }
             }
-            clearScreen();
+
             coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
             break;
         case 3:
@@ -180,6 +190,9 @@ int main()
                     coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");
                     break;
                 }
+                coutWithColor(colors::BLUE, "Старый список\n");
+                printQueue(root, tail, size);
+                cout << "\n";
                 del(root, tail, n, choise == 4);
                 n = min(n, size);
                 size -= n;
