@@ -51,7 +51,7 @@ void del(QueueNode*& root, QueueNode*& tail, int n, bool from_back) {
     QueueNode* curr_node = p;
     while (p && n > 0) {
         curr_node = p;
-        p = from_back ? p->prev : p->next;;
+        p = from_back ? p->prev : p->next;
         delete curr_node;
         n--;
     }
