@@ -1,0 +1,23 @@
+#include <iostream>
+
+int calculate(bool flag){
+	long int n = 0;
+	if (flag){
+		for(long int i = 0; i < 3000000000; i++){
+			n++;
+		}
+	} else {
+		for(long int i = 0; i < 3000000000; i++){
+			n--;
+		}
+	}
+	return n;
+}
+
+int main()
+{
+	std::cout << "if вне цикла" << std::endl;
+	std::cout << calculate(true) << std::endl;
+	std::cout << calculate(false) << std::endl;
+	return 0;
+}
