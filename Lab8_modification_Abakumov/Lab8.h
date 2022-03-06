@@ -8,6 +8,7 @@ struct student_entry;
 struct user_entry;
 
 typedef bool(*SortFunction)(student_entry, student_entry);
+typedef bool(*SearchFunction)(student_entry, std::string);
 
 bool displayUserMenu(std::vector<user_entry>* users, std::vector<student_entry>* entries);
 bool displayAdminMenu(std::vector<user_entry>* users, std::vector<student_entry>* entries);
@@ -22,14 +23,26 @@ unsigned int findMaxNameLength(std::vector<student_entry>* entries, unsigned int
 
 void printEntry(student_entry* entry);
 void printSummary(std::vector<student_entry>* entries);
+void printGroupSummary(std::vector<student_entry>* entries);
 
-bool avg_grade_compare(student_entry entry1, student_entry entry2);
+
 bool group_compare(student_entry entry1, student_entry entry2);
 bool fio_compare(student_entry entry1, student_entry entry2);
-bool year_compare(student_entry entry1, student_entry entry2);
+bool debt_compare(student_entry entry1, student_entry entry2);
 
 void sort(std::vector<student_entry>* entries);
 void entrySort(std::vector<student_entry>* entries, SortFunction sortFunction);
+
+
+
+bool fio_match(student_entry entry, std::string search);
+bool debt_match(student_entry entry, std::string search);
+bool group_match(student_entry entry, std::string search);
+
+void search(std::vector<student_entry>* entries);
+void entrySearch(std::vector<student_entry>* entries, SearchFunction sortFunction, std::string search);
+
+
 
 std::string createFile();
 void loadFromFile(std::vector<student_entry>* entries);

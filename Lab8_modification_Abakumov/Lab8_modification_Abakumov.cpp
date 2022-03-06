@@ -6,36 +6,32 @@ namespace fs = std::filesystem;
 
 #pragma execution_character_set( "utf-8" )
 
-enum lessons {
-    PHYSICS = 0,
-    MATH = 1,
-    INFORMATICS = 2,
-    CHEMISTRY = 3
-};
-
 string workingDir = "../student_files/";
 string userInfo_fileName = "users.dat";
 string currentFile = "";
 
-unsigned int lessons_size = 4;
-const char* lessons_map[] = { "Физика", "Математика", "Информатика", "Химия" };
-const char* lessons_map_case[] = { "физике", "математике", "информатике", "химии" };
+unsigned int lessons_size = 5;
+const char* lessons_map[] = { "Физика", "Математика", "Информатика", "Химия", "Логика"};
+const char* lessons_map_case[] = { "физике", "математике", "информатике", "химии", "логике"};
+
+unsigned int tests_size = 5;
+const char* tests_map[] = { "Философия", "История", "Русс.яз", "Бел.яз", "Физкультура" };
+const char* tests_map_case[] = { "философии", "истории", "русс.язу", "бел.язу", "физкультуре" };
 
 struct student_entry {
 
     student_entry()
     {
         fio = "None.N.N";
-        year_of_birth = 2000;
         group = 0;
-        grades_average = 0;
+        debts = 0;
         valid = true;
     }
     string fio;
-    unsigned int year_of_birth;
     unsigned int group;
-    map<lessons, vector<unsigned int>> grades;
-    float grades_average;
+    vector<unsigned int> exam_grades;
+    vector<char> test_results;
+    unsigned int debts;
     bool valid;
 };
 
@@ -49,7 +45,7 @@ struct user_entry {
     string login;
 };
 
-user_entry* currentUser;
+user_entry currentUser;
 
 int main()
 {
@@ -64,8 +60,8 @@ int main()
         exit = false;
 
         while (!exit) {
-            coutWithColor(colors::LIGHTER_BLUE, "Текущий пользователь: " + currentUser->login + ", роль: " + ((currentUser->access_level == 1) ? "администратор\n" : "пользователь\n"));
-            if (currentUser->access_level == 1) {
+            coutWithColor(colors::LIGHTER_BLUE, "Текущий пользователь: " + currentUser.login + ", роль: " + ((currentUser.access_level == 1) ? "администратор\n" : "пользователь\n"));
+            if (currentUser.access_level == 1) {
                 exit = displayAdminMenu(&users, &entries);
             }
             else {
@@ -113,13 +109,15 @@ bool displayAdminMenu(vector<user_entry> *users, vector<student_entry> *entries)
     listFiles();
     coutWithColor(colors::CYAN, "\nМеню (Выбор стрелками и Enter)\n");
     coutWithColor(colors::LIGHTER_BLUE, "Текущий файл: " + currentFile + "\n\n");
-    switch (displaySelection(new string[6]{
+    switch (displaySelection(new string[8]{
         "1.Открыть файл",
         "2.Создать файл",
         "3.Удалить файлы",
         "4.Редактировать/просмотреть текущий файл",
         "5.Добавить нового пользователя",
-        "6.Выйти" }, 6)) {
+        "6.Удалить пользователей",
+        "7.Редактировать пользователя",
+        "8.Выйти" }, 8)) {
     case 1:
         loadFromFile(entries);
         break;
@@ -142,6 +140,12 @@ bool displayAdminMenu(vector<user_entry> *users, vector<student_entry> *entries)
         add_user(users);
         break;
     case 6:
+        deleteUsers(users);
+        break;
+    case 7:
+        editUsers(users);
+        break;
+    case 8:
         string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите выйти?\n");
         if (input == "yes" || input == "y" || input == "1") {
             clearScreen();
@@ -159,7 +163,15 @@ void edit(vector<student_entry>* entries) {
     while (true) {
         printSummary(entries);
         bool save = true;
-        switch (displaySelection(new string[6]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по выбранному полю", "6.Назад" }, 6)) {
+        switch (displaySelection(new string[8]{ 
+            "1.Добавить записи", 
+            "2.Просмотреть записи", 
+            "3.Удалить записи", 
+            "4.Редактировать запись", 
+            "5.Сортировать по выбранному полю", 
+            "6.Поиск по выбранному полю", 
+            "7.Информация по группе(личное задание)",
+            "8.Назад" }, 8)) {
         case 1:
             save = addEntries(entries);
             break;
@@ -178,6 +190,14 @@ void edit(vector<student_entry>* entries) {
             save = false;
             break;
         case 6:
+            search(entries);
+            save = false;
+            break;
+        case 7:
+            printGroupSummary(entries);
+            save = false;
+            break;
+        case 8:
             exit = true;
             break;
         }
@@ -196,7 +216,12 @@ void edit_minimal(vector<student_entry>* entries) {
     bool exit = false;
     while (!exit) {
         printSummary(entries);
-        switch (displaySelection(new string[3]{ "1.Просмотреть записи", "2.Сортировать по выбранному полю", "3.Назад" }, 3)) {
+        switch (displaySelection(new string[5]{ 
+            "1.Просмотреть записи", 
+            "2.Сортировать по выбранному полю", 
+            "3.Поиск по выбранному полю",
+            "4.Информация по группе(личное задание)"
+            "5.Назад" }, 5)) {
         case 1:
             viewEntries(entries);
             break;
@@ -204,6 +229,12 @@ void edit_minimal(vector<student_entry>* entries) {
             sort(entries);
             break;
         case 3:
+            search(entries);
+            break;
+        case 4:
+            printGroupSummary(entries);
+            break;
+        case 5:
             exit = true;
             break;
         }
@@ -215,20 +246,17 @@ void sort(vector<student_entry>* entries) {
     coutWithColor(colors::LIGHT_YELLOW, "Сортировать по\n");
     bool sort = true;
     SortFunction sortFunction = NULL;
-    switch (displaySelection(new string[5]{ "1.Алфавиту", "2.Году рождения", "3.Номеру группы", "4.Среднему баллу", "5.Отмена" }, 5)) {
+    switch (displaySelection(new string[5]{ "1.Алфавиту", "2.Номеру группы", "3.Количеству задолженностей", "4.Отмена" }, 5)) {
     case 1:
         sortFunction = fio_compare;
         break;
     case 2:
-        sortFunction = year_compare;
-        break;
-    case 3:
         sortFunction = group_compare;
         break;
-    case 4:
-        sortFunction = avg_grade_compare;
+    case 3:
+        sortFunction = debt_compare;
         break;
-    case 5:
+    case 4:
         sort = false;
         break;
     }
@@ -249,102 +277,82 @@ void sort(vector<student_entry>* entries) {
             break;
         }
     }
+    clearScreen();
+}
+
+void search(vector<student_entry>* entries) {
+    string search = inputData("Поиск: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
+    coutWithColor(colors::LIGHT_YELLOW, "Поиск по\n");
+    bool sort = true;
+    SearchFunction searchFunction = NULL;
+    switch (displaySelection(new string[5]{ "1.Имени", "2.Номеру группы", "3.Количеству задолженностей", "4.Отмена" }, 5)) {
+    case 1:
+        searchFunction = fio_match;
+        break;
+    case 2:
+        searchFunction = group_match;
+        break;
+    case 3:
+        searchFunction = debt_match;
+        break;
+    case 4:
+        sort = false;
+        break;
+    }
+    if (sort) {
+        vector<student_entry> prev_entries = *entries;
+        entrySearch(entries, searchFunction, search);
+        if (entries->size() == 0) {
+            coutWithColor(colors::LIGHT_RED, "\nНичего не найдено, нажмите любую клавишу, чтобы продолжить\n");
+            _getch();
+            *entries = prev_entries;
+            clearScreen();
+            return;
+        }
+        coutWithColor(colors::LIGHT_YELLOW, "\nРезультаты поиска: \n");
+        printSummary(entries);
+        coutWithColor(colors::LIGHT_YELLOW, "Сохранить результат?\n");
+        switch (displaySelection(new string[3]{ "1.Да, в текущий файл", "2.Да, в другой файл", "3.Нет" }, 3)) {
+        case 1:
+            write_entries(entries, currentFile);
+            break;
+        case 2:
+            write_entries(entries, createFile());
+            break;
+        case 3:
+            *entries = prev_entries;
+            break;
+        }
+    }
+    clearScreen();
 }
 
 void inputEntry(student_entry* entry) {
     entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."));
-    entry->year_of_birth = stoi(inputData("Введите год рождения: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9]")));
     entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
-    unsigned int grades_sum = 0;
-    unsigned int grades_count = 0;
-    string failureBuffer = "";
-    string lastInput = "";
+
     for (unsigned int i = 0; i < lessons_size; i++) {
-        cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
-        string input = trim(inputData("", new char[12]{ "1234567890 " }, 11, failureBuffer)) + ' ';
-        lastInput = input;
-        failureBuffer = "";
-        if (input.length() != 1) {
-            unsigned int numberOfGrades;
-            unsigned int numberOfOutOfBoundsGrades = 0;
-            string* words = split(&input, false, &numberOfGrades);
-            for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
-                double grade_signed = stod(words[i2]);
-                numberOfOutOfBoundsGrades += (grade_signed < 0 || grade_signed > 10);
-                unsigned int grade = (unsigned int)min(max(grade_signed, 0.0), 10.0);
-                grades_sum += grade;
-                entry->grades[(lessons)i].push_back(grade);
-            }
-            delete[] words;
-            if (numberOfOutOfBoundsGrades > 0) {
-                coutWithColor(colors::YELLOW, "Некоторые введенные отметки(" + to_string(numberOfOutOfBoundsGrades) + ") выходят за границы допустимого диапазона(0 - 10)\n");
-                failureBuffer = lastInput;
-                i--;
-            }
-            grades_count += numberOfGrades;
-        }
+        entry->exam_grades.push_back(inputData("Введите отметку по экзамену по " + string(lessons_map_case[i]) + ": ", false));
     }
-    if (grades_count == 0) {
-        entry->grades_average = 0;
+    for (unsigned int i = 0; i < tests_size; i++) {
+        entry->test_results.push_back(inputData("Введите результат зачета по " + string(tests_map_case[i]) + " (больше 5и - это зачет, иначе незачет): ", false) > 5);
     }
-    else {
-        entry->grades_average = grades_sum / (float)grades_count;
-    }
+
+    entry->debts = inputData("Введите количество задолженностей: ", false);
 }
 
 void editEntry(student_entry* entry) {
     entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."), entry->fio, false);
-    entry->year_of_birth = stoi(inputData("Введите год рождения: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9]"), to_string(entry->year_of_birth), false));
     entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]"), to_string(entry->group), false));
-    unsigned int grades_sum = 0;
-    unsigned int grades_count = 0;
-    string failureBuffer = "";
-    string lastInput = "";
+
     for (unsigned int i = 0; i < lessons_size; i++) {
-        cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
-        string input;
-
-        if (failureBuffer == "") {
-            unsigned int previous_grades_len = entry->grades[(lessons)i].size();
-            string previous_grades;
-            for (unsigned int gr = 0; gr < previous_grades_len; gr++) {
-                previous_grades.append(to_string(entry->grades[(lessons)i].at(gr)) + " ");
-            }
-            input = trim(inputData("", new char[12]{ "1234567890 " }, 11, previous_grades)) + ' ';
-        }
-        else {
-            input = trim(inputData("", new char[12]{ "1234567890 " }, 11, failureBuffer)) + ' ';
-            failureBuffer = "";
-        }
-
-        lastInput = input;
-
-        if (input.length() != 1) {
-            unsigned int numberOfGrades;
-            unsigned int numberOfOutOfBoundsGrades = 0;
-            string* words = split(&input, false, &numberOfGrades);
-            for (unsigned int i2 = 0; i2 < numberOfGrades; i2++) {
-                double grade_signed = stod(words[i2]);
-                numberOfOutOfBoundsGrades += (grade_signed < 0 || grade_signed > 10);
-                unsigned int grade = (unsigned int)min(max(grade_signed, 0.0), 10.0);
-                grades_sum += grade;
-                entry->grades[(lessons)i].push_back(grade);
-            }
-            delete[] words;
-            if (numberOfOutOfBoundsGrades > 0) {
-                coutWithColor(colors::YELLOW, "Некоторые введенные отметки(" + to_string(numberOfOutOfBoundsGrades) + ") выходят за границы допустимого диапазона(0 - 10)\n");
-                failureBuffer = lastInput;
-                i--;
-            }
-            grades_count += numberOfGrades;
-        }
+        entry->exam_grades.push_back(inputData("Введите отметку по экзамену по " + string(lessons_map_case[i]) + ": ", false));
     }
-    if (grades_count == 0) {
-        entry->grades_average = 0;
+    for (unsigned int i = 0; i < tests_size; i++) {
+        entry->test_results.push_back(inputData("Введите результат зачета по " + string(tests_map_case[i]) + " (больше 5и - это зачет, иначе незачет): ", false) > 5);
     }
-    else {
-        entry->grades_average = grades_sum / (float)grades_count;
-    }
+
+    entry->debts = inputData("Введите количество задолженностей: ", false);
 }
 
 void write_entries(vector<student_entry>* entries, string fileName) {
@@ -352,6 +360,7 @@ void write_entries(vector<student_entry>* entries, string fileName) {
     unsigned int size = entries->size();
     file.write(reinterpret_cast<char*>(&size), sizeof(unsigned int));
     file.write(reinterpret_cast<char*>(&lessons_size), sizeof(unsigned int));
+    file.write(reinterpret_cast<char*>(&tests_size), sizeof(unsigned int));
     for (unsigned int i = 0; i < size; i++) {
         // determine the size of the string
         unsigned int fio_length = entries->at(i).fio.length();
@@ -360,17 +369,17 @@ void write_entries(vector<student_entry>* entries, string fileName) {
         // and actual string
         file.write(entries->at(i).fio.data(), fio_length);
 
-        file.write(reinterpret_cast<char*>(&(entries->at(i).year_of_birth)), sizeof(unsigned int));
         file.write(reinterpret_cast<char*>(&(entries->at(i).group)), sizeof(unsigned int));
 
         for (unsigned int e = 0; e < lessons_size; e++) {
-            unsigned int vector_size = entries->at(i).grades[(lessons)e].size();
-            file.write(reinterpret_cast<char*>(&vector_size), sizeof(unsigned int));
-            for (unsigned int m = 0; m < vector_size; m++) {
-                file.write(reinterpret_cast<char*>(&(entries->at(i).grades[(lessons)e].at(m))), sizeof(unsigned int));
-            }
+            file.write(reinterpret_cast<char*>(&(entries->at(i).exam_grades.at(e))), sizeof(unsigned int));
         }
-        file.write(reinterpret_cast<char*>(&(entries->at(i).grades_average)), sizeof(float));
+
+        for (unsigned int e = 0; e < tests_size; e++) {
+            file.write(reinterpret_cast<char*>(&(entries->at(i).test_results.at(e))), sizeof(char));
+        }
+
+        file.write(reinterpret_cast<char*>(&(entries->at(i).debts)), sizeof(unsigned int));
     }
     clearScreen();
     coutWithColor(colors::LIGHT_GREEN, "Сохранил изменения\n");
@@ -389,8 +398,9 @@ void read_entries(vector<student_entry>* entries, string fileName) {
         currentFile = fileName;
         return;
     }
-    unsigned int lessons_count = 0;
+    unsigned int lessons_count = 0, tests_count = 0;
     file.read(reinterpret_cast<char*>(&lessons_count), sizeof(unsigned int));
+    file.read(reinterpret_cast<char*>(&tests_count), sizeof(unsigned int));
 
     for (unsigned int i = 0; i < size; i++) {
         student_entry student;
@@ -399,20 +409,21 @@ void read_entries(vector<student_entry>* entries, string fileName) {
         file.read(reinterpret_cast<char*>(&fio_length), sizeof(unsigned int));
         student.fio.resize(fio_length);
         file.read(&student.fio[0], fio_length);
-        file.read(reinterpret_cast<char*>(&student.year_of_birth), sizeof(unsigned int));
         file.read(reinterpret_cast<char*>(&student.group), sizeof(unsigned int));
 
         for (unsigned int e = 0; e < lessons_count; e++) {
-            unsigned int vector_size = 0;
-            file.read(reinterpret_cast<char*>(&vector_size), sizeof(unsigned int));
-            for (unsigned int v = 0; v < vector_size; v++) {
-                unsigned int grade = 0;
-                file.read(reinterpret_cast<char*>(&grade), sizeof(unsigned int));
-                student.grades[(lessons)e].push_back(grade);
-            }
+            unsigned int grade = 0;
+            file.read(reinterpret_cast<char*>(&grade), sizeof(unsigned int));
+            student.exam_grades.push_back(grade);
         }
 
-        file.read(reinterpret_cast<char*>(&student.grades_average), sizeof(float));
+        for (unsigned int e = 0; e < tests_count; e++) {
+            bool test_result = 0;
+            file.read(reinterpret_cast<char*>(&test_result), sizeof(char));
+            student.test_results.push_back(test_result);
+        }
+
+        file.read(reinterpret_cast<char*>(&student.debts), sizeof(unsigned int));
 
         entries->push_back(student);
     }
@@ -436,18 +447,17 @@ void printEntry(student_entry* entry) {
     setConsoleColor(10);
     cout << "Ф.И.О: " << entry->fio << endl;
     setConsoleColor(7);
-    cout << "Год рождения: " << entry->year_of_birth << endl;
     cout << "Номер группы: " << entry->group << endl;
-    cout << "Отметки: " << endl;
-    for (unsigned int g = 0; g < lessons_size; g++) {
-        unsigned int grades_size = entry->grades[(lessons)g].size();
-        cout << lessons_map[g] << ": ";
-        for (unsigned int v = 0; v < grades_size; v++) {
-            cout << entry->grades[(lessons)g].at(v) << " ";
-        }
-        cout << endl;
+
+    for (unsigned int i = 0; i < lessons_size; i++) {
+        cout << "Оценка по экзамену по " << lessons_map_case[i] << ": " << entry->exam_grades.at(i) << endl;
     }
-    cout << "Средний балл: " << entry->grades_average << endl;
+
+    for (unsigned int i = 0; i < tests_size; i++) {
+        cout << "Результат зачета по " << lessons_map_case[i] << ": " << (entry->test_results.at(i) ? "зачет" : "незачет") << endl;
+    }
+
+    cout << "Количество задолженностей: " << entry->debts << endl;
 }
 
 void printSummary(vector<student_entry>* entries) {
@@ -459,28 +469,87 @@ void printSummary(vector<student_entry>* entries) {
         return;
     }
     unsigned int maxNameLength = max(findMaxNameLength(entries, size), (unsigned int)7);
-    cout << "Студент" << addSpaces("", maxNameLength - 7) << "|" << "Год рождения|" << "Номер группы|" << "Средний балл" << endl;
+    cout << "Студент" << addSpaces("", maxNameLength - 7) << "|Номер группы" << "|Задолженности" << endl;
     for (unsigned int i = 0; i < size; i++) {
-        cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).year_of_birth), 12) << "|";
-        cout << addSpaces(to_string(entries->at(i).group), 12) << "|" << entries->at(i).grades_average << endl;
+        cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).group), 12) << "|";
+        cout << addSpaces(to_string(entries->at(i).debts), 12) << endl;
     }
     cout << endl;
+}
+
+void printGroupSummary(vector<student_entry>* entries) {
+    unsigned int size = entries->size();
+    vector<unsigned int> groups;
+    vector<unsigned int> groups_students;
+    unsigned int unique_groups = 0;
+    for (unsigned int i = 0; i < size; i++) {
+
+        unsigned int groups_size = groups.size();
+        bool contains = false;
+        int g_index = 0;
+        for (unsigned int g = 0; g < groups_size; g++) {
+            contains = groups.at(g) == entries->at(i).group;
+            if (contains) {
+                g_index = g;
+                break;
+            }
+        }
+        if (!contains) {
+            groups.push_back(entries->at(i).group);
+            groups_students.push_back(1);
+            unique_groups++;
+        }
+        else {
+            groups_students.at(g_index)++;
+        }
+    }
+
+    string* groups_selection = new string[unique_groups];
+    for (unsigned int i = 0; i < unique_groups; i++) {
+        groups_selection[i] = to_string(groups.at(i));
+    }
+
+    coutWithColor(colors::LIGHT_YELLOW, "Выберите группу\n");
+    int selection = displaySelection(groups_selection, unique_groups) - 1;
+    
+    unsigned int students = groups_students.at(selection);
+    coutWithColor(colors::CYAN, "\nИнформация по группе " + groups_selection[selection]);
+    coutWithColor(colors::LIGHTER_BLUE, "\nКоличество студентов: " + to_string(students) + "\n");
+
+    double globalAverage = 0;
+
+    unsigned int maxNameLength = max(findMaxNameLength(entries, students), (unsigned int)7);
+    cout << "Студент" << addSpaces("", maxNameLength - 7) << "|Номер группы" << "|Задолженности" << "|Средний балл" << endl;
+    for (unsigned int i = 0; i < students; i++) {
+        cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).group), 12) << "|";
+
+        double average = 0;
+        for (int k = 0; k < lessons_size; k++) {
+            average += entries->at(i).exam_grades.at(k);
+            globalAverage += entries->at(i).exam_grades.at(k);
+        }
+        average /= lessons_size;
+
+        cout << addSpaces(to_string(entries->at(i).debts), 13) << "|" << addSpaces(to_string(average), 12) << endl;
+    }
+    cout << "\nСредний балл по группе: " << globalAverage / (students * lessons_size) << endl;
+
+    coutWithColor(colors::LIGHT_YELLOW, "\nНажмите любую клавишу, чтобы продолжить\n");
+    _getch();
+
+    clearScreen();
 }
 
 bool fio_compare(student_entry entry1, student_entry entry2) {
     return entry1.fio > entry2.fio;
 }
 
-bool avg_grade_compare(student_entry entry1, student_entry entry2) {
-    return entry1.grades_average < entry2.grades_average;
+bool debt_compare(student_entry entry1, student_entry entry2) {
+    return entry1.debts < entry2.debts;
 }
 
 bool group_compare(student_entry entry1, student_entry entry2) {
     return entry1.group < entry2.group;
-}
-
-bool year_compare(student_entry entry1, student_entry entry2) {
-    return entry1.year_of_birth < entry2.year_of_birth;
 }
 
 void entrySort(vector<student_entry>* entries, SortFunction sortFunction) {
@@ -501,6 +570,26 @@ void entrySort(vector<student_entry>* entries, SortFunction sortFunction) {
             }
         }
     }
+}
+
+bool fio_match(student_entry entry, string search) {
+    return entry.fio.find(search) != string::npos;
+}
+
+bool debt_match(student_entry entry, string search) {
+    return to_string(entry.debts).find(search) != string::npos;
+}
+
+bool group_match(student_entry entry, string search) {
+    return to_string(entry.group).find(search) != string::npos;
+}
+
+void entrySearch(vector<student_entry>* entries, SearchFunction sortFunction, string search) {
+    unsigned int size = entries->size();
+    for (unsigned int i = 0; i < size; i++) {
+        entries->at(i).valid = sortFunction(entries->at(i), search);
+    }
+    entries->erase(remove_if(entries->begin(), entries->end(), isInvalid), entries->end());
 }
 
 string createFile() {
@@ -720,9 +809,9 @@ void add_user(vector<user_entry>* users) {
     coutWithColor(colors::LIGHT_YELLOW, "\nВыберите роль пользователя:\n");
     new_user.access_level = displaySelection(new string[6]{ "1.Пользователь", "2.Администратор" }, 2) - 1;
     users->push_back(new_user);
-    save_users(users);
     clearScreen();
     coutWithColor(colors::LIGHT_GREEN, "Добавил нового " + string(((new_user.access_level == 0) ? "пользователя: " : "администратора: ")) + new_user.login + "\n");
+    save_users(users);
 }
 
 void deleteUsers(vector<user_entry>* users) {
@@ -735,21 +824,26 @@ void deleteUsers(vector<user_entry>* users) {
     bool* selected = displayMultiSelection(selection, size);
 
     for (unsigned int i = 0; i < size; i++) {
-        if (users->at(i).login == currentUser->login) {
+        if (selected[i] && users->at(i).login == currentUser.login) {
             coutWithColor(colors::YELLOW, "Вы выбрали текущую учетную запись, она не будет удалена\n");
             break;
         }
     }
 
     string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
+    int deleted_users = 0;
     if (input == "yes" || input == "y" || input == "1") {
         for (unsigned int i = 0; i < size; i++) {
-            users->at(i).valid = !(selected[i] && users->at(i).login != currentUser->login);
+            users->at(i).valid = !(selected[i] && users->at(i).login != currentUser.login);
+            deleted_users += !users->at(i).valid;
         }
         users->erase(remove_if(users->begin(), users->end(), isInvalidUser), users->end());
     }
 
     delete[] selected;
+    clearScreen();
+    coutWithColor(colors::LIGHT_GREEN, "Удалил " + to_string(deleted_users) + " пользователя(ей)\n");
+    save_users(users);
 }
 
 void listUsers(vector<user_entry>* users) {
@@ -768,15 +862,16 @@ void editUsers(vector<user_entry>* users) {
         selection[i] = users->at(i).login;
     }
     coutWithColor(colors::LIGHT_YELLOW, "Выберите пользователя\n");
-    user_entry user = users->at(displaySelection(selection, size) - 1);
+    user_entry* user = &users->at(displaySelection(selection, size) - 1);
 
-    coutWithColor(colors::LIGHT_GREEN, "Редактирую пользователя: " + user.login + "\n");
-    user.login = get_new_userName(users, "");
-    user.password = hash<string>{}(inputPassword());
-    if (user.login != currentUser->login) {
+    coutWithColor(colors::LIGHT_GREEN, "Редактирую пользователя: " + user->login + "\n");
+    user->login = get_new_userName(users, user->login);
+    user->password = hash<string>{}(inputPassword());
+    if (user->login != currentUser.login) {
         coutWithColor(colors::LIGHT_YELLOW, "\nВыберите новую роль пользователя:\n");
-        user.access_level = displaySelection(new string[6]{ "1.Пользователь", "2.Администратор" }, 2) - 1;
+        user->access_level = displaySelection(new string[6]{ "1.Пользователь", "2.Администратор" }, 2) - 1;
     }
+    clearScreen();
     save_users(users);
 }
 
@@ -797,6 +892,7 @@ void save_users(vector<user_entry>* users) {
     }
     file.flush();
     file.close();
+    coutWithColor(colors::LIGHT_GREEN, "Сохранил файл с пользователями\n");
 }
 
 void read_users(vector<user_entry>* users) {
@@ -826,6 +922,7 @@ void login(vector<user_entry>* users) {
         admin.login = string("admin");
         admin.password = hash<string>{}("admin");
         users->push_back(admin);
+        coutWithColor(colors::LIGHT_GREEN, "Первый запуска, создал администратора (пароль: admin)\n");
         save_users(users);
     }
 
@@ -857,5 +954,5 @@ void login(vector<user_entry>* users) {
             break;
         }
     }
-    currentUser = &users->at(selected - 1);
+    currentUser = users->at(selected - 1);
 }
