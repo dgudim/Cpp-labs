@@ -52,6 +52,11 @@ user_entry currentUser;
 
 int main()
 {
+
+    if (!fs::is_directory(workingDir_d) || !fs::exists(workingDir_d)) {
+        fs::create_directory(workingDir_d);
+    }
+
     vector<user_entry> users;
     vector<student_entry> entries;
 
@@ -926,7 +931,6 @@ void login(vector<user_entry>* users) {
         admin.password = hash<string>{}("admin");
         users->push_back(admin);
         coutWithColor(colors::LIGHT_GREEN, "First start, created template user (pass: admin)\n");
-        fs::create_directory(workingDir_d);
         save_users(users);
     }
 
@@ -954,7 +958,7 @@ void login(vector<user_entry>* users) {
         }
         else {
             clearScreen();
-            coutWithColor(colors::LIGHT_GREEN, "Successfully logged in, welcome, " + users->at(selected - 1).login + "\n");
+            coutWithColor(colors::LIGHT_GREEN, "Successfully logged in as " + users->at(selected - 1).login + "\n");
             break;
         }
     }
