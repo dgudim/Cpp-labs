@@ -96,7 +96,7 @@ std::string *split(std::string *input, bool print_count, unsigned int *len)
 
     if (print_count)
     {
-        coutWithColor(colors::LIGHTER_BLUE, "Количество слов: " + std::to_string(numberOfWords));
+        coutWithColor(colors::LIGHTER_BLUE, "Number of words: " + std::to_string(numberOfWords));
     }
 
     (*len) = numberOfWords;
@@ -132,9 +132,8 @@ double inputData(std::string message, bool allowWhiteSpaces)
     while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces))
     {
         std::cin.clear();
-        while (std::cin.get() != '\n')
-            ;
-        std::cout << "Пожалуйста, используйте числа" << std::endl;
+        while (std::cin.get() != '\n');
+        std::cout << "Please use numbers" << std::endl;
     }
     return toReturn;
 }
@@ -156,7 +155,7 @@ std::string inputData(std::string message, char *allowedChars, int allowedChars_
         {
             if (!std::regex_match(buffer, pattern))
             {
-                coutWithColor(colors::YELLOW, "\nВведеные данные не соответствуют шаблону\n");
+                coutWithColor(colors::YELLOW, "\nData doesn't match template\n");
                 std::cout << buffer;
             }
             else
@@ -207,7 +206,7 @@ std::string inputData(std::string message, char *allowedChars, int allowedChars_
 std::string inputPassword()
 {
     std::regex str_expr(".*");
-    return inputData("Введите пароль: ", new char[76]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890!@#$%^&*()+" }, 75, str_expr, "", true);
+    return inputData("Enter password: ", new char[76]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890!@#$%^&*()+" }, 75, str_expr, "", true);
 }
 
 std::string inputData(std::string message, char *allowedChars, int allowedChars_size)
@@ -267,7 +266,7 @@ std::string trim(const std::string s)
 
 void continueOrExit()
 {
-    std::string input = displayWarningWithInput(colors::DEFAULT, "Продолжить?\n");
+    std::string input = displayWarningWithInput(colors::DEFAULT, "Continue?\n");
     if (!(input == "yes" || input == "y" || input == "1"))
     {
         exit(-15);
@@ -319,7 +318,7 @@ int displaySelection(std::string *options, int optionCount)
         key = _getch();
         if (key == (int) keys::ENTER)
         {
-            coutWithColor(colors::GRAY, "\nВы выбрали: " + options[counter] + "\n");
+            coutWithColor(colors::GRAY, "\nYou've selected: " + options[counter] + "\n");
             return counter + 1;
         }
     }

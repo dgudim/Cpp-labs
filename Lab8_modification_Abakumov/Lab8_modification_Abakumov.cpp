@@ -6,17 +6,18 @@ namespace fs = std::filesystem;
 
 #pragma execution_character_set( "utf-8" )
 
-string workingDir = "../student_files/";
+string workingDir = "./student_files/";
+string workingDir_d = "student_files";
 string userInfo_fileName = "users.dat";
 string currentFile = "";
 
 unsigned int lessons_size = 5;
-const char* lessons_map[] = { "Физика", "Математика", "Информатика", "Химия", "Логика"};
-const char* lessons_map_case[] = { "физике", "математике", "информатике", "химии", "логике"};
+const char* lessons_map[] = { "Physics", "Math", "Informatics", "Chemistry", "Logic"};
+const char* lessons_map_case[] = { "physics", "math", "informatics", "chemistry", "logic"};
 
 unsigned int tests_size = 5;
-const char* tests_map[] = { "Философия", "История", "Русс.яз", "Бел.яз", "Физкультура" };
-const char* tests_map_case[] = { "философии", "истории", "русс.язу", "бел.язу", "физкультуре" };
+const char* tests_map[] = { "Philosofy", "History", "Russian lang.", "Belarussian lang.", "Physical training" };
+const char* tests_map_case[] = { "philosofy", "history", "russian lang.", "belarussian lang.", "physical training" };
 
 struct student_entry {
 
@@ -38,6 +39,8 @@ struct student_entry {
 struct user_entry {
     user_entry() {
         valid = true;
+        access_level = 0;
+        password = 0;
     }
     bool valid;
     char access_level;
@@ -60,7 +63,7 @@ int main()
         exit = false;
 
         while (!exit) {
-            coutWithColor(colors::LIGHTER_BLUE, "Текущий пользователь: " + currentUser.login + ", роль: " + ((currentUser.access_level == 1) ? "администратор\n" : "пользователь\n"));
+            coutWithColor(colors::LIGHTER_BLUE, "Current user: " + currentUser.login + ", role: " + ((currentUser.access_level == 1) ? "admin\n" : "user\n"));
             if (currentUser.access_level == 1) {
                 exit = displayAdminMenu(&users, &entries);
             }
@@ -73,12 +76,12 @@ int main()
 
 bool displayUserMenu(vector<user_entry>* users, vector<student_entry>* entries) {
     listFiles();
-    coutWithColor(colors::CYAN, "\nМеню (Выбор стрелками и Enter)\n");
-    coutWithColor(colors::LIGHTER_BLUE, "Текущий файл: " + currentFile + "\n\n");
+    coutWithColor(colors::CYAN, "\nMenu (Arrow selection and Enter)\n");
+    coutWithColor(colors::LIGHTER_BLUE, "Current file: " + currentFile + "\n\n");
     switch (displaySelection(new string[3]{
-        "1.Открыть файл",
-        "2.Просмотреть текущий файл, поиск по файлу",
-        "3.Выйти" }, 3)) {
+        "1.Open file",
+        "2.View current file, search",
+        "3.Exit" }, 3)) {
     case 1:
         loadFromFile(entries);
         break;
@@ -88,11 +91,11 @@ bool displayUserMenu(vector<user_entry>* users, vector<student_entry>* entries) 
             edit_minimal(entries);
         }
         else {
-            coutWithColor(colors::YELLOW, "Файл не открыт, откройте файл или создайте новый\n");
+            coutWithColor(colors::YELLOW, "No file opened, open or create one\n");
         }
         break;
     case 3:
-        string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите выйти?\n");
+        string input = displayWarningWithInput(colors::YELLOW, "Are you sure you want to exit?\n");
         if (input == "yes" || input == "y" || input == "1") {
             clearScreen();
             return true;
@@ -107,17 +110,17 @@ bool displayAdminMenu(vector<user_entry> *users, vector<student_entry> *entries)
 
     listUsers(users);
     listFiles();
-    coutWithColor(colors::CYAN, "\nМеню (Выбор стрелками и Enter)\n");
-    coutWithColor(colors::LIGHTER_BLUE, "Текущий файл: " + currentFile + "\n\n");
+    coutWithColor(colors::CYAN, "\nMenu (Arrow selection and Enter)\n");
+    coutWithColor(colors::LIGHTER_BLUE, "Current file: " + currentFile + "\n\n");
     switch (displaySelection(new string[8]{
-        "1.Открыть файл",
-        "2.Создать файл",
-        "3.Удалить файлы",
-        "4.Редактировать/просмотреть текущий файл",
-        "5.Добавить нового пользователя",
-        "6.Удалить пользователей",
-        "7.Редактировать пользователя",
-        "8.Выйти" }, 8)) {
+        "1.Open file",
+        "2.Create file",
+        "3.Delete files",
+        "4.Edit/view current file",
+        "5.Add new user",
+        "6.Delete users",
+        "7.Edit user",
+        "8.Exit" }, 8)) {
     case 1:
         loadFromFile(entries);
         break;
@@ -133,7 +136,7 @@ bool displayAdminMenu(vector<user_entry> *users, vector<student_entry> *entries)
             edit(entries);
         }
         else {
-            coutWithColor(colors::YELLOW, "Файл не открыт, откройте файл или создайте новый\n");
+            coutWithColor(colors::YELLOW, "No file opened, open or create one\n");
         }
         break;
     case 5:
@@ -146,7 +149,7 @@ bool displayAdminMenu(vector<user_entry> *users, vector<student_entry> *entries)
         editUsers(users);
         break;
     case 8:
-        string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите выйти?\n");
+        string input = displayWarningWithInput(colors::YELLOW, "Are you sure you want to exit?\n");
         if (input == "yes" || input == "y" || input == "1") {
             clearScreen();
             return true;
@@ -164,14 +167,14 @@ void edit(vector<student_entry>* entries) {
         printSummary(entries);
         bool save = true;
         switch (displaySelection(new string[8]{ 
-            "1.Добавить записи", 
-            "2.Просмотреть записи", 
-            "3.Удалить записи", 
-            "4.Редактировать запись", 
-            "5.Сортировать по выбранному полю", 
-            "6.Поиск по выбранному полю", 
-            "7.Информация по группе(личное задание)",
-            "8.Назад" }, 8)) {
+            "1.Add records", 
+            "2.View records", 
+            "3.Delete records", 
+            "4.Edit record", 
+            "5.Sort by selected field", 
+            "6.Search by selected field", 
+            "7.Group info (personal task)",
+            "8.Back" }, 8)) {
         case 1:
             save = addEntries(entries);
             break;
@@ -217,11 +220,11 @@ void edit_minimal(vector<student_entry>* entries) {
     while (!exit) {
         printSummary(entries);
         switch (displaySelection(new string[5]{ 
-            "1.Просмотреть записи", 
-            "2.Сортировать по выбранному полю", 
-            "3.Поиск по выбранному полю",
-            "4.Информация по группе(личное задание)"
-            "5.Назад" }, 5)) {
+            "1.View records", 
+            "2.Sort by selected field", 
+            "3.Search by selected field",
+            "4.Group info (personal task)"
+            "5.Back" }, 5)) {
         case 1:
             viewEntries(entries);
             break;
@@ -243,10 +246,10 @@ void edit_minimal(vector<student_entry>* entries) {
 }
 
 void sort(vector<student_entry>* entries) {
-    coutWithColor(colors::LIGHT_YELLOW, "Сортировать по\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Sort by\n");
     bool sort = true;
     SortFunction sortFunction = NULL;
-    switch (displaySelection(new string[5]{ "1.Алфавиту", "2.Номеру группы", "3.Количеству задолженностей", "4.Отмена" }, 5)) {
+    switch (displaySelection(new string[5]{ "1.Name", "2.Group", "3.Debts", "4.Cancel" }, 5)) {
     case 1:
         sortFunction = fio_compare;
         break;
@@ -264,8 +267,8 @@ void sort(vector<student_entry>* entries) {
         vector<student_entry> prev_entries = *entries;
         entrySort(entries, sortFunction);
         printSummary(entries);
-        coutWithColor(colors::LIGHT_YELLOW, "Сохранить изменения?\n");
-        switch (displaySelection(new string[3]{ "1.Да", "2.Да, в другой файл", "3.Нет" }, 3)) {
+        coutWithColor(colors::LIGHT_YELLOW, "Save changes?\n");
+        switch (displaySelection(new string[3]{ "1.Yes", "2.Yes, to another file", "3.No" }, 3)) {
         case 1:
             write_entries(entries, currentFile);
             break;
@@ -281,11 +284,11 @@ void sort(vector<student_entry>* entries) {
 }
 
 void search(vector<student_entry>* entries) {
-    string search = inputData("Поиск: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
-    coutWithColor(colors::LIGHT_YELLOW, "Поиск по\n");
+    string search = inputData("Search: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
+    coutWithColor(colors::LIGHT_YELLOW, "Search by\n");
     bool sort = true;
     SearchFunction searchFunction = NULL;
-    switch (displaySelection(new string[5]{ "1.Имени", "2.Номеру группы", "3.Количеству задолженностей", "4.Отмена" }, 5)) {
+    switch (displaySelection(new string[5]{ "1.Name", "2.Group", "3.Debts", "4.Cancel" }, 5)) {
     case 1:
         searchFunction = fio_match;
         break;
@@ -303,16 +306,16 @@ void search(vector<student_entry>* entries) {
         vector<student_entry> prev_entries = *entries;
         entrySearch(entries, searchFunction, search);
         if (entries->size() == 0) {
-            coutWithColor(colors::LIGHT_RED, "\nНичего не найдено, нажмите любую клавишу, чтобы продолжить\n");
+            coutWithColor(colors::LIGHT_RED, "\nNothing was found, press any button to continue\n");
             _getch();
             *entries = prev_entries;
             clearScreen();
             return;
         }
-        coutWithColor(colors::LIGHT_YELLOW, "\nРезультаты поиска: \n");
+        coutWithColor(colors::LIGHT_YELLOW, "\nSearch results: \n");
         printSummary(entries);
-        coutWithColor(colors::LIGHT_YELLOW, "Сохранить результат?\n");
-        switch (displaySelection(new string[3]{ "1.Да, в текущий файл", "2.Да, в другой файл", "3.Нет" }, 3)) {
+        coutWithColor(colors::LIGHT_YELLOW, "Save result?\n");
+        switch (displaySelection(new string[3]{ "1.Yes, to current file", "2.Yes, to another file", "3.No" }, 3)) {
         case 1:
             write_entries(entries, currentFile);
             break;
@@ -328,31 +331,31 @@ void search(vector<student_entry>* entries) {
 }
 
 void inputEntry(student_entry* entry) {
-    entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."));
-    entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
+    entry->fio = inputData("Enter full name: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."));
+    entry->group = stoi(inputData("Enter group: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
 
     for (unsigned int i = 0; i < lessons_size; i++) {
-        entry->exam_grades.push_back(inputData("Введите отметку по экзамену по " + string(lessons_map_case[i]) + ": ", false));
+        entry->exam_grades.push_back(inputData("Enter " + string(lessons_map_case[i]) + " exam grade: ", false));
     }
     for (unsigned int i = 0; i < tests_size; i++) {
-        entry->test_results.push_back(inputData("Введите результат зачета по " + string(tests_map_case[i]) + " (больше 5и - это зачет, иначе незачет): ", false) > 5);
+        entry->test_results.push_back(inputData("Enter " + string(tests_map_case[i]) + " test result( > 5 - pass): ", false) > 5);
     }
 
-    entry->debts = inputData("Введите количество задолженностей: ", false);
+    entry->debts = inputData("Enter number of debts: ", false);
 }
 
 void editEntry(student_entry* entry) {
-    entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."), entry->fio, false);
-    entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]"), to_string(entry->group), false));
+    entry->fio = inputData("Enter full name: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."), entry->fio, false);
+    entry->group = stoi(inputData("Enter group: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]"), to_string(entry->group), false));
 
     for (unsigned int i = 0; i < lessons_size; i++) {
-        entry->exam_grades.push_back(inputData("Введите отметку по экзамену по " + string(lessons_map_case[i]) + ": ", false));
+        entry->exam_grades.push_back(inputData("Enter " + string(lessons_map_case[i]) + " exam grade: ", false));
     }
     for (unsigned int i = 0; i < tests_size; i++) {
-        entry->test_results.push_back(inputData("Введите результат зачета по " + string(tests_map_case[i]) + " (больше 5и - это зачет, иначе незачет): ", false) > 5);
+        entry->test_results.push_back(inputData("Enter " + string(tests_map_case[i]) + " test result( > 5 - pass): ", false) > 5);
     }
 
-    entry->debts = inputData("Введите количество задолженностей: ", false);
+    entry->debts = inputData("Enter number of debts: ", false);
 }
 
 void write_entries(vector<student_entry>* entries, string fileName) {
@@ -382,7 +385,7 @@ void write_entries(vector<student_entry>* entries, string fileName) {
         file.write(reinterpret_cast<char*>(&(entries->at(i).debts)), sizeof(unsigned int));
     }
     clearScreen();
-    coutWithColor(colors::LIGHT_GREEN, "Сохранил изменения\n");
+    coutWithColor(colors::LIGHT_GREEN, "Saved changes\n");
     file.flush();
     file.close();
 }
@@ -394,7 +397,7 @@ void read_entries(vector<student_entry>* entries, string fileName) {
     if (!file.read(reinterpret_cast<char*>(&size), sizeof(unsigned int))) {
         file.close();
         clearScreen();
-        coutWithColor(colors::YELLOW, "Файл пустой\n");
+        coutWithColor(colors::YELLOW, "File is empty\n");
         currentFile = fileName;
         return;
     }
@@ -431,7 +434,7 @@ void read_entries(vector<student_entry>* entries, string fileName) {
 
     currentFile = fileName;
     clearScreen();
-    coutWithColor(colors::LIGHT_GREEN, "Успешно загрузил " + to_string(size) + " записей\n");
+    coutWithColor(colors::LIGHT_GREEN, "Successfully loaded " + to_string(size) + " records\n");
 }
 
 unsigned int findMaxNameLength(vector<student_entry>* entries, unsigned int size) {
@@ -445,31 +448,31 @@ unsigned int findMaxNameLength(vector<student_entry>* entries, unsigned int size
 void printEntry(student_entry* entry) {
     cout << "\n";
     setConsoleColor(10);
-    cout << "Ф.И.О: " << entry->fio << endl;
+    cout << "Full name: " << entry->fio << endl;
     setConsoleColor(7);
-    cout << "Номер группы: " << entry->group << endl;
+    cout << "Group: " << entry->group << endl;
 
     for (unsigned int i = 0; i < lessons_size; i++) {
-        cout << "Оценка по экзамену по " << lessons_map_case[i] << ": " << entry->exam_grades.at(i) << endl;
+        cout << lessons_map[i] << " exam grade: " << entry->exam_grades.at(i) << endl;
     }
 
     for (unsigned int i = 0; i < tests_size; i++) {
-        cout << "Результат зачета по " << lessons_map_case[i] << ": " << (entry->test_results.at(i) ? "зачет" : "незачет") << endl;
+        cout << lessons_map[i] << " test result: " << (entry->test_results.at(i) ? "pass" : "fail") << endl;
     }
 
-    cout << "Количество задолженностей: " << entry->debts << endl;
+    cout << "Debts: " << entry->debts << endl;
 }
 
 void printSummary(vector<student_entry>* entries) {
     unsigned int size = entries->size();
-    coutWithColor(colors::LIGHT_YELLOW, "\nТекущий файл: " + currentFile);
-    coutWithColor(colors::CYAN, "\nЗаписи:");
-    coutWithColor(colors::LIGHTER_BLUE, "\nКоличество студентов: " + to_string(size) + "\n");
+    coutWithColor(colors::LIGHT_YELLOW, "\nCurrent file: " + currentFile);
+    coutWithColor(colors::CYAN, "\nRecords:");
+    coutWithColor(colors::LIGHTER_BLUE, "\nNumber of students: " + to_string(size) + "\n");
     if (size == 0) {
         return;
     }
     unsigned int maxNameLength = max(findMaxNameLength(entries, size), (unsigned int)7);
-    cout << "Студент" << addSpaces("", maxNameLength - 7) << "|Номер группы" << "|Задолженности" << endl;
+    cout << "Student" << addSpaces("", maxNameLength - 7) << "|Group number" << "|Debts" << endl;
     for (unsigned int i = 0; i < size; i++) {
         cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).group), 12) << "|";
         cout << addSpaces(to_string(entries->at(i).debts), 12) << endl;
@@ -509,17 +512,17 @@ void printGroupSummary(vector<student_entry>* entries) {
         groups_selection[i] = to_string(groups.at(i));
     }
 
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите группу\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select group\n");
     int selection = displaySelection(groups_selection, unique_groups) - 1;
     
     unsigned int students = groups_students.at(selection);
-    coutWithColor(colors::CYAN, "\nИнформация по группе " + groups_selection[selection]);
-    coutWithColor(colors::LIGHTER_BLUE, "\nКоличество студентов: " + to_string(students) + "\n");
+    coutWithColor(colors::CYAN, "\nGroup info: " + groups_selection[selection]);
+    coutWithColor(colors::LIGHTER_BLUE, "\nNumber of students: " + to_string(students) + "\n");
 
     double globalAverage = 0;
 
     unsigned int maxNameLength = max(findMaxNameLength(entries, students), (unsigned int)7);
-    cout << "Студент" << addSpaces("", maxNameLength - 7) << "|Номер группы" << "|Задолженности" << "|Средний балл" << endl;
+    cout << "Student" << addSpaces("", maxNameLength - 7) << "|Group number" << "|Debts        " << "|Average grade" << endl;
     for (unsigned int i = 0; i < students; i++) {
         cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).group), 12) << "|";
 
@@ -532,9 +535,9 @@ void printGroupSummary(vector<student_entry>* entries) {
 
         cout << addSpaces(to_string(entries->at(i).debts), 13) << "|" << addSpaces(to_string(average), 12) << endl;
     }
-    cout << "\nСредний балл по группе: " << globalAverage / (students * lessons_size) << endl;
+    cout << "\nGroup average grade: " << globalAverage / (students * lessons_size) << endl;
 
-    coutWithColor(colors::LIGHT_YELLOW, "\nНажмите любую клавишу, чтобы продолжить\n");
+    coutWithColor(colors::LIGHT_YELLOW, "\nPress any button to continue\n");
     _getch();
 
     clearScreen();
@@ -598,14 +601,14 @@ string createFile() {
     while (true) {
         exit = true;
 
-        fileName = inputData("Введите название файла: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
+        fileName = inputData("Enter file name: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
 
         ifstream file_read(workingDir + fileName + ".dat", ios::in | ios::binary);
 
         if (file_read.is_open()) {
             unsigned int success_bytes = 0;
             if (file_read.read(reinterpret_cast<char*>(&success_bytes), sizeof(unsigned int))) {
-                string input = displayWarningWithInput(colors::YELLOW, "Файл существует и в нем есть данные, перезаписать?\n");
+                string input = displayWarningWithInput(colors::YELLOW, "File with the same name already exists, overwrite?\n");
                 if (!(input == "yes" || input == "y" || input == "1")) {
                     exit = false;
                 }
@@ -616,7 +619,7 @@ string createFile() {
             ofstream file(workingDir + fileName + ".dat", ios::out | ios::binary);
             file.close();
             clearScreen();
-            coutWithColor(colors::LIGHT_GREEN, "Файл был успешно создан\n");
+            coutWithColor(colors::LIGHT_GREEN, "File created successfully\n");
             return fileName + ".dat";
         }
     }
@@ -649,7 +652,7 @@ void deleteFiles() {
         file_names[i] = entry.path().filename().u8string();
         i++;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите файлы (backspace - выбрать/отменить), (enter - подтвердить)\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select files (backspace - select/deselect), (enter - confirm)\n");
     bool* files_chosen = displayMultiSelection(file_names, files);
     unsigned int deleted_files = 0;
     unsigned int files_to_delete = 0;
@@ -661,7 +664,7 @@ void deleteFiles() {
     }
 
     if (files_to_delete > 0) {
-        string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
+        string input = displayWarningWithInput(colors::YELLOW, "Are you sure you want to delete?\n");
         if (input == "yes" || input == "y" || input == "1") {
             for (unsigned int i = 0; i < files; i++) {
                 if (files_chosen[i]) {
@@ -672,7 +675,7 @@ void deleteFiles() {
                 }
             }
             clearScreen();
-            coutWithColor(colors::LIGHT_GREEN, "Удалил " + to_string(deleted_files) + " файлов\n");
+            coutWithColor(colors::LIGHT_GREEN, "Deleted " + to_string(deleted_files) + " files\n");
         }
         else {
             clearScreen();
@@ -698,7 +701,7 @@ unsigned int getStats(string path) {
 }
 
 void listFiles() {
-    coutWithColor(colors::CYAN, "\nСписок файлов:\n");
+    coutWithColor(colors::CYAN, "\nList of files:\n");
     size_t maxLen = 0;
     for (const auto& entry : fs::directory_iterator(workingDir)) {
         maxLen = max(entry.path().filename().u8string().length(), maxLen);
@@ -707,7 +710,7 @@ void listFiles() {
         string name = entry.path().filename().u8string();
         bool current = name == currentFile;
         coutWithColor(current ? colors::LIGHT_GREEN : colors::DEFAULT, addSpaces(name, maxLen + 1));
-        cout << "(" << getStats(name) << " записей)" << (current ? " -- текущий" : "") << endl;
+        cout << "(" << getStats(name) << " records)" << (current ? " -- current" : "") << endl;
     }
 }
 
@@ -717,7 +720,7 @@ void viewEntries(vector<student_entry>* entries) {
     for (unsigned int i = 0; i < size; i++) {
         selection[i] = entries->at(i).fio;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select students (backspace - select/deselect), (enter - confirm)\n");
     bool* selected = displayMultiSelection(selection, size);
     clearScreen();
     for (unsigned int i = 0; i < size; i++) {
@@ -743,10 +746,10 @@ void deleteEntries(vector<student_entry>* entries) {
     for (unsigned int i = 0; i < size; i++) {
         selection[i] = entries->at(i).fio;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select students (backspace - select/deselect), (enter - confirm)\n");
     bool* selected = displayMultiSelection(selection, size);
 
-    string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
+    string input = displayWarningWithInput(colors::YELLOW, "Are you sure you want to delete?\n");
     if (input == "yes" || input == "y" || input == "1") {
         for (unsigned int i = 0; i < size; i++) {
             entries->at(i).valid = !selected[i];
@@ -758,7 +761,7 @@ void deleteEntries(vector<student_entry>* entries) {
 }
 
 bool addEntries(vector<student_entry>* entries) {
-    unsigned int entries_to_add = (unsigned int)max(inputData("Сколько записей добавить?\n"), 0.0);
+    unsigned int entries_to_add = (unsigned int)max(inputData("How many records to add?\n"), 0.0);
 
     for (unsigned int i = 0; i < entries_to_add; i++) {
         student_entry entry;
@@ -774,7 +777,7 @@ void editEntries(vector<student_entry>* entries) {
     for (unsigned int i = 0; i < size; i++) {
         selection[i] = entries->at(i).fio;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите студента\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select student\n");
     editEntry(&(entries->at(displaySelection(selection, size) - 1)));
 }
 
@@ -783,7 +786,7 @@ string get_new_userName(vector<user_entry>* users, string previousName) {
     unsigned int size = users->size();
     bool user_exists;
     while (true) {
-        login = inputData("Введите имя пользователя: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64, previousName);
+        login = inputData("Enter username: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64, previousName);
         user_exists = false;
         for (unsigned int i = 0; i < size; i++) {
             user_exists = users->at(i).login == login;
@@ -795,7 +798,7 @@ string get_new_userName(vector<user_entry>* users, string previousName) {
             break;
         }
         else {
-            coutWithColor(colors::LIGHT_RED, "Пользователь с таким именем уже существует, используйте другое имя\n");
+            coutWithColor(colors::LIGHT_RED, "User with this name already exists\n");
         }
     }
     return login;
@@ -806,11 +809,11 @@ void add_user(vector<user_entry>* users) {
     unsigned int size = users->size();
     new_user.login = get_new_userName(users, "");
     new_user.password = hash<string>{}(inputPassword());
-    coutWithColor(colors::LIGHT_YELLOW, "\nВыберите роль пользователя:\n");
-    new_user.access_level = displaySelection(new string[6]{ "1.Пользователь", "2.Администратор" }, 2) - 1;
+    coutWithColor(colors::LIGHT_YELLOW, "\nChoose user role:\n");
+    new_user.access_level = displaySelection(new string[6]{ "1.User", "2.Admin" }, 2) - 1;
     users->push_back(new_user);
     clearScreen();
-    coutWithColor(colors::LIGHT_GREEN, "Добавил нового " + string(((new_user.access_level == 0) ? "пользователя: " : "администратора: ")) + new_user.login + "\n");
+    coutWithColor(colors::LIGHT_GREEN, "Added new " + string(((new_user.access_level == 0) ? "user: " : "admin: ")) + new_user.login + "\n");
     save_users(users);
 }
 
@@ -820,17 +823,17 @@ void deleteUsers(vector<user_entry>* users) {
     for (unsigned int i = 0; i < size; i++) {
         selection[i] = users->at(i).login;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите пользователей (backspace - выбрать/отменить), (enter - подтвердить)\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select users (backspace - select/deselect), (enter - confirm)\n");
     bool* selected = displayMultiSelection(selection, size);
 
     for (unsigned int i = 0; i < size; i++) {
         if (selected[i] && users->at(i).login == currentUser.login) {
-            coutWithColor(colors::YELLOW, "Вы выбрали текущую учетную запись, она не будет удалена\n");
+            coutWithColor(colors::YELLOW, "You have selected your own account, it won't be deleted\n");
             break;
         }
     }
 
-    string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
+    string input = displayWarningWithInput(colors::YELLOW, "Are you sure you want to delete?\n");
     int deleted_users = 0;
     if (input == "yes" || input == "y" || input == "1") {
         for (unsigned int i = 0; i < size; i++) {
@@ -842,15 +845,15 @@ void deleteUsers(vector<user_entry>* users) {
 
     delete[] selected;
     clearScreen();
-    coutWithColor(colors::LIGHT_GREEN, "Удалил " + to_string(deleted_users) + " пользователя(ей)\n");
+    coutWithColor(colors::LIGHT_GREEN, "Deleted " + to_string(deleted_users) + " user(s)\n");
     save_users(users);
 }
 
 void listUsers(vector<user_entry>* users) {
     unsigned int size = users->size();
-    coutWithColor(colors::CYAN, "\nСписок пользователей: " + to_string(size) + '\n');
+    coutWithColor(colors::CYAN, "\nList of users: " + to_string(size) + '\n');
     for (unsigned int i = 0; i < size; i++) {
-        cout << users->at(i).login << ((users->at(i).access_level == 0) ? " (пользователь)\n" : " (администратор)\n");
+        cout << users->at(i).login << ((users->at(i).access_level == 0) ? " (user)\n" : " (admin)\n");
     }
 }
 
@@ -861,15 +864,15 @@ void editUsers(vector<user_entry>* users) {
     for (unsigned int i = 0; i < size; i++) {
         selection[i] = users->at(i).login;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите пользователя\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select user\n");
     user_entry* user = &users->at(displaySelection(selection, size) - 1);
 
-    coutWithColor(colors::LIGHT_GREEN, "Редактирую пользователя: " + user->login + "\n");
+    coutWithColor(colors::LIGHT_GREEN, "Editing user: " + user->login + "\n");
     user->login = get_new_userName(users, user->login);
     user->password = hash<string>{}(inputPassword());
     if (user->login != currentUser.login) {
-        coutWithColor(colors::LIGHT_YELLOW, "\nВыберите новую роль пользователя:\n");
-        user->access_level = displaySelection(new string[6]{ "1.Пользователь", "2.Администратор" }, 2) - 1;
+        coutWithColor(colors::LIGHT_YELLOW, "\nSelect new user role:\n");
+        user->access_level = displaySelection(new string[6]{ "1.User", "2.Admin" }, 2) - 1;
     }
     clearScreen();
     save_users(users);
@@ -892,7 +895,7 @@ void save_users(vector<user_entry>* users) {
     }
     file.flush();
     file.close();
-    coutWithColor(colors::LIGHT_GREEN, "Сохранил файл с пользователями\n");
+    coutWithColor(colors::LIGHT_GREEN, "Saved user file\n");
 }
 
 void read_users(vector<user_entry>* users) {
@@ -922,7 +925,8 @@ void login(vector<user_entry>* users) {
         admin.login = string("admin");
         admin.password = hash<string>{}("admin");
         users->push_back(admin);
-        coutWithColor(colors::LIGHT_GREEN, "Первый запуска, создал администратора (пароль: admin)\n");
+        coutWithColor(colors::LIGHT_GREEN, "First start, created template user (pass: admin)\n");
+        fs::create_directory(workingDir_d);
         save_users(users);
     }
 
@@ -933,24 +937,24 @@ void login(vector<user_entry>* users) {
     for (unsigned int i = 0; i < size; i++) {
         selection[i] = users->at(i).login;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Выберите пользователя\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Select user\n");
     int selected = displaySelection(selection, size);
 
     size_t pass_hash = 0;
     int attempts = 0;
     while (true) {
         if ((pass_hash = hash<string>{}(inputPassword())) != users->at(selected - 1).password) {
-            coutWithColor(colors::LIGHT_RED, "Неправильный пароль\n");
+            coutWithColor(colors::LIGHT_RED, "Wrong password\n");
             attempts++;
             if (attempts > 3) {
-                coutWithColor(colors::RED, "Больше 3х неудачных попыток ввода\n");
+                coutWithColor(colors::RED, "More than 3 unsuccessfull attempts\n");
                 Sleep(1000);
                 exit(-100);
             }
         }
         else {
             clearScreen();
-            coutWithColor(colors::LIGHT_GREEN, "Успешная авторизация, добро пожаловать, " + users->at(selected - 1).login + "\n");
+            coutWithColor(colors::LIGHT_GREEN, "Successfully logged in, welcome, " + users->at(selected - 1).login + "\n");
             break;
         }
     }
