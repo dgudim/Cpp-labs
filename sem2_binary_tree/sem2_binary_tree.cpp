@@ -4,23 +4,20 @@
 using namespace std;
 
 struct TreeNode {
-    TreeNode() {
+    TreeNode(int dat = -100) {
         right = nullptr;
         left = nullptr;
-        parent = nullptr;
-        data = -100;
+        data = dat;
     }
     int data;
     TreeNode* right;
     TreeNode* left;
-    TreeNode* parent;
 };
 
 TreeNode* addElement(int value, TreeNode* root) {
     TreeNode* temp = root;
-    TreeNode* elem = new TreeNode;
-    elem->data = value;
-    
+    TreeNode* elem = new TreeNode(value);
+
     if (root) {
         while (temp) {
             if (elem->data == temp->data) {
@@ -32,7 +29,6 @@ TreeNode* addElement(int value, TreeNode* root) {
                     temp = temp->right;
                 } else {
                     temp->right = elem;
-                    elem->parent = temp;
                     break;
                 }
             } else {
@@ -40,7 +36,6 @@ TreeNode* addElement(int value, TreeNode* root) {
                     temp = temp->left;
                 } else {
                     temp->left = elem;
-                    elem->parent = temp;
                     break;
                 }
             }
@@ -50,6 +45,58 @@ TreeNode* addElement(int value, TreeNode* root) {
     return elem;
 }
 
+TreeNode* getMinNode(TreeNode* node) {
+    if (!node) return node;
+    TreeNode* current = node;
+
+    while (current && current->left)
+        current = current->left;
+
+    return current;
+}
+
+TreeNode* deleteByKey(TreeNode* root, int key) {
+
+    if (!root) return root;
+
+    if (key < root->data)
+        root->left = deleteByKey(root->left, key);
+
+    else if (key > root->data)
+        root->right = deleteByKey(root->right, key);
+
+    else {
+
+        if (!root->left && !root->right)
+            return nullptr;
+
+        else if (!root->left) {
+            TreeNode* temp = root->right;
+            delete root;
+            return temp;
+        } else if (!root->right) {
+            TreeNode* temp = root->left;
+            delete root;
+            return temp;
+        }
+
+        TreeNode* temp = getMinNode(root->right);
+
+        root->data = temp->data;
+
+        root->right = deleteByKey(root->right, temp->data);
+    }
+    return root;
+}
+
+void deleteWholeTree(TreeNode* root) {
+    if(root){
+        deleteWholeTree(root->right);
+        deleteWholeTree(root->left);
+        delete root;
+    }
+}
+
 void printTree(const string& prefix, const TreeNode* node, bool isLeft)
 {
     if (node != nullptr)
@@ -57,7 +104,6 @@ void printTree(const string& prefix, const TreeNode* node, bool isLeft)
         cout << prefix;
         cout << (isLeft ? "├──" : "└──");
 
-        // print the value of the node
         cout << node->data << endl;
 
         printTree(prefix + (isLeft ? "│   " : "    "), node->left, true);
@@ -78,19 +124,19 @@ void printMinMax(TreeNode* root) {
     coutWithColor(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->data) + "\n");
 }
 
+void inorder(TreeNode* root)
+{
+    if (root != NULL) {
+        inorder(root->left);
+        cout << root->data << " | ";
+        inorder(root->right);
+    }
+}
+
 int getHeight(TreeNode* root)
 {
-    if (root == NULL)
-        return 0;
-    else
-    {
-        /* compute the height of each subtree */
-        int lheight = getHeight(root->left);
-        int rheight = getHeight(root->right);
-
-        /* use the larger one */
-        return max(lheight, rheight) + 1;
-    }
+    if (!root) return 0;
+    return max(getHeight(root->left), getHeight(root->right)) + 1;
 }
 
 void printLeftRootRight_infix(TreeNode* root) {
@@ -119,17 +165,19 @@ void printTree(TreeNode* root)
 int main()
 {
     TreeNode* root = nullptr;
-    
+
     int n = 0;
 
     while (true) {
         printTree(root);
+        inorder(root);
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection(new string[3]{
+        int choise = displaySelection(new string[4]{
             "1.Добавить элементы в дерево",
-            "2.-----",
-            "3.Выйти" }, 3);
+            "2.Удалить элемент по ключу",
+            "3.Удалить все дерево",
+            "4.Выйти" }, 4);
         switch (choise) {
         case 1:
             n = (int)inputData("Сколько элементов добавить? : ", false);
@@ -151,8 +199,24 @@ int main()
             }
 
             coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
+            break;
+        case 2:
 
+            clearScreen();
+            coutWithColor(colors::LIGHT_BLUE, "Старое дерево\n");
+            printTree(root);
+            cout << "\n";
+
+            root = deleteByKey(root, (int)inputData("Введите ключ для удаления: "));
+            break;
+        case 3:
+            deleteWholeTree(root);
+            root = nullptr;
+            clearScreen();
+            break;
+        case 4:
+            return 0;
         }
     }
-    
+
 }
