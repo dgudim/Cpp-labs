@@ -4,27 +4,29 @@
 using namespace std;
 
 struct TreeNode {
-    TreeNode(int dat = -100) {
+    TreeNode(int k = -100, string dat = "") {
         right = nullptr;
         left = nullptr;
+        key = k;
         data = dat;
     }
-    int data;
+    int key;
+    string data;
     TreeNode* right;
     TreeNode* left;
 };
 
-TreeNode* addElement(int value, TreeNode* root) {
+TreeNode* addElement(int value, string data, TreeNode* root) {
     TreeNode* temp = root;
-    TreeNode* elem = new TreeNode(value);
+    TreeNode* elem = new TreeNode(value, data);
 
     if (root) {
         while (temp) {
-            if (elem->data == temp->data) {
+            if (elem->key == temp->key) {
                 coutWithColor(colors::LIGHT_RED, "Дубликат ключа\n");
                 break;
             }
-            if (elem->data > temp->data) {
+            if (elem->key > temp->key) {
                 if (temp->right) {
                     temp = temp->right;
                 } else {
@@ -59,10 +61,10 @@ TreeNode* deleteByKey(TreeNode* root, int key) {
 
     if (!root) return root;
 
-    if (key < root->data)
+    if (key < root->key)
         root->left = deleteByKey(root->left, key);
 
-    else if (key > root->data)
+    else if (key > root->key)
         root->right = deleteByKey(root->right, key);
 
     else {
@@ -82,9 +84,9 @@ TreeNode* deleteByKey(TreeNode* root, int key) {
 
         TreeNode* temp = getMinNode(root->right);
 
-        root->data = temp->data;
+        root->key = temp->key;
 
-        root->right = deleteByKey(root->right, temp->data);
+        root->right = deleteByKey(root->right, temp->key);
     }
     return root;
 }
@@ -104,7 +106,7 @@ void printTree(const string& prefix, const TreeNode* node, bool isLeft)
         cout << prefix;
         cout << (isLeft ? "├──" : "└──");
 
-        cout << node->data << endl;
+        cout << node->key << endl;
 
         printTree(prefix + (isLeft ? "│   " : "    "), node->left, true);
         printTree(prefix + (isLeft ? "│   " : "    "), node->right, false);
@@ -120,16 +122,34 @@ void printMinMax(TreeNode* root) {
     while (max->right) {
         max = max->right;
     }
-    coutWithColor(colors::LIGHT_GREEN, "Максимальный элемент: " + to_string(max->data) + "\n");
-    coutWithColor(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->data) + "\n");
+    coutWithColor(colors::LIGHT_GREEN, "Максимальный элемент: " + to_string(max->key) + "\n");
+    coutWithColor(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->key) + "\n");
 }
 
-void inorder(TreeNode* root)
+void inorderLeftRootRight_infix(TreeNode* root)
 {
-    if (root != NULL) {
-        inorder(root->left);
-        cout << root->data << " | ";
-        inorder(root->right);
+    if (root) {
+        inorderLeftRootRight_infix(root->left);
+        cout << root->key << " | ";
+        inorderLeftRootRight_infix(root->right);
+    }
+}
+
+void inorderRootLeftRight_prefix(TreeNode* root)
+{
+    if (root) {
+        cout << root->key << " | ";
+        inorderRootLeftRight_prefix(root->left);
+        inorderRootLeftRight_prefix(root->right);
+    }
+}
+
+void inorderLeftRightRoot_postfix(TreeNode* root)
+{
+    if (root) {
+        inorderLeftRightRoot_postfix(root->left);
+        inorderLeftRightRoot_postfix(root->right);
+        cout << root->key << " | ";
     }
 }
 
@@ -137,18 +157,6 @@ int getHeight(TreeNode* root)
 {
     if (!root) return 0;
     return max(getHeight(root->left), getHeight(root->right)) + 1;
-}
-
-void printLeftRootRight_infix(TreeNode* root) {
-
-}
-
-void printRootLeftRight_prefix(TreeNode* root) {
-
-}
-
-void printLeftRightRoot_postfix(TreeNode* root) {
-
 }
 
 void printTree(TreeNode* root)
@@ -160,24 +168,99 @@ void printTree(TreeNode* root)
     printTree("", root, false);
     printMinMax(root);
     coutWithColor(colors::LIGHT_GREEN, "Глубина дерева: " + to_string(getHeight(root)) + "\n");
+    inorderLeftRootRight_infix(root);
+    cout << "\n";
+    inorderRootLeftRight_prefix(root);
+    cout << "\n";
+    inorderLeftRightRoot_postfix(root);
+    cout << "\n";
+}
+
+TreeNode* findByKey(TreeNode* root, TreeNode*& parent, int key) {
+    if (!root) return nullptr;
+
+    if (key < root->key) {
+        parent = root;
+        return findByKey(root->left, parent, key);
+    }
+
+    if (key > root->key) {
+        parent = root;
+        return findByKey(root->right, parent, key);
+    }
+        
+    return root;
+}
+
+void printByKey(TreeNode* root, int key) {
+    TreeNode* r = nullptr;
+    TreeNode* node = findByKey(root, r, key);
+    clearScreen();
+    if (node) {
+        coutWithColor(colors::LIGHTER_BLUE, "Информация по ключу " + to_string(key) + ": " + node->data + " (родитель: " + (r ? to_string(r->key) : string("null")) + ")\n");
+        return;
+    }
+    coutWithColor(colors::LIGHT_RED, "В дереве нет такого ключа\n");
+}
+
+void printOldTree(TreeNode* root){
+    clearScreen();
+    coutWithColor(colors::LIGHT_BLUE, "Старое дерево\n");
+    printTree(root);
+    cout << "\n";
+}
+
+void treeToVector(TreeNode* root, vector<TreeNode*>& nodes) {
+    if (!root) return;
+
+    // в порядке возрастания ключа
+    treeToVector(root->left, nodes);
+    nodes.push_back(root);
+    treeToVector(root->right, nodes);
+}
+
+TreeNode* vectorToBalancedTree(vector<TreeNode*>& nodes, int start, int end) {
+
+    if (start > end) return nullptr;
+
+    int mid = (start + end) / 2;
+    TreeNode* root = nodes[mid];
+    //middle element in array in our root
+
+    root->left = vectorToBalancedTree(nodes, start, mid - 1);
+    root->right = vectorToBalancedTree(nodes, mid + 1, end);
+
+    return root;
+}
+
+TreeNode* balanceTree(TreeNode* root)
+{
+    vector<TreeNode*> nodes;
+    treeToVector(root, nodes);
+
+    int n = nodes.size();
+    return vectorToBalancedTree(nodes, 0, n - 1);
 }
 
 int main()
 {
     TreeNode* root = nullptr;
+    TreeNode* temp = nullptr;
+    TreeNode* temp2 = nullptr;
 
     int n = 0;
 
     while (true) {
         printTree(root);
-        inorder(root);
-        cout << "\n";
-        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection(new string[4]{
+        coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
+        int choise = displaySelection(new string[7]{
             "1.Добавить элементы в дерево",
             "2.Удалить элемент по ключу",
-            "3.Удалить все дерево",
-            "4.Выйти" }, 4);
+            "3.Удалить ветвь с вершиной по ключу",
+            "4.Удалить все дерево",
+            "5.Найти информацию по ключу",
+            "6.Сбалансировать дерево",
+            "7.Выйти" }, 7);
         switch (choise) {
         case 1:
             n = (int)inputData("Сколько элементов добавить? : ", false);
@@ -187,34 +270,56 @@ int main()
                 break;
             }
 
-            clearScreen();
-            coutWithColor(colors::LIGHT_BLUE, "Старое дерево\n");
-            printTree(root);
-            cout << "\n";
+            printOldTree(root);
 
             coutWithColor(colors::LIGHT_BLUE, "Введите элементы(" + to_string(n) + "): ");
 
             for (int i = 0; i < n; i++) {
-                root = addElement((int)inputData(""), root);
+                root = addElement((int)inputData("Ключ: "), inputData("Данные: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64), root);
             }
 
             coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
             break;
         case 2:
 
-            clearScreen();
-            coutWithColor(colors::LIGHT_BLUE, "Старое дерево\n");
-            printTree(root);
-            cout << "\n";
+            printOldTree(root);
 
             root = deleteByKey(root, (int)inputData("Введите ключ для удаления: "));
             break;
         case 3:
+
+            printOldTree(root);
+
+            temp = findByKey(root, temp2, (int)inputData("Введите ключ для удаления: "));
+            
+            if (!temp) {
+                coutWithColor(colors::LIGHT_RED, "В дереве нет такого ключа\n");
+                break;
+            }
+            deleteWholeTree(temp);
+            if (temp == root) {
+                root = nullptr;
+            } else {
+                if (temp2->right == temp) {
+                    temp2->right = nullptr;
+                } else {
+                    temp2->left = nullptr;
+                }
+            }
+
+            break;
+        case 4:
             deleteWholeTree(root);
             root = nullptr;
             clearScreen();
             break;
-        case 4:
+        case 5:
+            printByKey(root, (int)inputData("Ключ: "));
+            break;
+        case 6:
+            root = balanceTree(root);
+            break;
+        case 7:
             return 0;
         }
     }
