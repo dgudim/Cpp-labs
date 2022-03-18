@@ -16,14 +16,16 @@ struct TreeNode {
     TreeNode* left;
 };
 
-TreeNode* addElement(int value, string data, TreeNode* root) {
+TreeNode* addElement(string data, int key, TreeNode* root, bool& success) {
     TreeNode* temp = root;
-    TreeNode* elem = new TreeNode(value, data);
+    TreeNode* elem = new TreeNode(key, data);
+    success = true;
 
     if (root) {
         while (temp) {
             if (elem->key == temp->key) {
-                coutWithColor(colors::LIGHT_RED, "Дубликат ключа\n");
+                coutWithColor(colors::LIGHT_RED, "Дубликат ключа, повторите ввод\n");
+                success = false;
                 break;
             }
             if (elem->key > temp->key) {
@@ -92,7 +94,7 @@ TreeNode* deleteByKey(TreeNode* root, int key) {
 }
 
 void deleteWholeTree(TreeNode* root) {
-    if(root){
+    if (root) {
         deleteWholeTree(root->right);
         deleteWholeTree(root->left);
         delete root;
@@ -188,7 +190,7 @@ TreeNode* findByKey(TreeNode* root, TreeNode*& parent, int key) {
         parent = root;
         return findByKey(root->right, parent, key);
     }
-        
+
     return root;
 }
 
@@ -203,7 +205,7 @@ void printByKey(TreeNode* root, int key) {
     coutWithColor(colors::LIGHT_RED, "В дереве нет такого ключа\n");
 }
 
-void printOldTree(TreeNode* root){
+void printOldTree(TreeNode* root) {
     clearScreen();
     coutWithColor(colors::LIGHT_BLUE, "Старое дерево\n");
     printTree(root);
@@ -249,6 +251,8 @@ int main()
     TreeNode* temp2 = nullptr;
 
     int n = 0;
+    int n2 = 0;
+    bool success = true;
 
     while (true) {
         printTree(root);
@@ -264,6 +268,7 @@ int main()
         switch (choise) {
         case 1:
             n = (int)inputData("Сколько элементов добавить? : ", false);
+            n2 = n;
             if (n <= 0) {
                 clearScreen();
                 coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество элементов\n");
@@ -275,10 +280,11 @@ int main()
             coutWithColor(colors::LIGHT_BLUE, "Введите элементы(" + to_string(n) + "): ");
 
             for (int i = 0; i < n; i++) {
-                root = addElement((int)inputData("Ключ: "), inputData("Данные: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64), root);
+                root = addElement(inputData("Данные: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64), (int)inputData("Ключ: "), root, success);
+                n += !success;
             }
 
-            coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n2) + " элементов\n");
             break;
         case 2:
 
@@ -291,7 +297,7 @@ int main()
             printOldTree(root);
 
             temp = findByKey(root, temp2, (int)inputData("Введите ключ для удаления: "));
-            
+
             if (!temp) {
                 coutWithColor(colors::LIGHT_RED, "В дереве нет такого ключа\n");
                 break;
@@ -317,6 +323,8 @@ int main()
             printByKey(root, (int)inputData("Ключ: "));
             break;
         case 6:
+            clearScreen();
+            coutWithColor(colors::LIGHTER_BLUE, "Сбалансировал дерево\n");
             root = balanceTree(root);
             break;
         case 7:
