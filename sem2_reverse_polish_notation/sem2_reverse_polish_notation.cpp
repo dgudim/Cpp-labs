@@ -3,8 +3,10 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <map>
 #include <stdio.h>
 #include <math.h>
+#include "../genericFunctions.h"
 
 using namespace std;
 
@@ -31,10 +33,20 @@ public:
 class Tokenizer {
 private:
     string str;
+    string str_copy;
     string buff;
 public:
     Tokenizer(string string) {
+        setExpression(string);
+    }
+
+    void setExpression(string string) {
         str = string;
+        str_copy = string;
+    }
+
+    void reset() {
+        str = str_copy;
     }
 
     bool hasTokens() {
@@ -54,7 +66,7 @@ public:
                     str.erase(0, 1);
                     skipSpaces();
                     if (!isNumOrLetter(ch)) {
-                        throw "illegal character " + buff + "\n";
+                        throw "нелегальный символ " + buff;
                     }
 
                     if (str.empty()) {
@@ -66,7 +78,7 @@ public:
                     if (isOperator(ch) || isParenthesis(ch)) {
                         return buff;
                     } else if (isParenthesis(ch)) {
-                        throw "missing operator after " + buff + "\n";
+                        throw "не хватает операторы после " + buff;
                     }
                 }
             } else if (isOperator(ch)) {
@@ -74,12 +86,12 @@ public:
                 str.erase(0, 1);
                 skipSpaces();
                 if (str.empty()) {
-                    throw "dangling operator " + buff + "\n";
+                    throw "не хватает второго значения после оператора: " + buff;
                 }
                 if (!isOperator(str.at(0))) {
                     return buff;
                 } else {
-                    throw "subsequent operators after " + buff + "\n";
+                    throw "стоящие подряд операторы " + buff;
                 }
             } else if (isParenthesis(ch)) {
                 buff.insert(0, 1, ch);
@@ -91,11 +103,11 @@ public:
                 if (!isParenthesis(str.at(0))) {
                     return buff;
                 } else {
-                    throw "subsequent parenthesis after " + buff + "\n";
+                    throw "стоящие подряд разные скобки после " + buff;
                 }
             }
         }
-        throw "can't get next token\n";
+        throw "не могу получить следующий токен";
     }
 
     void skipSpaces() {
@@ -108,7 +120,7 @@ public:
     }
 
     bool isNumOrLetter(char ch) {
-        return isalpha(ch) || isupper(ch) || isdigit(ch);
+        return isalpha(ch) || isupper(ch) || isdigit(ch) || ch == '.';
     }
 
     bool isParenthesis(char ch) {
@@ -130,7 +142,7 @@ bool isLetter(char ch) {
 }
 
 bool isLetterOrNumber(char ch) {
-    return isLetter(ch) || isdigit(ch);
+    return isLetter(ch) || isdigit(ch) || ch == '.';
 }
 
 deque<Token> exprToTokens(const string& expr) {
@@ -246,14 +258,14 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
             if (!match && stack.empty()) {
                 // If the stack runs out without finding a left parenthesis,
                 // then there are mismatched parentheses.
-                cout << "RightParen error " << token.str.c_str() << "\n";
+                throw "Ошибка закрывающей скобки " + token.str;
                 return {};
             }
         }
         break;
 
         default:
-            cout << "error, unknown token: " << token.str.c_str() << "\n";
+            throw "Неизвестный токен: " + token.str;
             return {};
         }
     }
@@ -264,7 +276,7 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
         // If the operator token on the top of the stack is a parenthesis,
         // then there are mismatched parentheses.
         if (stack.back().type == Token::Type::LeftParen) {
-            cout << "Mismatched parentheses error\n";
+            cout << "Несоответствие скобок";
             return {};
         }
 
@@ -276,47 +288,32 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
     return queue;
 }
 
-
-int main() {
-
-    string expr = "30 + 40 * 20 / (1 - 5) ^ 2 ^ 3 + -10";
-    
-    if (expr.at(0) == '-') {
-        expr.insert(0, 1, '0');
-    }
-    Tokenizer* tokenizer = new Tokenizer(expr);
-    string currentToken;
-    try {
-        while (tokenizer->hasTokens()) {
-            currentToken = tokenizer->getNextToken();
-        }
-    } catch (const char* err) {
-        cout << "Error: " << err << endl;
-    } catch (string err) {
-        cout << "Error: " << err << endl;
-    }
-
-    const auto tokens = exprToTokens(expr);
-    auto queue = shuntingYard(tokens);
-
-    vector<int> stack;
-
-    cout << "\nCalculation\n";
+void calculate(deque<Token> queue) {
+   
+    vector<double> stack;
+    map<string, double> var_map;
+    double in_var = 0;
 
     while (!queue.empty()) {
         string op;
 
         const Token token = queue.front();
-        cout << token;
+        
         queue.pop_front();
         switch (token.type) {
         case Token::Type::Number:
         case Token::Type::Variable:
 
             if (token.type == Token::Type::Variable) {
-                stack.push_back(0);
+                if (var_map.find(token.str) != var_map.end()) {
+                    stack.push_back(var_map.at(token.str));
+                } else {
+                    in_var = inputData("Введите значение для " + token.str + ": ");
+                    var_map.insert(std::pair<string, double>(token.str, in_var));
+                    stack.push_back(in_var);
+                }
             } else {
-                stack.push_back(stoi(token.str));
+                stack.push_back(stod(token.str));
             }
             break;
 
@@ -329,16 +326,24 @@ int main() {
 
             switch (token.str[0]) {
             default:
-                cout << "Operator error " << token.str.c_str() << endl;
-                exit(0);
+                throw "Ошибка оператора " + token.str;
                 break;
             case '^':
-                stack.push_back(static_cast<int>(pow(lhs, rhs)));
+                if (lhs < 0 && rhs < 1 && rhs > 0) {
+                    throw  "Возведение отрицательного числа в дробную степень";
+                }
+                if (lhs == 0 && rhs == 0) {
+                    throw  "Возведение нуля в нулевую степень";
+                }
+                stack.push_back(pow(lhs, rhs));
                 break;
             case '*':
                 stack.push_back(lhs * rhs);
                 break;
             case '/':
+                if (rhs == 0) {
+                    throw "Деление на 0 ";
+                }
                 stack.push_back(lhs / rhs);
                 break;
             case '+':
@@ -352,10 +357,85 @@ int main() {
         break;
 
         default:
-            cout << "Token error\n";
-            exit(0);
+            throw "Ошибка токена";
         }
     }
-    cout << "\n  result = " << stack.back() << endl;
+    clearScreen();
+    coutWithColor(colors::LIGHT_BLUE, "Результат = " + to_string(stack.back()) + "\n");
+}
 
+int main() {
+
+    string expr = "a/(b-c)*(d+e)";
+    Tokenizer* tokenizer = new Tokenizer(expr);
+    deque<Token> queue;
+    string currentToken;
+
+    while (true) {
+        coutWithColor(colors::LIGHT_GREEN, "Текущее выражение: " + expr + "\n");
+        coutWithColor(colors::LIGHT_GREEN, "Текущая польская запись: ");
+        for (Token token : queue) {
+            cout << token;
+        }
+        cout << endl;
+        coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
+        int choise = displaySelection(new string[4]{
+            "1.Ввести пример",
+            "2.Преобразовать в польскую запись",
+            "3.Решить",
+            "4.Выйти" }, 4);
+
+        switch (choise)
+        {
+        case 1:
+            expr = inputData("Выражение: ", new char[72]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM. 1234567890+-/*^()" }, 71);
+
+            if (expr.at(0) == '-' || expr.at(0) == '+') {
+                expr.insert(0, 1, '0');
+            }
+
+            queue.clear();
+
+            tokenizer->setExpression(expr);
+            clearScreen();
+            break;
+        case 2:
+            clearScreen();
+            try {
+                while (tokenizer->hasTokens()) {
+                    currentToken = tokenizer->getNextToken();
+                }
+                queue = shuntingYard(exprToTokens(expr));
+            } catch (const string str) {
+                coutWithColor(colors::LIGHT_RED, str + "\n");
+            } catch (const char* str) {
+                coutWithColor(colors::LIGHT_RED, string(str) + "\n");
+            } catch (...) {
+                coutWithColor(colors::LIGHT_RED, "Неизвестная ошибка, последний токен: " + currentToken + "\n");
+            }
+            tokenizer->reset();
+            break;
+        case 3:
+            try {
+                if (queue.empty()) {
+                    clearScreen();
+                    coutWithColor(colors::LIGHT_RED, "Польская запись не сгенерирована\n");
+                    break;
+                }
+                calculate(queue);
+            } catch (const string str) {
+                clearScreen();
+                coutWithColor(colors::LIGHT_RED, str + "\n");
+            } catch (const char* str) {
+                clearScreen();
+                coutWithColor(colors::LIGHT_RED, string(str) + "\n");
+            } catch (...) {
+                clearScreen();
+                coutWithColor(colors::LIGHT_RED, "Неизвестная ошибка\n");
+            }
+            break;
+        case 4:
+            return 1;
+        }
+    }
 }
