@@ -78,7 +78,7 @@ public:
                     if (isOperator(ch) || isParenthesis(ch)) {
                         return buff;
                     } else if (isParenthesis(ch)) {
-                        throw "не хватает операторы после " + buff;
+                        throw "не хватает оператора после " + buff;
                     }
                 }
             } else if (isOperator(ch)) {
