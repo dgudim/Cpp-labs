@@ -103,7 +103,11 @@ public:
                 if (!isParenthesis(str.at(0))) {
                     return buff;
                 } else {
-                    throw "стоящие подряд разные скобки после " + buff;
+                    if (ch != str.at(0)) {
+                        throw "стоящие подряд разные скобки после " + buff;
+                    } else {
+                        return buff;
+                    }
                 }
             }
         }
@@ -145,6 +149,10 @@ bool isLetterOrNumber(char ch) {
     return isLetter(ch) || isdigit(ch) || ch == '.';
 }
 
+bool isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
+}
+
 deque<Token> exprToTokens(const string& expr) {
     deque<Token> tokens;
 
@@ -163,8 +171,8 @@ deque<Token> exprToTokens(const string& expr) {
             --ch;
         } else {
             Token::Type type = Token::Type::Undefined;
-            int precedence = -1;            
-            bool ra = false;        
+            int precedence = -1;
+            bool ra = false;
             switch (*ch) {
             default:                                       break;
             case '(':   type = Token::Type::LeftParen;     break;
@@ -289,7 +297,7 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
 }
 
 void calculate(deque<Token> queue) {
-   
+
     vector<double> stack;
     map<string, double> var_map;
     double in_var = 0;
@@ -298,7 +306,7 @@ void calculate(deque<Token> queue) {
         string op;
 
         const Token token = queue.front();
-        
+
         queue.pop_front();
         switch (token.type) {
         case Token::Type::Number:
@@ -370,6 +378,7 @@ int main() {
     Tokenizer* tokenizer = new Tokenizer(expr);
     deque<Token> queue;
     string currentToken;
+    bool exit = false;
 
     while (true) {
         coutWithColor(colors::LIGHT_GREEN, "Текущее выражение: " + expr + "\n");
@@ -388,10 +397,26 @@ int main() {
         switch (choise)
         {
         case 1:
-            expr = inputData("Выражение: ", new char[72]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM. 1234567890+-/*^()" }, 71);
+            exit = false;
+            while (!exit) {
+                expr = inputData("Выражение: ", new char[72]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM. 1234567890+-/*^()" }, 71);
 
-            if (expr.at(0) == '-' || expr.at(0) == '+') {
-                expr.insert(0, 1, '0');
+                if (expr.empty()) {
+                    coutWithColor(colors::LIGHT_RED, "ошибка ввода, пустая строка\n");
+                    continue;
+                }
+
+                if (expr.at(0) == '(' && expr.at(expr.size() - 1) == ')'){
+                    expr.insert(0, "0+");
+                }
+
+                if (expr.at(0) == '-' || expr.at(0) == '+') {
+                    expr.insert(0, 1, '0');
+                } else if (isOperator(expr.at(0))) {
+                    coutWithColor(colors::LIGHT_RED, "ошибка ввода, первый символ - оператор\n");
+                } else {
+                    exit = true;
+                }
             }
 
             queue.clear();
