@@ -30,112 +30,6 @@ public:
     const bool rightAssociative;
 };
 
-class Tokenizer {
-private:
-    string str;
-    string str_copy;
-    string buff;
-public:
-    Tokenizer(string string) {
-        setExpression(string);
-    }
-
-    void setExpression(string string) {
-        str = string;
-        str_copy = string;
-    }
-
-    void reset() {
-        str = str_copy;
-    }
-
-    bool hasTokens() {
-        skipSpaces();
-        return !str.empty();
-    }
-
-    string getNextToken() {
-        skipSpaces();
-        buff.clear();
-        char ch = 0;
-        if (!str.empty()) {
-            ch = str.at(0);
-            if (isNumOrLetter(ch)) {
-                while (!str.empty()) {
-                    buff.insert(buff.end(), 1, ch);
-                    str.erase(0, 1);
-                    skipSpaces();
-                    if (!isNumOrLetter(ch)) {
-                        throw "нелегальный символ " + buff;
-                    }
-
-                    if (str.empty()) {
-                        return buff;
-                    }
-
-                    ch = str.at(0);
-
-                    if (isOperator(ch) || isParenthesis(ch)) {
-                        return buff;
-                    } else if (isParenthesis(ch)) {
-                        throw "не хватает оператора после " + buff;
-                    }
-                }
-            } else if (isOperator(ch)) {
-                buff.insert(0, 1, ch);
-                str.erase(0, 1);
-                skipSpaces();
-                if (str.empty()) {
-                    throw "не хватает второго значения после оператора: " + buff;
-                }
-                if (!isOperator(str.at(0))) {
-                    return buff;
-                } else {
-                    throw "стоящие подряд операторы " + buff;
-                }
-            } else if (isParenthesis(ch)) {
-                buff.insert(0, 1, ch);
-                str.erase(0, 1);
-                skipSpaces();
-                if (str.empty()) {
-                    return buff;
-                }
-                if (!isParenthesis(str.at(0))) {
-                    return buff;
-                } else {
-                    if (ch != str.at(0)) {
-                        throw "стоящие подряд разные скобки после " + buff;
-                    } else {
-                        return buff;
-                    }
-                }
-            }
-        }
-        throw "не могу получить следующий токен";
-    }
-
-    void skipSpaces() {
-        if (str.empty()) return;
-        char ch = str.at(0);
-        while (ch == ' ') {
-            str.erase(0, 1);
-            ch = str.at(0);
-        }
-    }
-
-    bool isNumOrLetter(char ch) {
-        return isalpha(ch) || isupper(ch) || isdigit(ch) || ch == '.';
-    }
-
-    bool isParenthesis(char ch) {
-        return ch == '(' || ch == ')';
-    }
-
-    bool isOperator(char ch) {
-        return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
-    }
-};
-
 ostream& operator<<(ostream& os, const Token& token) {
     os << token.str;
     return os;
@@ -296,6 +190,133 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
     return queue;
 }
 
+void printMessageOneLineLower(colors color, string message) {
+    COORD pos = getConsoleCursorPosition();
+    setConsoleCursorPosition(0, pos.Y + 1);
+    printf("\33[2K\r"); // clear line
+    coutWithColor(color, message);
+    setConsoleCursorPosition(pos.X, pos.Y);
+}
+
+string inputExpression() {
+    coutWithColor(colors::LIGHT_YELLOW, "Выражение: ");
+    string buffer;
+    char* allowedChars = new char[71]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM.1234567890+-/*^()" };
+    int allowedChars_size = 71;
+    int opening_parenthesis = 0;
+    int closing_parenthesis = 0;
+    char currChar = 0;
+    while (true)
+    {
+        currChar = _getch();
+
+        if (currChar == (int)keys::ENTER)
+        {
+            if (buffer.empty())
+            {
+                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, пустая строка");
+                continue;
+            } else
+            {
+                break;
+            }
+        }
+
+        if (currChar == (int)keys::BACKSPACE)
+        {
+            unsigned int bufLen = buffer.length();
+            if (bufLen > 0)
+            {
+                char ch = buffer.back();
+                if(ch == '('){
+                    opening_parenthesis--;
+                } else if (ch == ')') {
+                    closing_parenthesis --;
+                }
+                printf("%s", "\b \b");
+                buffer.erase(bufLen - 1, bufLen);
+            }
+        }
+
+        bool add = false;
+        for (int i = 0; i < allowedChars_size; i++)
+        {
+            if (allowedChars[i] == currChar)
+            {
+                add = true;
+                break;
+            }
+        }
+
+        if (!add){
+            continue;
+        }
+
+        if (buffer.length() > 0) {
+            char prev_ch = buffer.back();
+            char ch = currChar;
+            if (ch == ')') {
+                if (closing_parenthesis == opening_parenthesis) {
+                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нельзя закрыть скобку, не открыв её");
+                    continue;
+                }
+                if (prev_ch == '(') {
+                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нельзя закрыть пустую скобку");
+                    continue;
+                }
+                if (isOperator(prev_ch)) {
+                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нельзя закрыть скобку после оператора");
+                    continue;
+                }
+            }
+            if (isOperator(ch)) {
+                if (isOperator(prev_ch)) {
+                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, стоящие подряд операторы");
+                    continue;
+                }
+                if(prev_ch == '('){
+                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, унарные операторы не поддерживаются");
+                    continue;
+                }
+            }
+            if ((ch == '.' && prev_ch == '.') || (!isdigit(ch) && prev_ch == '.')) {
+                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нелегальная комбинация символов");
+                continue;
+            }
+            if (ch == '(') {
+                if(prev_ch == ')') {
+                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между скобками");
+                    continue;
+                }
+                if(isLetterOrNumber(prev_ch)){
+                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между числом/переменной и скобкой");
+                    continue;
+                }
+            }
+            if (isLetterOrNumber(ch) && prev_ch == ')') {
+                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между числом/переменной и скобкой");
+                continue;
+            }
+        } else {
+            if (currChar == '*' || currChar == '/' || currChar == ')') {
+                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нелегальный первый символ");
+                continue;
+            }
+        }
+
+        buffer += currChar;
+        putchar(currChar);
+        opening_parenthesis += currChar == '(';
+        closing_parenthesis += currChar == ')';
+    }
+    while (closing_parenthesis < opening_parenthesis) {
+        buffer += ')';
+        closing_parenthesis++;
+    }
+    putchar('\n');
+    return buffer;
+}
+
 void calculate(deque<Token> queue) {
 
     vector<double> stack;
@@ -375,7 +396,6 @@ void calculate(deque<Token> queue) {
 int main() {
 
     string expr = "a/(b-c)*(d+e)";
-    Tokenizer* tokenizer = new Tokenizer(expr);
     deque<Token> queue;
     string currentToken;
     bool exit = false;
@@ -399,14 +419,9 @@ int main() {
         case 1:
             exit = false;
             while (!exit) {
-                expr = inputData("Выражение: ", new char[72]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM. 1234567890+-/*^()" }, 71);
+                expr = inputExpression();
 
-                if (expr.empty()) {
-                    coutWithColor(colors::LIGHT_RED, "ошибка ввода, пустая строка\n");
-                    continue;
-                }
-
-                if (expr.at(0) == '(' && expr.at(expr.size() - 1) == ')'){
+                if (expr.at(0) == '(' && expr.at(expr.size() - 1) == ')') {
                     expr.insert(0, "0+");
                 }
 
@@ -421,15 +436,11 @@ int main() {
 
             queue.clear();
 
-            tokenizer->setExpression(expr);
             clearScreen();
             break;
         case 2:
             clearScreen();
             try {
-                while (tokenizer->hasTokens()) {
-                    currentToken = tokenizer->getNextToken();
-                }
                 queue = shuntingYard(exprToTokens(expr));
             } catch (const string str) {
                 coutWithColor(colors::LIGHT_RED, str + "\n");
@@ -438,7 +449,6 @@ int main() {
             } catch (...) {
                 coutWithColor(colors::LIGHT_RED, "Неизвестная ошибка, последний токен: " + currentToken + "\n");
             }
-            tokenizer->reset();
             break;
         case 3:
             try {
