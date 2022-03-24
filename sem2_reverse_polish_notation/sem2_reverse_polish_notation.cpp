@@ -298,7 +298,7 @@ string inputExpression() {
                 continue;
             }
         } else {
-            if (currChar == '*' || currChar == '/' || currChar == ')') {
+            if (currChar == '^' || currChar == '*' || currChar == '/' || currChar == ')') {
                 printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нелегальный первый символ");
                 continue;
             }
