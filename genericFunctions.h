@@ -310,6 +310,7 @@ std::string inputData(std::string message, char *allowedChars, int allowedChars_
             {
                 addToBuffer = true;
                 putchar(currChar);
+                break;
             }
         }
 
