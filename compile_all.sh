@@ -35,5 +35,3 @@ done
 
 cat hashes.txt > hashes_old.txt
 printf "\n${NC}$compiled ${GREEN}compiled${NC}, $skipped ${MAGENTA}up to date${NC}, $failed ${RED}failed\n"
-
-sleep 1
