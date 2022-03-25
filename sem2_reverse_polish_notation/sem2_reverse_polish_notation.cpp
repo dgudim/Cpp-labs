@@ -249,6 +249,7 @@ string inputExpression() {
         }
 
         if (!add){
+            printMessageOneLineLower(colors::LIGHT_RED, string("Нелегальный символ: ") + currChar);
             continue;
         }
 
@@ -299,7 +300,7 @@ string inputExpression() {
             }
         } else {
             if (currChar == '^' || currChar == '*' || currChar == '/' || currChar == ')') {
-                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нелегальный первый символ");
+                printMessageOneLineLower(colors::LIGHT_RED, string("Ошибка ввода, нелегальный первый символ: ") + currChar);
                 continue;
             }
         }
