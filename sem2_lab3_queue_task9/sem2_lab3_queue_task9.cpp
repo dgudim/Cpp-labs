@@ -39,7 +39,7 @@ void add(QueueNode*& root, QueueNode*& tail, int data, bool back) {
 void view(QueueNode* end_node) {
     QueueNode* curr_node = end_node;
     bool from_back = !curr_node->next;
-    while (curr_node) {          
+    while (curr_node) {
         cout << curr_node->data << " ";
         curr_node = from_back ? curr_node->prev : curr_node->next;
     }
@@ -59,24 +59,21 @@ void del(QueueNode*& root, QueueNode*& tail, int n, bool from_back) {
         if (from_back) {
             tail = p;
             tail->next = nullptr;
-        }
-        else {
+        } else {
             root = p;
             root->prev = nullptr;
         }
-    }
-    else {
+    } else {
         tail = nullptr;
         root = nullptr;
     }
 }
 
-void printQueue(QueueNode*& root, QueueNode*& tail, int size){
+void printQueue(QueueNode*& root, QueueNode*& tail, int size) {
     if (!root) {
         coutWithColor(colors::LIGHT_BLUE, "--- Очередь --- (" + to_string(size) + ")\n");
         coutWithColor(colors::LIGHT_RED, "Очередь пустая\n");
-    }
-    else {
+    } else {
         coutWithColor(colors::LIGHT_BLUE, "--- Очередь --- (" + to_string(size) + ")\n");
         coutWithColor(colors::LIGHT_GREEN, "Обычный вывод ---\n");
         view(root);
@@ -100,7 +97,7 @@ int remove_between_min_max(QueueNode*& root, QueueNode*& tail, int size) {
         }
         curr_node = curr_node->next;
     }
-    
+
     if (min == max || min->next == max || max->next == min) {
         coutWithColor(colors::LIGHT_YELLOW, "Максимальный и минимальный стоят рядом, нечего убирать\n");
         return 0;
@@ -126,44 +123,44 @@ int remove_between_min_max(QueueNode*& root, QueueNode*& tail, int size) {
         delete curr_node;
     }
     coutWithColor(colors::LIGHT_YELLOW, "Удалил " + to_string(deletedElems) + " элемента(ов) между максимальным("
-        + to_string(minFirst ? max->data : min->data) 
+        + to_string(minFirst ? max->data : min->data)
         + ") и минимальным(" + to_string(minFirst ? min->data : max->data) + ") элементами\n");
     return deletedElems;
 }
 
 
-int deleteAllNegative(QueueNode*& root, QueueNode*& tail){
-     int deletedElems = 0;
-     QueueNode* curr_node = root;
-     bool delete_ = false;
-     while (curr_node) {
-         if (curr_node->data < 0){
-             if(curr_node->next){
+int deleteAllNegative(QueueNode*& root, QueueNode*& tail) {
+    int deletedElems = 0;
+    QueueNode* curr_node = root;
+    bool delete_ = false;
+    while (curr_node) {
+        if (curr_node->data < 0) {
+            if (curr_node->next) {
                 curr_node->next->prev = curr_node->prev;
-             }
-             if(curr_node->prev){
-                 curr_node->prev->next = curr_node->next;
-             }
-             delete_ = true;
-             deletedElems ++;
-         }
-         if (delete_){
-             QueueNode* temp_node = curr_node;
-             if (curr_node == root && root){
-                 root = root->next;
-             }
-             if(curr_node == tail && tail){
-                 tail = tail->prev;
-             }
-             curr_node = curr_node->next;
-             delete temp_node;
-             delete_ = false;
-         } else {
+            }
+            if (curr_node->prev) {
+                curr_node->prev->next = curr_node->next;
+            }
+            delete_ = true;
+            deletedElems++;
+        }
+        if (delete_) {
+            QueueNode* temp_node = curr_node;
+            if (curr_node == root && root) {
+                root = root->next;
+            }
+            if (curr_node == tail && tail) {
+                tail = tail->prev;
+            }
             curr_node = curr_node->next;
-         }
-     }
-     coutWithColor(colors::LIGHT_YELLOW, "Удалил " + to_string(deletedElems) + " элемента(ов)\n");
-     return deletedElems;
+            delete temp_node;
+            delete_ = false;
+        } else {
+            curr_node = curr_node->next;
+        }
+    }
+    coutWithColor(colors::LIGHT_YELLOW, "Удалил " + to_string(deletedElems) + " элемента(ов)\n");
+    return deletedElems;
 }
 
 int main()
@@ -202,21 +199,20 @@ int main()
             printQueue(root, tail, size);
             cout << "\n";
 
-            if (manual){
-                 coutWithColor(colors::BLUE, "Введите элементы(" + to_string(n) + "): ");
+            if (manual) {
+                coutWithColor(colors::BLUE, "Введите элементы(" + to_string(n) + "): ");
             }
 
             for (int i = 0; i < n; i++) {
                 if (manual) {
                     add(root, tail, (int)inputData(""), choise == 2);
-                }
-                else {
+                } else {
                     add(root, tail, rand() % 100 / 2 - 25, choise == 2);
                 }
             }
 
-            coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов с " 
-            + (choise == 2 ? "конца\n" : "начала\n"));
+            coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элеентов с " 
+                + (choise == 2 ? "конца\n" : "начала\n"));
             break;
         case 3:
         case 4:
@@ -234,9 +230,8 @@ int main()
                 n = min(n, size);
                 size -= n;
                 coutWithColor(colors::LIGHTER_BLUE, "Удалил " + to_string(n) + " элементов c "
-                + (choise == 4 ? "конца\n" : "начала\n"));
-            }
-            else {
+                    + (choise == 4 ? "конца\n" : "начала\n"));
+            } else {
                 clearScreen();
                 coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
             }
@@ -248,8 +243,7 @@ int main()
                 printQueue(root, tail, size);
                 cout << "\n";
                 size -= remove_between_min_max(root, tail, size);
-            }
-            else {
+            } else {
                 coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
             }
             break;
@@ -260,8 +254,7 @@ int main()
                 printQueue(root, tail, size);
                 cout << "\n";
                 size -= deleteAllNegative(root, tail);
-            }
-            else {
+            } else {
                 coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
             }
             break;

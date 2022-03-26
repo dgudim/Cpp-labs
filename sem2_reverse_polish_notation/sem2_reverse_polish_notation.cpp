@@ -228,10 +228,10 @@ string inputExpression() {
             if (bufLen > 0)
             {
                 char ch = buffer.back();
-                if(ch == '('){
+                if (ch == '(') {
                     opening_parenthesis--;
                 } else if (ch == ')') {
-                    closing_parenthesis --;
+                    closing_parenthesis--;
                 }
                 printf("%s", "\b \b");
                 buffer.erase(bufLen - 1, bufLen);
@@ -248,7 +248,7 @@ string inputExpression() {
             }
         }
 
-        if (!add){
+        if (!add) {
             printMessageOneLineLower(colors::LIGHT_RED, string("Нелегальный символ: ") + currChar);
             continue;
         }
@@ -275,7 +275,7 @@ string inputExpression() {
                     printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, стоящие подряд операторы");
                     continue;
                 }
-                if(prev_ch == '('){
+                if (prev_ch == '(') {
                     printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, унарные операторы не поддерживаются");
                     continue;
                 }
@@ -285,11 +285,11 @@ string inputExpression() {
                 continue;
             }
             if (ch == '(') {
-                if(prev_ch == ')') {
+                if (prev_ch == ')') {
                     printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между скобками");
                     continue;
                 }
-                if(isLetterOrNumber(prev_ch)){
+                if (isLetterOrNumber(prev_ch)) {
                     printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между числом/переменной и скобкой");
                     continue;
                 }
