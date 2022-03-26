@@ -121,19 +121,6 @@ void printTree(const string& prefix, const TreeNode* node, bool isLeft)
     }
 }
 
-void printMinMax(TreeNode* root) {
-    TreeNode* min = root;
-    TreeNode* max = root;
-    while (min->left) {
-        min = min->left;
-    }
-    while (max->right) {
-        max = max->right;
-    }
-    coutWithColor(colors::LIGHT_GREEN, "Максимальный элемент: " + to_string(max->key) + "\n");
-    coutWithColor(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->key) + "\n");
-}
-
 int countLeaves(TreeNode* root) {
     if (root) {
         if (!root->left && !root->right) {
@@ -260,6 +247,9 @@ int main()
     TreeNode* temp = nullptr;
     TreeNode* temp2 = nullptr;
 
+    TreeNode* min = nullptr;
+    TreeNode* max = nullptr;
+
     int n = 0;
     int n2 = 0;
     bool success = true;
@@ -339,18 +329,37 @@ int main()
             root = balanceTree(root);
             break;
         case 7:
-            clearScreen();
             if (root) {
-                printMinMax(root);
-                coutWithColor(colors::LIGHT_GREEN, "Глубина дерева: " + to_string(getHeight(root)) + "\n");
-                coutWithColor(colors::LIGHT_GREEN, "Количество листьев: " + to_string(countLeaves(root)) + "\n");
-                coutWithColor(colors::LIGHT_GREEN, "Количество элементов: " + to_string(countNodes(root)) + "\n");
+                clearScreen();
+                min = root;
+                max = root;
+                while (min->left) {
+                    min = min->left;
+                }
+                while (max->right) {
+                    max = max->right;
+                }
+
+                setConsoleCursorPosition(80, 1);
+                coutWithColor(colors::LIGHT_BLUE, "Информация по дереву");
+                setConsoleCursorPosition(80, 2);
+                coutWithColor(colors::LIGHT_GREEN, "Максимальный элемент: " + to_string(max->key));
+                setConsoleCursorPosition(80, 3);
+                coutWithColor(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->key));
+                setConsoleCursorPosition(80, 4);
+                coutWithColor(colors::LIGHT_GREEN, "Глубина дерева: " + to_string(getHeight(root)));
+                setConsoleCursorPosition(80, 5);
+                coutWithColor(colors::LIGHT_GREEN, "Количество листьев: " + to_string(countLeaves(root)));
+                setConsoleCursorPosition(80, 6);
+                coutWithColor(colors::LIGHT_GREEN, "Количество элементов: " + to_string(countNodes(root)));
+                setConsoleCursorPosition(80, 7);
                 inorderLeftRootRight_infix(root);
-                cout << "\n";
+                setConsoleCursorPosition(80, 8);
                 inorderRootLeftRight_prefix(root);
-                cout << "\n";
+                setConsoleCursorPosition(80, 9);
                 inorderLeftRightRoot_postfix(root);
-                cout << "\n";
+
+                setConsoleCursorPosition(0, 0);
             }
             break;
         case 8:
