@@ -236,6 +236,7 @@ string inputExpression() {
                 printf("%s", "\b \b");
                 buffer.erase(bufLen - 1, bufLen);
             }
+            continue;
         }
 
         bool add = false;
@@ -310,11 +311,16 @@ string inputExpression() {
         opening_parenthesis += currChar == '(';
         closing_parenthesis += currChar == ')';
     }
+    int p = 0;
     while (closing_parenthesis < opening_parenthesis) {
         buffer += ')';
         closing_parenthesis++;
+        p++;
     }
     putchar('\n');
+    if(p > 0){
+        coutWithColor(colors::LIGHT_RED, string("Закрыл ") + to_string(p) + " незакрытых скобок\n");
+    }
     return buffer;
 }
 
@@ -428,8 +434,6 @@ int main() {
 
                 if (expr.at(0) == '-' || expr.at(0) == '+') {
                     expr.insert(0, 1, '0');
-                } else if (isOperator(expr.at(0))) {
-                    coutWithColor(colors::LIGHT_RED, "ошибка ввода, первый символ - оператор\n");
                 } else {
                     exit = true;
                 }

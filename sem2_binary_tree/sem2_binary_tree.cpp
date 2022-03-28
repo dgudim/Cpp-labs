@@ -109,8 +109,7 @@ void deleteWholeTree(TreeNode* root) {
 
 void printTree(const string& prefix, const TreeNode* node, bool isLeft)
 {
-    if (node)
-    {
+    if (node) {
         coutWithColor(colors::LIGHTER_BLUE, prefix);
         coutWithColor(colors::LIGHT_BLUE, isLeft ? "├──" : "└──");
 
