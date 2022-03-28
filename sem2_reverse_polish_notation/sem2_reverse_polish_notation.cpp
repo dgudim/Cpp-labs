@@ -198,7 +198,7 @@ void printMessageOneLineLower(colors color, string message) {
     setConsoleCursorPosition(pos.X, pos.Y);
 }
 
-string inputExpression() {
+string inputExpression(int& not_closed_p) {
     coutWithColor(colors::LIGHT_YELLOW, "Выражение: ");
     string buffer;
     char* allowedChars = new char[71]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM.1234567890+-/*^()" };
@@ -216,8 +216,10 @@ string inputExpression() {
             {
                 printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, пустая строка");
                 continue;
-            } else
-            {
+            } else if (isOperator(buffer.back())) {
+                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, последний символ оператор");
+                continue;
+            } else {
                 break;
             }
         }
@@ -317,10 +319,7 @@ string inputExpression() {
         closing_parenthesis++;
         p++;
     }
-    putchar('\n');
-    if(p > 0){
-        coutWithColor(colors::LIGHT_RED, string("Закрыл ") + to_string(p) + " незакрытых скобок\n");
-    }
+    not_closed_p = p;
     return buffer;
 }
 
@@ -406,12 +405,18 @@ int main() {
     deque<Token> queue;
     string currentToken;
     bool exit = false;
+    int not_closed_p = 0;
+    bool prevIsVar = false;
 
     while (true) {
         coutWithColor(colors::LIGHT_GREEN, "Текущее выражение: " + expr + "\n");
         coutWithColor(colors::LIGHT_GREEN, "Текущая польская запись: ");
         for (Token token : queue) {
+            if ((token.type == Token::Type::Variable || token.type == Token::Type::Number) && prevIsVar) {
+                cout << "|";
+            }
             cout << token;
+            prevIsVar = token.type == Token::Type::Variable || token.type == Token::Type::Number;
         }
         cout << endl;
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
@@ -426,7 +431,7 @@ int main() {
         case 1:
             exit = false;
             while (!exit) {
-                expr = inputExpression();
+                expr = inputExpression(not_closed_p);
 
                 if (expr.at(0) == '(' && expr.at(expr.size() - 1) == ')') {
                     expr.insert(0, "0+");
@@ -442,6 +447,9 @@ int main() {
             queue.clear();
 
             clearScreen();
+            if (not_closed_p > 0) {
+                coutWithColor(colors::LIGHT_RED, "Закрыл " + to_string(not_closed_p) + " незакрытых скобки(ок)\n");
+            }
             break;
         case 2:
             clearScreen();

@@ -236,8 +236,16 @@ TreeNode* balanceTree(TreeNode* root)
     vector<TreeNode*> nodes;
     treeToVector(root, nodes);
 
-    int n = nodes.size();
-    return vectorToBalancedTree(nodes, 0, n - 1);
+    return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
+}
+
+TreeNode* generateSampleTree(int layers) {
+    int nodes_count = (1 << layers) - 1; // 1 << layers = pow(2, layers)
+    vector<TreeNode*> nodes;
+    for (int i = 0; i < nodes_count; i++) {
+        nodes.push_back(new TreeNode(i, to_string(i)));
+    }
+    return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
 }
 
 int main()
@@ -256,15 +264,16 @@ int main()
     while (true) {
         printTree(root);
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection(new string[8]{
+        int choise = displaySelection(new string[9]{
             "1.Добавить элементы в дерево",
             "2.Удалить элемент по ключу",
             "3.Удалить ветвь с вершиной по ключу",
             "4.Удалить все дерево",
             "5.Найти информацию по ключу",
             "6.Сбалансировать дерево",
-            "7.Информация о дереве",
-            "8.Выйти" }, 8);
+            "7.Сгенерировать дерево по количеству слоев",
+            "8.Информация о дереве",
+            "9.Выйти" }, 9);
         switch (choise) {
         case 1:
             n = (int)inputData("Сколько элементов добавить? : ", false);
@@ -328,8 +337,18 @@ int main()
             root = balanceTree(root);
             break;
         case 7:
-            if (root) {
+            n = (int)inputData("Сколько слоев? : ", false);
+            if (n <= 0) {
                 clearScreen();
+                coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество слоев\n");
+                break;
+            }
+            root = generateSampleTree(n);
+            clearScreen();
+            break;
+        case 8:
+            clearScreen();
+            if (root) {
                 min = root;
                 max = root;
                 while (min->left) {
@@ -361,7 +380,7 @@ int main()
                 setConsoleCursorPosition(0, 0);
             }
             break;
-        case 8:
+        case 9:
             return 0;
         }
     }
