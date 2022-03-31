@@ -1,5 +1,6 @@
 #include "../genericFunctions.h"
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -107,7 +108,7 @@ void deleteWholeTree(TreeNode* root) {
     }
 }
 
-void printTree(const string& prefix, const TreeNode* node, bool isLeft)
+void printTreeHorizontal(const string& prefix, const TreeNode* node, bool isLeft)
 {
     if (node) {
         coutWithColor(colors::LIGHTER_BLUE, prefix);
@@ -115,9 +116,18 @@ void printTree(const string& prefix, const TreeNode* node, bool isLeft)
 
         coutWithColor(colors::LIGHT_YELLOW, to_string(node->key) + "\n");
 
-        printTree(prefix + (isLeft ? "│   " : "    "), node->left, true);
-        printTree(prefix + (isLeft ? "│   " : "    "), node->right, false);
+        printTreeHorizontal(prefix + (isLeft ? "│   " : "    "), node->left, true);
+        printTreeHorizontal(prefix + (isLeft ? "│   " : "    "), node->right, false);
     }
+}
+
+void printTreeHorizontal(TreeNode* root)
+{
+    if (!root) {
+        coutWithColor(colors::LIGHT_RED, "Дерево пустое\n");
+        return;
+    }
+    printTreeHorizontal("", root, false);
 }
 
 int countLeaves(TreeNode* root) {
@@ -168,15 +178,6 @@ int getHeight(TreeNode* root)
     return max(getHeight(root->left), getHeight(root->right)) + 1;
 }
 
-void printTree(TreeNode* root)
-{
-    if (!root) {
-        coutWithColor(colors::LIGHT_RED, "Дерево пустое\n");
-        return;
-    }
-    printTree("", root, false);
-}
-
 TreeNode* findByKey(TreeNode* root, int key) {
     if (!root) return nullptr;
     if (root->key == key) return root;
@@ -201,10 +202,10 @@ void printByKey(TreeNode* root, int key) {
     coutWithColor(colors::LIGHT_RED, "В дереве нет такого ключа\n");
 }
 
-void printOldTree(TreeNode* root) {
+void printOldTreeHorizontal(TreeNode* root) {
     clearScreen();
     coutWithColor(colors::LIGHT_BLUE, "Старое дерево\n");
-    printTree(root);
+    printTreeHorizontal(root);
     cout << "\n";
 }
 
@@ -248,6 +249,43 @@ TreeNode* generateSampleTree(int layers) {
     return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
 }
 
+void printNode(int x, int y, TreeNode* node, int layer, int layers) {
+    setConsoleCursorPosition(x, y);
+    if (!node) {
+        coutWithColor(colors::PURPLE, "N");
+        return;
+    }
+    coutWithColor(colors::LIGHT_YELLOW, node->data);
+    if (layer < layers) {
+        int width = (layers - layer) * 3 - 1;
+        setConsoleCursorPosition(x, y + 1);
+        coutWithColor(colors::BLUE, "|");
+        for (int i = 1; i < width; i++) {
+            setConsoleCursorPosition(x + i, y + 1);
+            coutWithColor(colors::BLUE, "⎻");
+            setConsoleCursorPosition(x - i, y + 1);
+            coutWithColor(colors::BLUE, "⎻");
+        }
+        setConsoleCursorPosition(x + width, y + 1);
+        coutWithColor(colors::LIGHTER_BLUE, "⎤");
+        setConsoleCursorPosition(x - width, y + 1);
+        coutWithColor(colors::LIGHTER_BLUE, "⎡");
+        printNode(x + width, y + 2, node->right, layer + 1, layers);
+        printNode(x - width, y + 2, node->left, layer + 1, layers);
+    }
+}
+
+void printTreeVertical(TreeNode* root) {
+    int layers = getHeight(root);
+    int width = 0;
+    COORD pos = getConsoleCursorPosition();
+    for (int i = 0; i < layers; i++) {
+        width += (layers - i) * 3;
+    }
+    printNode(width + 1, pos.Y + 1, root, 0, layers);
+    setConsoleCursorPosition(0, pos.Y + layers * 3);
+}
+
 int main()
 {
     TreeNode* root = nullptr;
@@ -262,7 +300,8 @@ int main()
     bool success = true;
 
     while (true) {
-        printTree(root);
+        printTreeVertical(root);
+
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
         int choise = displaySelection(new string[9]{
             "1.Добавить элементы в дерево",
@@ -284,7 +323,7 @@ int main()
                 break;
             }
 
-            printOldTree(root);
+            printOldTreeHorizontal(root);
 
             coutWithColor(colors::LIGHT_BLUE, "Введите элементы(" + to_string(n) + "): ");
 
@@ -297,13 +336,13 @@ int main()
             break;
         case 2:
 
-            printOldTree(root);
+            printOldTreeHorizontal(root);
 
             root = deleteByKey(root, (int)inputData("Введите ключ для удаления: "));
             break;
         case 3:
 
-            printOldTree(root);
+            printOldTreeHorizontal(root);
 
             temp = findByKey(root, temp2, (int)inputData("Введите ключ для удаления: "));
 
