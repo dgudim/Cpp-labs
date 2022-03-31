@@ -154,6 +154,32 @@ enum class colors
 };
 #endif
 
+void setConsoleCursorPosition(int x, int y)
+{
+#ifdef __linux__
+    std::cout << "\033[" << y << ";" << x << "H";
+#elif _WIN32
+    COORD c;
+    c.X = x;
+    c.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+#endif
+}
+
+COORD getConsoleCursorPosition()
+{
+#ifdef __linux__
+    int x = 0;
+    int y = 0;
+    get_pos(&y, &x);
+    return { x, y };
+#elif _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    return csbi.dwCursorPosition;
+#endif
+}
+
 void clearScreen() {
     #ifdef __linux__
         system("clear");
@@ -175,42 +201,17 @@ void setConsoleColor(colors color){
     setConsoleColor((int) color);
 }
 
-void coutWithColor(int color, std::string message)
+void coutWithColor(colors color, std::string message, int delay = 0)
 {
     setConsoleColor(color);
     std::cout << message << std::flush;
     setConsoleColor(colors::DEFAULT);
+    usleep(delay * 1000);
 }
 
-void coutWithColor(colors color, std::string message)
-{
-    coutWithColor((int)color, message);
-}
-
-void setConsoleCursorPosition(int x, int y)
-{
-#ifdef __linux__
-    std::cout << "\033[" << y << ";" << x << "H";
-#elif _WIN32
-    COORD c;
-    c.X = x;
-    c.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-#endif
-}
-
-COORD getConsoleCursorPosition()
-{
-#ifdef __linux__
-    int x = 0;
-    int y = 0;
-    get_pos(&y, &x);
-    return {x, y};
-#elif _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    return csbi.dwCursorPosition;
-#endif
+void coutWithColorAtPos(colors color, std::string message, int x, int y, int delay = 0) {
+    setConsoleCursorPosition(x, y);
+    coutWithColor(color, message, delay);
 }
 
 std::string *split(std::string *input, bool print_count, unsigned int *len)

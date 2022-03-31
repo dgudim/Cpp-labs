@@ -1,6 +1,7 @@
 #include "../genericFunctions.h"
 #include <iostream>
 #include <math.h>
+#include <sys/ioctl.h>
 
 using namespace std;
 
@@ -249,41 +250,37 @@ TreeNode* generateSampleTree(int layers) {
     return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
 }
 
-void printNode(int x, int y, TreeNode* node, int layer, int layers) {
-    setConsoleCursorPosition(x, y);
+constexpr int delay = 7;
+
+void printNode(int x, int y, TreeNode* node, int layer, int width, bool animate) {
+    int delay_ = animate ? delay : 0;
     if (!node) {
-        coutWithColor(colors::PURPLE, "N");
+        coutWithColorAtPos(colors::RED, "◯", x, y, delay_);
         return;
     }
-    coutWithColor(colors::LIGHT_YELLOW, node->data);
-    if (layer < layers) {
-        int width = (layers - layer) * 3 - 1;
-        setConsoleCursorPosition(x, y + 1);
-        coutWithColor(colors::BLUE, "|");
+    coutWithColorAtPos(colors::LIGHT_YELLOW, node->data, x, y, delay_);
+    if (layer >= 0) {
+        coutWithColorAtPos(colors::BLUE, "|", x, y + 1, delay_);
         for (int i = 1; i < width; i++) {
-            setConsoleCursorPosition(x + i, y + 1);
-            coutWithColor(colors::BLUE, "⎻");
-            setConsoleCursorPosition(x - i, y + 1);
-            coutWithColor(colors::BLUE, "⎻");
+            coutWithColorAtPos(colors::BLUE, "⎻", x + i, y + 1, delay_);
+            coutWithColorAtPos(colors::BLUE, "⎻", x - i, y + 1, delay_);
         }
-        setConsoleCursorPosition(x + width, y + 1);
-        coutWithColor(colors::LIGHTER_BLUE, "⎤");
-        setConsoleCursorPosition(x - width, y + 1);
-        coutWithColor(colors::LIGHTER_BLUE, "⎡");
-        printNode(x + width, y + 2, node->right, layer + 1, layers);
-        printNode(x - width, y + 2, node->left, layer + 1, layers);
+        coutWithColorAtPos(colors::LIGHTER_BLUE, "⎤", x + width, y + 1, delay_);
+        coutWithColorAtPos(colors::LIGHTER_BLUE, "⎡", x - width, y + 1, delay_);
+        printNode(x + width, y + 2, node->right, layer + 1, width / 2, animate);
+        printNode(x - width, y + 2, node->left, layer + 1, width / 2, animate);
     }
 }
 
-void printTreeVertical(TreeNode* root) {
+void printTreeVertical(TreeNode* root, bool animate = false) {
     int layers = getHeight(root);
-    int width = 0;
+
+    winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
     COORD pos = getConsoleCursorPosition();
-    for (int i = 0; i < layers; i++) {
-        width += (layers - i) * 3;
-    }
-    printNode(width + 1, pos.Y + 1, root, 0, layers);
-    setConsoleCursorPosition(0, pos.Y + layers * 3);
+    printNode(w.ws_col / 2, pos.Y + 1, root, 0, 1 << layers, animate);
+    setConsoleCursorPosition(0, pos.Y + layers * 2 + 1);
 }
 
 int main()
@@ -298,9 +295,35 @@ int main()
     int n = 0;
     int n2 = 0;
     bool success = true;
+    bool animateOnNextPrint = false;
+    bool printInfoOnNextPrint = false;
+
+    int y_offset = 0;
 
     while (true) {
-        printTreeVertical(root);
+        printTreeVertical(root, animateOnNextPrint);
+        animateOnNextPrint = false;
+
+        if (printInfoOnNextPrint && root) {
+            min = root;
+            max = root;
+            while (min->left) {
+                min = min->left;
+            }
+
+            while (max->right) {
+                max = max->right;
+            }
+            y_offset = getHeight(root) * 2 + 2;
+            coutWithColorAtPos(colors::LIGHT_BLUE, "Информация о дереве", 70, y_offset + 1);
+            coutWithColorAtPos(colors::LIGHT_GREEN, "Максимальный элемент: " + to_string(max->key), 70, y_offset + 2);
+            coutWithColorAtPos(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->key), 70, y_offset + 3);
+            coutWithColorAtPos(colors::LIGHT_GREEN, "Глубина дерева: " + to_string(getHeight(root)), 70, y_offset + 4);
+            coutWithColorAtPos(colors::LIGHT_GREEN, "Количество листьев: " + to_string(countLeaves(root)), 70, y_offset + 5);
+            coutWithColorAtPos(colors::LIGHT_GREEN, "Количество элементов: " + to_string(countNodes(root)), 70, y_offset + 6);
+            setConsoleCursorPosition(70, y_offset);
+        }
+        printInfoOnNextPrint = false;
 
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
         int choise = displaySelection(new string[9]{
@@ -379,45 +402,16 @@ int main()
             n = (int)inputData("Сколько слоев? : ", false);
             if (n <= 0) {
                 clearScreen();
-                coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество слоев\n");
+                coutWithColor(colors::LIGHT_RED, "Не могу создать 0 или отрицательное количество слоев\n");
                 break;
             }
             root = generateSampleTree(n);
+            animateOnNextPrint = true;
             clearScreen();
             break;
         case 8:
             clearScreen();
-            if (root) {
-                min = root;
-                max = root;
-                while (min->left) {
-                    min = min->left;
-                }
-                while (max->right) {
-                    max = max->right;
-                }
-
-                setConsoleCursorPosition(80, 1);
-                coutWithColor(colors::LIGHT_BLUE, "Информация по дереву");
-                setConsoleCursorPosition(80, 2);
-                coutWithColor(colors::LIGHT_GREEN, "Максимальный элемент: " + to_string(max->key));
-                setConsoleCursorPosition(80, 3);
-                coutWithColor(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->key));
-                setConsoleCursorPosition(80, 4);
-                coutWithColor(colors::LIGHT_GREEN, "Глубина дерева: " + to_string(getHeight(root)));
-                setConsoleCursorPosition(80, 5);
-                coutWithColor(colors::LIGHT_GREEN, "Количество листьев: " + to_string(countLeaves(root)));
-                setConsoleCursorPosition(80, 6);
-                coutWithColor(colors::LIGHT_GREEN, "Количество элементов: " + to_string(countNodes(root)));
-                setConsoleCursorPosition(80, 7);
-                inorderLeftRootRight_infix(root);
-                setConsoleCursorPosition(80, 8);
-                inorderRootLeftRight_prefix(root);
-                setConsoleCursorPosition(80, 9);
-                inorderLeftRightRoot_postfix(root);
-
-                setConsoleCursorPosition(0, 0);
-            }
+            printInfoOnNextPrint = true;
             break;
         case 9:
             return 0;
