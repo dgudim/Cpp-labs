@@ -9,7 +9,7 @@ void findMaxElemen(double** arr, int size) {
             maxElement = (*arr)[i];
         }
     }
-    coutWithColor(3, "\nСамое большое число: " + to_string(maxElement) + "\n");
+    coutWithColor(colors::LIGHTER_BLUE, "\nСамое большое число: " + to_string(maxElement) + "\n");
 }
 
 double findMaxElemen_recursion(double* arr, int size, int index) {
@@ -40,7 +40,7 @@ int main()
     }
 
     findMaxElemen(&dynamic_array, array_size);
-    coutWithColor(3, "\nСамое большое число (рекурсия): " + to_string(findMaxElemen_recursion(dynamic_array, array_size, 0)) + "\n");
-    coutWithColor(3, "\nСамое большое число (рекурсия 2): " + to_string(findMaxElemen_recursion_concise(dynamic_array, array_size - 1)) + "\n");
+    coutWithColor(colors::LIGHTER_BLUE, "\nСамое большое число (рекурсия): " + to_string(findMaxElemen_recursion(dynamic_array, array_size, 0)) + "\n");
+    coutWithColor(colors::LIGHTER_BLUE, "\nСамое большое число (рекурсия 2): " + to_string(findMaxElemen_recursion_concise(dynamic_array, array_size - 1)) + "\n");
     
 }
