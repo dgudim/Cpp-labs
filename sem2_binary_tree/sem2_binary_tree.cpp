@@ -273,6 +273,10 @@ void printNode(int x, int y, TreeNode* node, int layer, int width, bool animate)
 }
 
 void printTreeVertical(TreeNode* root, bool animate = false) {
+    if (!root) {
+        coutWithColor(colors::LIGHT_RED, "Дерево пустое\n");
+        return;
+    }
     int layers = getHeight(root);
 
     winsize w;
@@ -281,6 +285,13 @@ void printTreeVertical(TreeNode* root, bool animate = false) {
     COORD pos = getConsoleCursorPosition();
     printNode(w.ws_col / 2, pos.Y + 1, root, 0, 1 << layers, animate);
     setConsoleCursorPosition(0, pos.Y + layers * 2 + 1);
+}
+
+void printOldTreeVertical(TreeNode* root) {
+    clearScreen();
+    coutWithColor(colors::LIGHT_BLUE, "Старое дерево\n");
+    printTreeVertical(root);
+    cout << "\n";
 }
 
 int main()
@@ -346,7 +357,7 @@ int main()
                 break;
             }
 
-            printOldTreeHorizontal(root);
+            printOldTreeVertical(root);
 
             coutWithColor(colors::LIGHT_BLUE, "Введите элементы(" + to_string(n) + "): ");
 
@@ -359,13 +370,13 @@ int main()
             break;
         case 2:
 
-            printOldTreeHorizontal(root);
+            printOldTreeVertical(root);
 
             root = deleteByKey(root, (int)inputData("Введите ключ для удаления: "));
             break;
         case 3:
 
-            printOldTreeHorizontal(root);
+            printOldTreeVertical(root);
 
             temp = findByKey(root, temp2, (int)inputData("Введите ключ для удаления: "));
 
