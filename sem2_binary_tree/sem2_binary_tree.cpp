@@ -251,22 +251,23 @@ TreeNode* generateSampleTree(int layers) {
 }
 
 constexpr int delay = 7;
+colors trunk_color = colors::BLUE;
 
 void printNode(int x, int y, TreeNode* node, int layer, int width, bool animate) {
     int delay_ = animate ? delay : 0;
     if (!node) {
-        coutWithColorAtPos(colors::RED, "◯", x, y, delay_);
+        coutWithColorAtPos(colors::RED, "◈", x, y, delay_);
         return;
     }
     coutWithColorAtPos(colors::LIGHT_YELLOW, node->data, x, y, delay_);
     if (layer >= 0) {
-        coutWithColorAtPos(colors::BLUE, "|", x, y + 1, delay_);
+        coutWithColorAtPos(trunk_color, "┴", x, y + 1, delay_);
         for (int i = 1; i < width; i++) {
-            coutWithColorAtPos(colors::BLUE, "⎻", x + i, y + 1, delay_);
-            coutWithColorAtPos(colors::BLUE, "⎻", x - i, y + 1, delay_);
+            coutWithColorAtPos(trunk_color, "─", x + i, y + 1, delay_);
+            coutWithColorAtPos(trunk_color, "─", x - i, y + 1, delay_);
         }
-        coutWithColorAtPos(colors::LIGHTER_BLUE, "⎤", x + width, y + 1, delay_);
-        coutWithColorAtPos(colors::LIGHTER_BLUE, "⎡", x - width, y + 1, delay_);
+        coutWithColorAtPos(trunk_color, "╮", x + width, y + 1, delay_);
+        coutWithColorAtPos(trunk_color, "╭", x - width, y + 1, delay_);
         printNode(x + width, y + 2, node->right, layer + 1, width / 2, animate);
         printNode(x - width, y + 2, node->left, layer + 1, width / 2, animate);
     }
