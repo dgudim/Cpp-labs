@@ -5,7 +5,7 @@ cd compiled_binaries_linux
 
 printf "\033[0m"
 
-FILES=$(ls -I '*.*')
+FILES=$(ls -I '*.*' -t)
 CHOICES=""
 
 i=0
