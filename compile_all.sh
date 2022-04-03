@@ -17,7 +17,7 @@ do
 	name=$(echo "$elem" | cut -f2 -d'/')
 	printf "${YELLOW}compiling: $name\n${NC}"
 	hash=$(md5sum $elem | cut -d" " -f1) 
-	echo "$hash" >> hashes.txt
+	
 	if grep -q $hash "hashes_old.txt"; then
 		printf " ${MAGENTA}up-to-date, skipping\n"
 		skipped=$((skipped+1))
@@ -27,6 +27,7 @@ do
 	if g++ $elem -o ./compiled_binaries_linux/$name -I $name -I . ; then
 		compiled=$((compiled+1))
 		printf "${GREEN}compiled: $name\n${NC}"
+		echo "$hash" >> hashes.txt
 	else
 		failed=$((failed+1))
 		printf "${RED}failed: $name\n${NC}"
@@ -35,3 +36,7 @@ done
 
 cat hashes.txt > hashes_old.txt
 printf "\n${NC}$compiled ${GREEN}compiled${NC}, $skipped ${MAGENTA}up to date${NC}, $failed ${RED}failed\n"
+if (($failed > 0)); then
+	echo "Press any key to continue: "
+	read -n 1 k <&1
+fi
