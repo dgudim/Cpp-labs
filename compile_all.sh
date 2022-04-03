@@ -35,11 +35,11 @@ do
     
     ( if g++ $elem -o ./compiled_binaries_linux/$name -I $name -I . ; then
             printf "${GREEN}compiled: $name\n${NC}"
-            echo "c" >> compiled_tmp
+            echo -n "c" >> compiled_tmp
             echo "$hash" >> hashes.txt
         else
             printf "${RED}failed: $name\n${NC}"
-            echo "f" >> failed_tmp
+            echo -n "f" >> failed_tmp
     fi ) &
 done
 
@@ -51,14 +51,6 @@ cat hashes.txt > hashes_old.txt
 
 compiled=$(wc -m < compiled_tmp)
 failed=$(wc -m < failed_tmp)
-
-if (($compiled > 0)); then
-    compiled=$((compiled - 1))
-fi
-
-if (($failed > 0)); then
-    failed=$((failed - 1))
-fi
 
 rm compiled_tmp
 rm failed_tmp
