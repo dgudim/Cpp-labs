@@ -395,35 +395,30 @@ std::string addSpaces(std::string input, unsigned int targetLength)
     return input;
 }
 
-std::string ltrim(const std::string s)
-{
+std::string ltrim(const std::string s) {
     return std::regex_replace(s, std::regex("^\\s+"), std::string(""));
 }
 
-std::string rtrim(const std::string s)
-{
+std::string rtrim(const std::string s) {
     return std::regex_replace(s, std::regex("\\s+$"), std::string(""));
 }
 
-std::string trim(const std::string s)
-{
+std::string trim(const std::string s) {
     return ltrim(rtrim(s));
 }
 
-void continueOrExit()
-{
+void continueOrExit() {
     std::string input = displayWarningWithInput(colors::DEFAULT, "Продолжить?\n");
-    if (!(input == "yes" || input == "y" || input == "1"))
-    {
+    if (!(input == "yes" || input == "y" || input == "1")) {
         exit(-15);
     }
 }
 
-int displaySelection(std::string *options, int optionCount)
-{
+int displaySelection(std::string *options, int optionCount) {
 
     int offset = getConsoleCursorPosition().Y;
     int counter = 0;
+    int prev_counter = 0;
     int key = 0;
 
     for (int i = 0; i < optionCount; i++) {
@@ -433,32 +428,38 @@ int displaySelection(std::string *options, int optionCount)
     }
 
     while (true) {
-        key = _getch();
         
         if (key == (int)keys::ARROW_UP) {
+            prev_counter = counter;
             counter--;
             if (counter < 0) {
                 counter = optionCount - 1;
             }
         } else if (key == (int)keys::ARROW_DOWN) {
+            prev_counter = counter;
             counter++;
             if (counter > optionCount - 1) {
                 counter = 0;
             }
         } else if(key >= '1' && key <= '9'){
-            counter = std::clamp(counter, 1, optionCount - 1);
-        } else if (key == (int)keys::ENTER) {
-            coutWithColor(colors::GRAY, "\nВы выбрали: " + options[counter] + "\n");
-            return counter + 1;
+            prev_counter = counter;
+            counter = std::clamp(key - '1', 0, optionCount - 1);
         }
 
         for (int i = 0; i < optionCount; i++) {
-            if (abs(counter - i) <= 1 || i == 0 || i == optionCount - 1) {
+            if (i == counter || i == prev_counter) {
                 setConsoleCursorPosition(0, offset + i);
                 setConsoleColor(counter == i ? colors::LIGHT_RED : colors::DEFAULT);
                 puts(options[i].c_str());
                 fflush(stdout);
             }
+        }
+
+        key = _getch();
+        if (key == (int)keys::ENTER) {
+            setConsoleCursorPosition(0, offset + optionCount);
+            coutWithColor(colors::GRAY, "\nВы выбрали: " + options[counter] + "\n");
+            return counter + 1;
         }
     }
 }
@@ -472,6 +473,7 @@ bool *displayMultiSelection(std::string *options, int optionCount) {
 
     int offset = getConsoleCursorPosition().Y;
     int counter = 0;
+    int prev_counter = 0;
     int key = 0;
 
     for (int i = 0; i < optionCount; i++) {
@@ -482,19 +484,24 @@ bool *displayMultiSelection(std::string *options, int optionCount) {
 
     while (true) {
         if (key == (int )keys::ARROW_UP) {
+            prev_counter = counter;
             counter--;
             if (counter < 0) {
                 counter = optionCount - 1;
             }
-        }
-        if (key == (int) keys::ARROW_DOWN) {
+        } else if (key == (int) keys::ARROW_DOWN) {
+            prev_counter = counter;
             counter++;
             if (counter > optionCount - 1) {
                 counter = 0;
             }
+        } else if (key >= '1' && key <= '9') {
+            prev_counter = counter;
+            counter = std::clamp(key - '1', 0, optionCount - 1);
         }
+
         for (int i = 0; i < optionCount; i++) {
-            if (abs(counter - i) <= 1 || i == 0 || i == optionCount - 1) {
+            if (i == counter || i == prev_counter) {
                 setConsoleCursorPosition(0, offset + i);
                 if (selectedFunctions[i]) {
                     setConsoleColor(counter == i ? colors::LIGHT_GREEN : colors::GREEN);
@@ -505,8 +512,10 @@ bool *displayMultiSelection(std::string *options, int optionCount) {
                 fflush(stdout);
             }
         }
+
         key = _getch();
         if (key == (int) keys::ENTER) {
+            setConsoleCursorPosition(0, offset + optionCount);
             return selectedFunctions;
         }
         if (key == (int) keys::BACKSPACE) {

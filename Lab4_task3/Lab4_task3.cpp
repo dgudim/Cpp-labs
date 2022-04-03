@@ -11,7 +11,7 @@ int main()
 {
 
     while (true) {
-        system("CLS");
+        clearScreen();
 
         double from;
         double to;
@@ -101,7 +101,7 @@ int main()
         }
 
         if (selectedFunctionsCount == 0) {
-            coutWithColor(colors::GRAY, "\nВы не выбрали ни одной функции(");
+            coutWithColor(colors::GRAY, "\nВы не выбрали ни одной функции(\n");
         }
 
         coutWithColor(colors::LIGHT_YELLOW, "\nВыберите дополнительные опции\n");
