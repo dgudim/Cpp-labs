@@ -21,6 +21,7 @@ do
 	if grep -q $hash "hashes_old.txt"; then
 		printf " ${MAGENTA}up-to-date, skipping\n"
 		skipped=$((skipped+1))
+		echo "$hash" >> hashes.txt
 		continue
 	fi
 	
