@@ -39,7 +39,7 @@ void initializeArray(double size_double) {
     }
     dynamic_array = (int*)malloc(size * 4 + 1);
     dynamic_array_size = size;
-    coutWithColor(14, "\nКак бы вы хотели проинициализировать массив?\n");
+    coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели проинициализировать массив?\n");
     switch (displaySelection(new string[2]{ "1. Случайными числами", "2. Вручную" }, 2)) {
     case 1:
         cout << "Заполняю ваш массив случайными числами..." << endl;

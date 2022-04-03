@@ -37,7 +37,7 @@ void initializeArray (double size_double) {
     }
     dynamic_array = (int*)malloc(size * 4 + 1);
     dynamic_array_size = size;
-    coutWithColor(14, "\nКак бы вы хотели проинициализировать массив?\n");
+    coutWithColor(colors::LIGHT_YELLOW, "\nКак бы вы хотели проинициализировать массив?\n");
     switch (displaySelection(new string[2]{ "1. Случайными числами", "2. Вручную" }, 2)) {
     case 1:
         cout << "Заполняю ваш массив случайными числами..." << endl;
@@ -60,7 +60,7 @@ int findMinElementIndex(bool absolute) {
             minIndex = i;
         }
     }
-    coutWithColor(3, "Самое маленькое " + string(absolute ? "по модулю " : "") + "число: " + to_string(minElement) + "(индекс " + to_string(minIndex) + ")\n");
+    coutWithColor(colors::LIGHTER_BLUE, "Самое маленькое " + string(absolute ? "по модулю " : "") + "число: " + to_string(minElement) + "(индекс " + to_string(minIndex) + ")\n");
     return minIndex;
 }
 
@@ -73,14 +73,14 @@ int findMaxElementIndex() {
             maxIndex = i;
         }
     }
-    coutWithColor(3, "Самое большое число: " + to_string(maxElement) + "(индекс " + to_string(maxIndex) + ")\n");
+    coutWithColor(colors::LIGHTER_BLUE, "Самое большое число: " + to_string(maxElement) + "(индекс " + to_string(maxIndex) + ")\n");
     return maxIndex;
 }
 
 int findLastZeroElementIndex() {
     for (int i = dynamic_array_size - 1; i >= 0; i--) {
         if (dynamic_array[i] == 0) {
-            coutWithColor(3, "Индекс последнего нулевого элемента: "+to_string(i) + "\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Индекс последнего ну л евого элемента: "+to_string(i) + "\n");
             return i;
         }
     }
@@ -90,7 +90,7 @@ int findLastZeroElementIndex() {
 int findFirstZeroElementIndex() {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (dynamic_array[i] == 0) {
-            coutWithColor(3, "Индекс первого нулевого элемента: " + to_string(i) + "\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Индекс первого нулевого элемента: " + to_string(i) + "\n");
             return i;
         }
     }
@@ -102,7 +102,7 @@ int findSecondZeroElementIndex() {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (dynamic_array[i] == 0) {
             if (firstZeroFound) {
-                coutWithColor(3, "Индекс второго нулевого элемента: " + to_string(i) + "\n");
+                coutWithColor(colors::LIGHTER_BLUE, "Индекс второго нулевого элемента: " + to_string(i) + "\n");
                 return i;
             }
             firstZeroFound = true;
@@ -114,7 +114,7 @@ int findSecondZeroElementIndex() {
 int findLastPositiveElementIndex() {
     for (int i = dynamic_array_size - 1; i >= 0; i--) {
         if (dynamic_array[i] > 0) {
-            coutWithColor(3, "Индекс последнего положительного элемента("+ to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Индекс последнего полож ительного элемента("+ to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
             return i;
         }
     }
@@ -124,7 +124,7 @@ int findLastPositiveElementIndex() {
 int findFirstPositiveElementIndex() {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (dynamic_array[i] > 0) {
-            coutWithColor(3, "Индекс первого положительного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Индекс первого положительного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
             return i;
         }
     }
@@ -134,7 +134,7 @@ int findFirstPositiveElementIndex() {
 int findFirstNegativeElementIndex() {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (dynamic_array[i] < 0) {
-            coutWithColor(3, "Индекс первого отрицательного элемент(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Индекс первого отрицательного элемент(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
             return i;
         }
     }
@@ -144,7 +144,7 @@ int findFirstNegativeElementIndex() {
 int findLastNegativeElementIndex() {
     for (int i = dynamic_array_size - 1; i >= 0; i--) {
         if (dynamic_array[i] < 0) {
-            coutWithColor(3, "Индекс последнего отрицательного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Индекс последнего отрицательного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
             return i;
         }
     }
@@ -156,7 +156,7 @@ int findSecondNegativeElementIndex() {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (dynamic_array[i] < 0) {
             if (secondZeroFound) {
-                coutWithColor(3, "Индекс второго отрицательного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
+                coutWithColor(colors::LIGHTER_BLUE, "Индекс второго отрицательного элемента(" + to_string(dynamic_array[i]) + "): " + to_string(i) + "\n");
                 return i;
             }
             secondZeroFound = true;
@@ -199,7 +199,7 @@ double caclulateProductBetweenTwoIndexes(int index1, int index2) {
 }
 
 void printResult(double result) {
-    coutWithColor(10, "Результат: " + doubleToString(result) + "\n");
+    coutWithColor(colors::LIGHT_GREEN, "Результат: " + doubleToString(result) + "\n");
 }
 
 int main()
@@ -208,7 +208,7 @@ int main()
 
     while (true) {
         initializeArray(inputData("Введите размер массива: "));
-        coutWithColor(14, "\nВыберите что вычислить\n");
+        coutWithColor(colors::LIGHT_YELLOW, "\nВыберите что вычислить\n");
         try
         {
             switch (displaySelection(new string[16]{ 
@@ -290,7 +290,7 @@ int main()
         }
         catch (const char* message)
         {
-            coutWithColor(4, message);
+            coutWithColor(colors::RED, message);
         }
 
         free(dynamic_array);

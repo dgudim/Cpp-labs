@@ -191,7 +191,7 @@ int main()
                 break;
             }
             size += n;
-            coutWithColor(14, "\nКак бы вы хотели ввести элементы?\n");
+            coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели ввести элементы?\n");
             manual = displaySelection(new string[2]{ "1.Случайно", "2.Вручную" }, 2) == 2;
 
             clearScreen();

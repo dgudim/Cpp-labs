@@ -18,7 +18,7 @@ int main()
         double step;
         int n;
 
-        coutWithColor(14, "\nВыберите промежуток, шаг и n для суммы\n");
+        coutWithColor(colors::LIGHT_YELLOW, "\nВыберите промежуток, шаг и n для суммы\n");
         switch (displaySelection(new string[5]{ 
             "1. начальный x = 0, конечный x = 10, шаг = 0.1, n = 50", 
             "2. начальный x = 0, конечный x = 1, шаг = 0.05, n = 50",
@@ -79,13 +79,13 @@ int main()
             n = 3;
         }
         if ((abs(to) > 70 || abs(from) > 70) && n >= 50) {
-            coutWithColor(4, "Начальный или конечный x больше 70 по модулю при n >= 50, возможно переполнение\n");
+            coutWithColor(colors::RED, "Начальный или конечный x больше 70 по модулю при n >= 50, возможно переполнение\n");
         }
         if (n > 150) {
-            coutWithColor(4, "Количество членов в сумме больше 150, возможно переполнение\n");
+            coutWithColor(colors::RED, "Количество членов в сумме больше 150, возможно переполнение\n");
         }
        
-        coutWithColor(14, "\nВыберите функции (backspace - выбрать/отменить), (enter - подтвердить)\n");
+        coutWithColor(colors::LIGHT_YELLOW, "\nВыберите функции (backspace - выбрать/отменить), (enter - подтвердить)\n");
 
         const unsigned int functions_len = 3;
 
@@ -101,16 +101,16 @@ int main()
         }
 
         if (selectedFunctionsCount == 0) {
-            coutWithColor(8, "\nВы не выбрали ни одной функции(");
+            coutWithColor(colors::GRAY, "\nВы не выбрали ни одной функции(");
         }
 
-        coutWithColor(14, "\nВыберите дополнительные опции\n");
+        coutWithColor(colors::LIGHT_YELLOW, "\nВыберите дополнительные опции\n");
         bool* selectedOptions = displayMultiSelection(new string[3]{"1. Печатать сумму", "2. Печатать |S-Y|", "3. Печатать график" }, 3);
 
         cout << endl;
         for (int i = 0; i < functions_len; i++) {
             if (selectedFunctions[i]) {
-                coutWithColor(10, "\nФункция: "+functions[i]+"\n");
+                coutWithColor(colors::LIGHT_GREEN, "\nФункция: " + functions[i] + "\n");
                 printTable(pArray[i], pArray_sum[i], from, to, step, n, selectedOptions[0], selectedOptions[1], selectedOptions[2]);
             }
         }

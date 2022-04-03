@@ -17,10 +17,10 @@ int main()
             }
         }
         if (numberOfWords == 0) {
-            coutWithColor(4, "Ошибка ввода: пустая строка или только пробелы, повторите ввод\n");
+            coutWithColor(colors::RED, "Ошибка ввода: пустая строка или только пробелы, повторите ввод\n");
             continue;
         }
-        coutWithColor(3, "Количество слов: " + to_string(numberOfWords));
+        coutWithColor(colors::LIGHTER_BLUE, "Количество слов: " + to_string(numberOfWords));
 
         char** words = new char* [numberOfWords];
         int pos = 0;
@@ -53,7 +53,7 @@ int main()
             }
         }
 
-        coutWithColor(6, "\nСортировка по алфавиту: \n");
+        coutWithColor(colors::YELLOW, "\nСортировка по алфавиту: \n");
         alphabeticSort_char(words, numberOfWords);
 
         for (unsigned int i = 0; i < numberOfWords; i++) {

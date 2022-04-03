@@ -8,7 +8,7 @@ int main() {
     while (true) {
         size = (int)inputData("Введите размер квадратной матрицы: ", false);
         if (size <= 0) {
-            coutWithColor(4, "Размер не может быть меньше иле или равен 0, устанавливаю размер 3\n");
+            coutWithColor(colors::RED, "Размер не может быть меньше иле или равен 0, устанавливаю размер 3\n");
             size = 3;
         }
         matrix = inputMatrix(size);
@@ -40,10 +40,14 @@ double** inputMatrix(int size){
 void printMatrix(int size, double** matrix)
 {
     int maxLen = 0;
+    int maxElem = 0;
+    int minElem = 0;
     for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size; j++) {
             maxLen = max((int)doubleToString(matrix[i][j]).length(), maxLen);
+            maxElem = max((int)matrix[i][j], maxElem);
+            minElem = min((int)matrix[i][j], minElem);
         }
     }
 
@@ -51,7 +55,7 @@ void printMatrix(int size, double** matrix)
     for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size; j++) {
-            coutWithColor((int)(matrix[i][j]) % 11 + 1, addSpaces(doubleToString(matrix[i][j]), maxLen) + " ");
+            coutWithColor(mapToColor(matrix[i][j], minElem, maxElem), addSpaces(doubleToString(matrix[i][j]), maxLen) + " ");
         }
         cout << "\n";
     }
