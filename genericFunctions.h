@@ -88,6 +88,8 @@ struct COORD
 
 #pragma execution_character_set("utf-8")
 
+constexpr int colors_count = 12;
+
 #ifdef __linux__
 enum class keys
 {
@@ -154,6 +156,14 @@ enum class colors
 };
 #endif
 
+constexpr colors colormap[colors_count] = { 
+    colors::LIGHT_GREEN, colors::GREEN,
+    colors::CYAN, colors::LIGHTER_BLUE,
+    colors::LIGHT_BLUE, colors::BLUE,
+    colors::LIGHT_PURPLE, colors::PURPLE,
+    colors::LIGHT_YELLOW, colors::YELLOW,
+    colors::LIGHT_RED, colors::RED };
+
 void setConsoleCursorPosition(int x, int y)
 {
 #ifdef __linux__
@@ -178,6 +188,15 @@ COORD getConsoleCursorPosition()
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     return csbi.dwCursorPosition;
 #endif
+}
+
+colors mapToColor(int n, int min, int max){
+    max = std::max(min, max);
+    n = std::clamp(n, min, max);
+    max -= min;
+    n -= min;
+    min = 0;
+    return colormap[(int)((n / (float)max) * (colors_count - 1))];
 }
 
 void clearScreen() {
@@ -431,6 +450,9 @@ int displaySelection(std::string *options, int optionCount)
             {
                 counter = 0;
             }
+        }
+        if(key >= '1' && key <= '9'){
+            counter = std::clamp(counter, 1, optionCount - 1);
         }
         for (int i = 0; i < optionCount; i++)
         {
