@@ -259,7 +259,8 @@ void printNode(int x, int y, TreeNode* node, int layer, int width, bool animate)
         coutWithColorAtPos(colors::RED, "◈", x, y, delay_);
         return;
     }
-    coutWithColorAtPos(colors::LIGHT_YELLOW, node->data, x, y, delay_);
+    int num_offset = (to_string(node->key).length() - 1) / 2;
+    coutWithColorAtPos(colors::LIGHT_YELLOW, to_string(node->key), x - num_offset, y, delay_);
     if (layer >= 0) {
         coutWithColorAtPos(trunk_color, "┴", x, y + 1, delay_);
         for (int i = 1; i < width; i++) {
