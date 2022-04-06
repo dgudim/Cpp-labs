@@ -21,10 +21,10 @@ int _getch(void)
     return ch;
 }
 
-int get_pos(int *y, int *x)
+int get_pos(int* y, int* x)
 {
 
-    char buf[30] = {0};
+    char buf[30] = { 0 };
     int ret, i, pow;
     char ch;
 
@@ -156,7 +156,7 @@ enum class colors
 };
 #endif
 
-constexpr colors colormap[colors_count] = { 
+constexpr colors colormap[colors_count] = {
     colors::LIGHT_GREEN, colors::GREEN,
     colors::CYAN, colors::LIGHTER_BLUE,
     colors::LIGHT_BLUE, colors::BLUE,
@@ -164,8 +164,7 @@ constexpr colors colormap[colors_count] = {
     colors::LIGHT_YELLOW, colors::YELLOW,
     colors::LIGHT_RED, colors::RED };
 
-void setConsoleCursorPosition(int x, int y)
-{
+void setConsoleCursorPosition(int x, int y) {
 #ifdef __linux__
     std::cout << "\033[" << y << ";" << x << "H";
 #elif _WIN32
@@ -176,8 +175,7 @@ void setConsoleCursorPosition(int x, int y)
 #endif
 }
 
-COORD getConsoleCursorPosition()
-{
+COORD getConsoleCursorPosition() {
 #ifdef __linux__
     int x = 0;
     int y = 0;
@@ -190,7 +188,7 @@ COORD getConsoleCursorPosition()
 #endif
 }
 
-colors mapToColor(int n, int min, int max){
+colors mapToColor(int n, int min, int max) {
     max = std::max(min, max);
     n = std::clamp(n, min, max);
     max -= min;
@@ -200,11 +198,11 @@ colors mapToColor(int n, int min, int max){
 }
 
 void clearScreen() {
-    #ifdef __linux__
-        system("clear");
-    #elif _WIN32
-        system("CLS");
-    #endif
+#ifdef __linux__
+    system("clear");
+#elif _WIN32
+    system("CLS");
+#endif
 }
 
 void setConsoleColor(int color)
@@ -216,8 +214,8 @@ void setConsoleColor(int color)
 #endif
 }
 
-void setConsoleColor(colors color){
-    setConsoleColor((int) color);
+void setConsoleColor(colors color) {
+    setConsoleColor((int)color);
 }
 
 void coutWithColor(colors color, std::string message, int delay = 0)
@@ -233,33 +231,27 @@ void coutWithColorAtPos(colors color, std::string message, int x, int y, int del
     coutWithColor(color, message, delay);
 }
 
-std::string *split(std::string *input, bool print_count, unsigned int *len)
-{
+std::string* split(std::string* input, bool print_count, unsigned int* len) {
     unsigned int numberOfWords = 0;
     unsigned int strLen = (*input).length();
-    for (unsigned int i = 0; i < strLen; i++)
-    {
-        if ((*input)[i] == ' ' && (*input)[i - 1] != ' ')
-        {
+    for (unsigned int i = 0; i < strLen; i++) {
+        if ((*input)[i] == ' ' && (*input)[i - 1] != ' ') {
             numberOfWords++;
         }
     }
 
-    if (print_count)
-    {
+    if (print_count) {
         coutWithColor(colors::LIGHTER_BLUE, "Количество слов: " + std::to_string(numberOfWords));
     }
 
     (*len) = numberOfWords;
 
-    std::string *words = new std::string[numberOfWords];
+    std::string* words = new std::string[numberOfWords];
     int pos = 0;
     unsigned int index = 0;
 
-    while ((pos = (*input).find(' ')) != std::string::npos)
-    {
-        if (pos > 0)
-        {
+    while ((pos = (*input).find(' ')) != std::string::npos) {
+        if (pos > 0) {
             words[index] = (*input).substr(0, pos);
             index++;
         }
@@ -268,20 +260,17 @@ std::string *split(std::string *input, bool print_count, unsigned int *len)
     return words;
 }
 
-std::string displayWarningWithInput(colors color, std::string message)
-{
+std::string displayWarningWithInput(colors color, std::string message) {
     coutWithColor(color, message);
     std::string input;
     std::cin >> input;
     return input;
 }
 
-double inputData(std::string message, bool allowWhiteSpaces)
-{
+double inputData(std::string message, bool allowWhiteSpaces) {
     std::cout << message << std::flush;
     double toReturn;
-    while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces))
-    {
+    while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
         std::cin.clear();
         while (std::cin.get() != '\n');
         std::cout << "Пожалуйста, используйте числа" << std::endl;
@@ -289,53 +278,41 @@ double inputData(std::string message, bool allowWhiteSpaces)
     return toReturn;
 }
 
-double inputData(std::string message)
-{
+double inputData(std::string message) {
     return inputData(message, true);
 }
 
-std::string inputData(std::string message, char *allowedChars, int allowedChars_size, std::regex pattern, std::string previousBuffer)
-{
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern, std::string previousBuffer) {
     printf("%s", (message + previousBuffer).c_str());
     std::string buffer = previousBuffer;
-    while (true)
-    {
+    while (true) {
         char currChar = _getch();
         bool addToBuffer = false;
-        if (currChar == (int) keys::ENTER)
-        {
-            if (!std::regex_match(buffer, pattern))
-            {
+        if (currChar == (int)keys::ENTER) {
+            if (!std::regex_match(buffer, pattern)) {
                 coutWithColor(colors::YELLOW, "\nВведеные данные не соответствуют шаблону\n");
                 std::cout << buffer;
-            }
-            else
-            {
+            } else {
                 break;
             }
         }
-        if (currChar == (int) keys::BACKSPACE)
-        {
+        if (currChar == (int)keys::BACKSPACE) {
             unsigned int bufLen = buffer.length();
-            if (bufLen > 0)
-            {
+            if (bufLen > 0) {
                 printf("%s", "\b \b");
                 buffer.erase(bufLen - 1, bufLen);
             }
         }
 
-        for (int i = 0; i < allowedChars_size; i++)
-        {
-            if (allowedChars[i] == currChar)
-            {
+        for (int i = 0; i < allowedChars_size; i++) {
+            if (allowedChars[i] == currChar) {
                 addToBuffer = true;
                 putchar(currChar);
                 break;
             }
         }
 
-        if (addToBuffer)
-        {
+        if (addToBuffer) {
             buffer += currChar;
             addToBuffer = false;
         }
@@ -344,35 +321,29 @@ std::string inputData(std::string message, char *allowedChars, int allowedChars_
     return buffer;
 }
 
-std::string inputData(std::string message, char *allowedChars, int allowedChars_size, std::string previousBuffer)
-{
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::string previousBuffer) {
     std::regex str_expr(".*");
     return inputData(message, allowedChars, allowedChars_size, str_expr, previousBuffer);
 }
 
-std::string inputData(std::string message, char *allowedChars, int allowedChars_size, std::regex pattern)
-{
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
     return inputData(message, allowedChars, allowedChars_size, pattern, "");
 }
 
-std::string inputData(std::string message, char *allowedChars, int allowedChars_size)
-{
+std::string inputData(std::string message, char* allowedChars, int allowedChars_size) {
     std::regex str_expr(".*");
     return inputData(message, allowedChars, allowedChars_size, str_expr);
 }
 
-std::string doubleToString(double value, int precision)
-{
+std::string doubleToString(double value, int precision) {
     std::ostringstream out;
     out.precision(precision);
     out << std::fixed << value;
     std::string strOut = out.str();
     char currChar = strOut[strOut.length() - 1];
-    while ((currChar == '0' || currChar == '.') && strOut.length() > 1)
-    {
+    while ((currChar == '0' || currChar == '.') && strOut.length() > 1) {
         strOut.erase(strOut.length() - 1, 1);
-        if (currChar == '.')
-        {
+        if (currChar == '.') {
             break;
         }
         currChar = strOut[strOut.length() - 1];
@@ -380,16 +351,13 @@ std::string doubleToString(double value, int precision)
     return strOut;
 }
 
-std::string doubleToString(double value)
-{
+std::string doubleToString(double value) {
     return doubleToString(value, 5);
 }
 
-std::string addSpaces(std::string input, unsigned int targetLength)
-{
+std::string addSpaces(std::string input, unsigned int targetLength) {
     int spaces = targetLength - input.length();
-    for (int i = 0; i < spaces; i++)
-    {
+    for (int i = 0; i < spaces; i++) {
         input.append(" ");
     }
     return input;
@@ -414,7 +382,7 @@ void continueOrExit() {
     }
 }
 
-int displaySelection(std::string *options, int optionCount) {
+int displaySelection(std::string* options, int optionCount) {
 
     int offset = getConsoleCursorPosition().Y;
     int counter = 0;
@@ -428,7 +396,7 @@ int displaySelection(std::string *options, int optionCount) {
     }
 
     while (true) {
-        
+
         if (key == (int)keys::ARROW_UP) {
             prev_counter = counter;
             counter--;
@@ -441,7 +409,7 @@ int displaySelection(std::string *options, int optionCount) {
             if (counter > optionCount - 1) {
                 counter = 0;
             }
-        } else if(key >= '1' && key <= '9'){
+        } else if (key >= '1' && key <= '9') {
             prev_counter = counter;
             counter = std::clamp(key - '1', 0, optionCount - 1);
         }
@@ -464,9 +432,9 @@ int displaySelection(std::string *options, int optionCount) {
     }
 }
 
-bool *displayMultiSelection(std::string *options, int optionCount) {
+bool* displayMultiSelection(std::string* options, int optionCount) {
 
-    bool *selectedFunctions = new bool[optionCount];
+    bool* selectedFunctions = new bool[optionCount];
     for (int i = 0; i < optionCount; i++) {
         selectedFunctions[i] = false;
     }
@@ -483,13 +451,13 @@ bool *displayMultiSelection(std::string *options, int optionCount) {
     }
 
     while (true) {
-        if (key == (int )keys::ARROW_UP) {
+        if (key == (int)keys::ARROW_UP) {
             prev_counter = counter;
             counter--;
             if (counter < 0) {
                 counter = optionCount - 1;
             }
-        } else if (key == (int) keys::ARROW_DOWN) {
+        } else if (key == (int)keys::ARROW_DOWN) {
             prev_counter = counter;
             counter++;
             if (counter > optionCount - 1) {
@@ -514,11 +482,11 @@ bool *displayMultiSelection(std::string *options, int optionCount) {
         }
 
         key = _getch();
-        if (key == (int) keys::ENTER) {
+        if (key == (int)keys::ENTER) {
             setConsoleCursorPosition(0, offset + optionCount);
             return selectedFunctions;
         }
-        if (key == (int) keys::BACKSPACE) {
+        if (key == (int)keys::BACKSPACE) {
             selectedFunctions[counter] = !selectedFunctions[counter];
         }
     }
