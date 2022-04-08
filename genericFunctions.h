@@ -382,6 +382,10 @@ void continueOrExit() {
     }
 }
 
+double lerp(double from, double to, double progress) {
+    return from * (1 - progress) + to * progress;
+}
+
 int displaySelection(std::string* options, int optionCount) {
 
     int offset = getConsoleCursorPosition().Y;
