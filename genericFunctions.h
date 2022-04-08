@@ -1,5 +1,6 @@
 #include <sstream>
 #include <string>
+#include <limits>
 #include <regex>
 #include <iostream>
 #include <stdio.h>
@@ -156,6 +157,8 @@ enum class colors
 };
 #endif
 
+typedef double (*Converter)(double);
+
 constexpr colors colormap[colors_count] = {
     colors::LIGHT_GREEN, colors::GREEN,
     colors::CYAN, colors::LIGHTER_BLUE,
@@ -188,12 +191,17 @@ COORD getConsoleCursorPosition() {
 #endif
 }
 
-colors mapToColor(int n, int min, int max) {
+colors mapToColor(int n, int min = 0, int max = colors_count - 1, bool loop = true) {
     max = std::max(min, max);
-    n = std::clamp(n, min, max);
+    if(!loop){
+        n = std::clamp(n, min, max);
+    }
     max -= min;
     n -= min;
     min = 0;
+    if (loop) {
+        n -= n / max * max;
+    }
     return colormap[(int)((n / (float)max) * (colors_count - 1))];
 }
 
@@ -494,4 +502,86 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
             selectedFunctions[counter] = !selectedFunctions[counter];
         }
     }
+}
+
+void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45) {
+    using namespace std;
+
+    vector<vector<double>> x_points;
+    vector<vector<double>> y_points;
+
+    unsigned int point;
+
+    double minX = from;
+    double maxX = to;
+
+    double minY = std::numeric_limits<double>::infinity();
+    double maxY = -std::numeric_limits<double>::infinity();
+
+    for (int g = 0; g < graphs.size(); g++) {
+        vector<double> x;
+        vector<double> y;
+        point = 0;
+        for (long double i = from; i * (step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
+            x.push_back(i);
+            y.push_back(graphs[g](i));
+            maxY = max(maxY, y.back());
+            minY = min(minY, y.back());
+            point++;
+        }
+        x_points.push_back(x);
+        y_points.push_back(y);
+    }
+
+    for (int g = 0; g < graphs.size(); g++) {
+        for (unsigned int p = 0; p < point; p++) {
+            x_points[g][p] -= minX;
+            x_points[g][p] /= (maxX - minX);
+            x_points[g][p] *= (field_size - 1);
+
+            y_points[g][p] -= minY;
+            y_points[g][p] /= (maxY - minY);
+            y_points[g][p] *= (field_size - 1);
+        }
+    }
+
+    int** field = new int* [field_size];
+    for (unsigned int i = 0; i < field_size; i++) {
+        field[i] = new int[field_size];
+    }
+
+    for (unsigned int x_coord = 0; x_coord < field_size; x_coord++) {
+        for (unsigned int y_coord = 0; y_coord < field_size; y_coord++) {
+            field[x_coord][y_coord] = 0;
+        }
+    }
+
+    for (int g = 0; g < graphs.size(); g++) {
+        for (unsigned int p = 0; p < point - 1; p++) {
+            unsigned int steps = max(abs((int)x_points[g][p] - (int)x_points[g][p + 1]), abs((int)y_points[g][p] - (int)y_points[g][p + 1])) + 1;
+            if (steps > 1) {
+                for (unsigned int i = 1; i < steps; i++) {
+                    field[(int)lerp(x_points[g][p], x_points[g][p + 1], i / (double)(steps - 1))][(int)lerp(y_points[g][p], y_points[g][p + 1], i / (double)(steps - 1))] += (g + 1);
+                }
+            } else {
+                field[(int)x_points[g][p]][(int)y_points[g][p]] += (g + 1);
+            }
+
+        }
+    }
+
+    for (unsigned int y_coord = 0; y_coord < field_size; y_coord++) {
+        for (unsigned int x_coord = 0; x_coord < field_size; x_coord++) {
+            coutWithColor(field[x_coord][field_size - y_coord - 1] ? 
+            mapToColor(field[x_coord][field_size - y_coord - 1] - 1) : // graphs
+            colors::BLACK, // background
+                field[x_coord][field_size - y_coord - 1] > 0 ? "██" : "░░");
+        }
+        cout << endl;
+    }
+
+    for (unsigned int i = 0; i < field_size; ++i) {
+        delete[] field[i];
+    }
+    delete[] field;
 }
