@@ -171,10 +171,6 @@ double expXexpX_sum(double x, int n) {
     return s;
 }
 
-double lerp(double from, double to, double progress) {
-    return from * (1 - progress) + to * progress;
-}
-
 void printGraph(FunctionPointer func, double from, double to, double step) {
     unsigned int field_size = 45;
     unsigned int points = (int)((to - from) / step + 1);
