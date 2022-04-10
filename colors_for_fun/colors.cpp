@@ -40,7 +40,7 @@ int main() {
 
         for (int x = -resolution; x < resolution; x++) {
             for (int y = -resolution; y < resolution; y++) {
-                setConsoleColor(mapToColor(x*x + y*y + k, -resolution_sqr * 2, resolution_sqr *));
+                setConsoleColor(mapToColor(x*x + y*y + k, -resolution_sqr * 2, resolution_sqr * 2));
                 cout << "██";
             }
             cout << "\n";
