@@ -1,4 +1,4 @@
-compiled_binaries_linux/
+compiled_binaries_linux/*
 !compiled_binaries_linux/menu.sh
 hashes.txt
 hashes_old.txt
