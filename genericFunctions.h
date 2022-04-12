@@ -157,6 +157,11 @@ enum class colors
 };
 #endif
 
+enum class GraphingBackend {
+    CONSOLE,
+    GNUPLOT
+};
+
 typedef double (*Converter)(double);
 
 constexpr colors colormap[colors_count] = {
@@ -193,7 +198,7 @@ COORD getConsoleCursorPosition() {
 
 colors mapToColor(int n, int min = 0, int max = colors_count - 1, bool loop = true) {
     max = std::max(min, max);
-    if(!loop){
+    if (!loop) {
         n = std::clamp(n, min, max);
     }
     max -= min;
@@ -504,7 +509,7 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
     }
 }
 
-void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45) {
+void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, std::string gnuplotTitle = "") {
     using namespace std;
 
     vector<vector<double>> x_points;
@@ -531,6 +536,26 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
         }
         x_points.push_back(x);
         y_points.push_back(y);
+    }
+
+    if (graphingBackend == GraphingBackend::GNUPLOT) {
+        string plotString;
+        plotString = "echo 'set title \"" + gnuplotTitle + "\"; plot ";
+        for (int g = 0; g < graphs.size(); g++) {
+            for (int p = 0; p < point; p++) {
+                system(("echo '" + to_string(x_points[g][p]) + " " + to_string(y_points[g][p]) + "' >> plot" + to_string(g)).c_str());
+            }
+            if (g > 0) {
+                plotString += ", ";
+            }
+            plotString += "\"plot" + to_string(g) + "\" smooth bezier";
+        }
+        plotString += "' | gnuplot --persist";
+        system(plotString.c_str());
+        for (int g = 0; g < graphs.size(); g++) {
+            system(("rm plot" + to_string(g)).c_str());
+        }
+        return;
     }
 
     for (int g = 0; g < graphs.size(); g++) {
@@ -572,9 +597,9 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
 
     for (unsigned int y_coord = 0; y_coord < field_size; y_coord++) {
         for (unsigned int x_coord = 0; x_coord < field_size; x_coord++) {
-            coutWithColor(field[x_coord][field_size - y_coord - 1] ? 
-            mapToColor(field[x_coord][field_size - y_coord - 1] - 1) : // graphs
-            colors::BLACK, // background
+            coutWithColor(field[x_coord][field_size - y_coord - 1] ?
+                mapToColor(field[x_coord][field_size - y_coord - 1] - 1) : // graphs
+                colors::BLACK, // background
                 field[x_coord][field_size - y_coord - 1] > 0 ? "██" : "░░");
         }
         cout << endl;

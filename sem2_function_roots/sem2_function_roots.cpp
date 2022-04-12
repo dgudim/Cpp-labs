@@ -60,7 +60,7 @@ int main() {
         case 3:
             coutWithColor(colors::YELLOW, "График:\n");
 
-            printGraph({ F, level }, a, b, (b - a) / (double)field_size, field_size);
+            printGraph({ F, level }, a, b, (b - a) / (double)field_size, field_size, GraphingBackend::GNUPLOT);
 
             for (double i = a; i < b; i += step) {
                 if (choice == 2) {
@@ -74,7 +74,7 @@ int main() {
                     results.push_back((int)(res / e / 10));
                     coutWithColor(colors::LIGHT_GREEN, "Корень " + to_string(res) + " | f(x)=" + to_string(F(res)) + " | " + to_string(iter) + " итераций\n");
                     coutWithColor(colors::YELLOW, "Схождение:\n");
-                    printGraph({ convergence, root_level }, 0, root_convergence.size() - 1, 1, field_size);
+                    printGraph({ convergence, root_level }, 0, root_convergence.size() - 1, 1, field_size, GraphingBackend::GNUPLOT);
                 }
             }
             coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
