@@ -36,6 +36,9 @@ int main() {
     int choice;
     double step = (b - a) / 5;
     vector<int> results;
+
+    GraphingBackend graphingBackend;
+
     while (true) {
         results.clear();
         clearScreen();
@@ -45,7 +48,8 @@ int main() {
             "1.Ввести e (точность)",
             "2.Вычислить с помощью метода деления отрезка пополам",
             "3.Вычислить с помощью метода парабол",
-            "4.Выйти"}, 4);
+            "4.Выйти"
+            }, 4);
         switch (choice) {
         case 1:
             while (true) {
@@ -58,9 +62,16 @@ int main() {
             break;
         case 2:
         case 3:
+
+            coutWithColor(colors::LIGHT_YELLOW, "\nВыберите как рисовать графики\n");
+            graphingBackend = displaySelection(new string[2]{
+            "1.Gnuplot (в отдельном окне)",
+            "2.В консоли"
+                }, 2) == 1 ? GraphingBackend::GNUPLOT : GraphingBackend::CONSOLE;
+
             coutWithColor(colors::YELLOW, "График:\n");
 
-            printGraph({ F, level }, a, b, (b - a) / (double)field_size, field_size, GraphingBackend::GNUPLOT);
+            printGraph({ F, level }, a, b, (b - a) / (double)field_size, field_size, graphingBackend, "График");
 
             for (double i = a; i < b; i += step) {
                 if (choice == 2) {
@@ -69,12 +80,12 @@ int main() {
                     res = findRootsOnInterval_interval_porabolic(i, step / 3, e, iter);
                 }
 
-                if (abs(F(res)) < abs(F(res) - F(res + e)) && res >= a && res <= b && 
+                if (abs(F(res)) < abs(F(res) - F(res + e)) && res >= a && res <= b &&
                     find(results.begin(), results.end(), (int)(res / e / 10)) == results.end()) {
                     results.push_back((int)(res / e / 10));
                     coutWithColor(colors::LIGHT_GREEN, "Корень " + to_string(res) + " | f(x)=" + to_string(F(res)) + " | " + to_string(iter) + " итераций\n");
                     coutWithColor(colors::YELLOW, "Схождение:\n");
-                    printGraph({ convergence, root_level }, 0, root_convergence.size() - 1, 1, field_size, GraphingBackend::GNUPLOT);
+                    printGraph({ convergence, root_level }, 0, root_convergence.size() - 1, 1, field_size, graphingBackend, "Схождение");
                 }
             }
             coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
