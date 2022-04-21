@@ -157,9 +157,70 @@ enum class colors
 };
 #endif
 
+class Vector2 {
+private:
+    float x, y;
+public:
+    Vector2(float x_, float y_) {
+        x = x_;
+        y = y_;
+    }
+
+    Vector2() {
+        x = 0;
+        y = 0;
+    }
+
+    Vector2 operator+(Vector2 b) {
+        return { x + b.x, y + b.y };
+    }
+
+    Vector2 operator-(Vector2 b) {
+        return { x - b.x, y - b.y };
+    }
+
+    Vector2 operator*(float b) {
+        return { x * b, y * b };
+    }
+
+    Vector2 operator/(float b) {
+        return { x / b, y / b };
+    }
+
+    Vector2 operator*(Vector2 b) {
+        return { x * b.x, y * b.y };
+    }
+
+    Vector2 operator/(Vector2 b) {
+        return { x / b.x, y / b.y };
+    }
+};
+
+class CubicBezier {
+private:
+    Vector2 a, b, c, d;
+    float t;
+public:
+    CubicBezier(Vector2 a_ = {}, Vector2 b_ = {}, Vector2 c_ = {}, Vector2 d_ = {}) {
+        a = a_; 
+        b = b_; 
+        c = c_; 
+        d = d_;
+    }
+
+    Vector2 getPoint(float t) {
+        return pow(1 - t, 3) * a + 3 * pow(1 - t, 2) * t * b + 3 * (1 - t) * pow(t, 2) * c + pow(t, 3) * d;
+    }
+};
+
 enum class GraphingBackend {
     CONSOLE,
     GNUPLOT
+};
+
+enum class Interpolation {
+    LINEAR,
+    BEZIER
 };
 
 typedef double (*Converter)(double);
@@ -509,7 +570,11 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
     }
 }
 
-void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, std::string gnuplotTitle = "") {
+Vector2 getCubicBezier(float a, float b, float c, float d) {
+
+}
+
+void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, std::string gnuplotTitle = "") {
     using namespace std;
 
     vector<vector<double>> x_points;
@@ -548,7 +613,8 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
             if (g > 0) {
                 plotString += ", ";
             }
-            plotString += "\"plot" + to_string(g) + "\" smooth bezier";
+            plotString += "\"plot" + to_string(g) + "\" ";
+            plotString += interpolation == Interpolation::BEZIER ? "smooth bezier" : "with lines";
         }
         plotString += "' | gnuplot --persist";
         system(plotString.c_str());
