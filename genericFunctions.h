@@ -180,16 +180,16 @@ public:
         return y;
     }
 
+    Vector2 operator*(double b) {
+        return { x * b, y * b };
+    }
+
     Vector2 operator+(Vector2 b) {
         return { x + b.x, y + b.y };
     }
 
     Vector2 operator-(Vector2 b) {
         return { x - b.x, y - b.y };
-    }
-
-    Vector2 operator*(double b) {
-        return { x * b, y * b };
     }
 
     void operator*=(double b) {
@@ -212,6 +212,13 @@ private:
     Vector2 a, b, c, d;
 public:
     CubicBezier(Vector2 a_ = {}, Vector2 b_ = {}, Vector2 c_ = {}, Vector2 d_ = {}) {
+        a = a_;
+        b = b_;
+        c = c_;
+        d = d_;
+    }
+
+    void set(Vector2 a_, Vector2 b_, Vector2 c_, Vector2 d_) {
         a = a_;
         b = b_;
         c = c_;
@@ -586,34 +593,30 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
 
 std::vector<Vector2> getPVector(std::vector<Vector2> points) {
     std::vector<Vector2> P_vector;
-    for (int i = 0; i < points.size() - 1; i++) {
-        P_vector.push_back((points[i] * 2 + points[i + 1]) * 2);
+    P_vector.push_back(points[0] + points[1] * 2);
+    for (int i = 1; i < points.size() - 1; i++) {
+        P_vector.push_back(points[i] * 4 + points[i + 1] * 2);
     }
-    P_vector[0] = points[0] + points[1] * 2;
-    P_vector[points.size() - 2] = points[points.size() - 2] * 8 + points[points.size() - 1];
+    P_vector.push_back(points[points.size() - 2] * 8 + points[points.size() - 1]);
     return P_vector;
 }
 
-std::vector<Vector2> getBvector(std::vector<Vector2> points, std::vector<Vector2> A_vector) {
+std::vector<Vector2> getBVector(std::vector<Vector2> points, std::vector<Vector2> A_vector) {
     std::vector<Vector2> B_vector;
-
     for (int i = 0; i < A_vector.size() - 1; i++) {
-        B_vector.push_back(points[i + 1] - A_vector[i + 1] * 2);
+        B_vector.push_back(points[i + 1] * 2 - A_vector[i + 1]);
     }
-    B_vector.push_back((A_vector[A_vector.size() - 1] + points[A_vector.size()]) / 2);
+    B_vector.push_back((A_vector[points.size() - 2] + points[points.size() - 1]) / 2);
     return B_vector;
 }
 
-void solve_tridiagonal_in_place_destructive(std::vector<Vector2> P_vector, float* a, float* b, float* c) {
+void solve_tridiagonal_in_place_destructive(std::vector<Vector2>& P_vector, float* a, float* b, float* c) {
     /*
      solves Ax = v where A is a tridiagonal matrix consisting of vectors a, b, c
      P_vector - initially contains the input vector v, and returns the solution x. indexed from 0 to X - 1 inclusive
      a - subdiagonal (means it is the diagonal below the main diagonal), indexed from 1 to X - 1 inclusive
      b - the main diagonal, indexed from 0 to X - 1 inclusive
      c - superdiagonal (means it is the diagonal above the main diagonal), indexed from 0 to X - 2 inclusive
-
-     Note: contents of input vector c will be modified, making this a one-time-use function (scratch space can be allocated instead for this purpose to make it reusable)
-     Note 2: We don't check for diagonal dominance, etc.; this is not guaranteed stable
      */
 
     c[0] = c[0] / b[0];
@@ -636,10 +639,10 @@ void test() {
     using namespace std;
     vector<Vector2> points;
 
-    points.push_back({ 1, 1 });
-    points.push_back({ 2, 4 });
-    points.push_back({ 4, 7 });
-    points.push_back({ 9, 0 });
+    for(double i = 0; i < 30; i+= 2){
+        points.push_back({i, sin(i)});
+        cout << i << " " << sin(i) << endl;
+    }
 
     vector<Vector2> Pvector = getPVector(points);
 
@@ -664,18 +667,28 @@ void test() {
 
     solve_tridiagonal_in_place_destructive(Pvector, sub_diagonal, diagonal, super_diagonal);
 
-    vector<Vector2> Bvector = getBvector(points, Pvector);
+    vector<Vector2> Bvector = getBVector(points, Pvector);
 
-    CubicBezier bezier = {
-        points[0],
-        Pvector[0],
-        Bvector[0],
-        points[1] };
+    CubicBezier bezier = {};
 
-    for (double t = 0; t <= 100; t++) {
-        cout << bezier.getPoint(t / 100).getX() << "    ";
-        cout << bezier.getPoint(t / 100).getY() << endl;
+    delete[] diagonal;
+    delete[] sub_diagonal;
+    delete[] super_diagonal;
+
+    for(int p = 0 ; p < points.size() - 1; p++) {
+        bezier.set(points[p], Pvector[p], Bvector[p], points[p + 1]);
+        for (double t = 0; t <= 10; t++) {
+            cout << bezier.getPoint(t / 10).getX() << " " << bezier.getPoint(t / 10).getY() << endl;
+            system(("echo '" + to_string(Pvector[p].getX()) + " " + to_string(Pvector[p].getY()) + "' >> points_a").c_str());
+            system(("echo '" + to_string(Bvector[p].getX()) + " " + to_string(Bvector[p].getY()) + "' >> points_b").c_str());
+            system(("echo '" + to_string(bezier.getPoint(t / 10).getX()) + " " + to_string(bezier.getPoint(t / 10).getY()) + "' >> temp").c_str());
+        }
     }
+
+    system("echo 'plot \"temp\" with lines, \"points_a\", \"points_b\"' | gnuplot --persist");
+    system("rm temp");
+    system("rm points_a");
+    system("rm points_b");
 }
 
 void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, std::string gnuplotTitle = "") {
@@ -722,6 +735,7 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
         }
         plotString += "' | gnuplot --persist";
         system(plotString.c_str());
+        coutWithColor(colors::LIGHT_BLUE, "Executing system command: " + plotString + "\n");
         for (int g = 0; g < graphs.size(); g++) {
             system(("rm plot" + to_string(g)).c_str());
         }
