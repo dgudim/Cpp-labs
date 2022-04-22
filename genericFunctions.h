@@ -651,7 +651,7 @@ void test() {
     float* sub_diagonal = new float[size];
     float* super_diagonal = new float[size];
 
-    for (int i = 1; i < size - 1; i++) {
+    for (int i = 0; i < size - 1; i++) {
         diagonal[i] = 4;
     }
     diagonal[0] = 2;
@@ -671,7 +671,17 @@ void test() {
     vector<Vector2> A_vector = P_vector;
     vector<Vector2> B_vector = getBVector(points, P_vector);
 
-    CubicBezier bezier = {};
+    for (int i = 0; i < A_vector.size(); i++) {
+        cout << A_vector.at(i).getX() << " " << A_vector.at(i).getY() << endl;
+    }
+
+    cout << endl << endl;
+
+    for (int i = 0; i < B_vector.size(); i++) {
+        cout << B_vector.at(i).getX() << " " << B_vector.at(i).getY() << endl;
+    }
+
+    CubicBezier bezier;
 
     delete[] diagonal;
     delete[] sub_diagonal;
@@ -680,12 +690,11 @@ void test() {
     for(int p = 0 ; p < points.size() - 1; p++) {
         bezier.set(points[p], A_vector[p], B_vector[p], points[p + 1]);
         system(("echo '" + to_string(points[p].getX()) + " " + to_string(points[p].getY()) + "' >> points_all").c_str());
+        system(("echo '" + to_string(A_vector[p].getX()) + " " + to_string(A_vector[p].getY()) + "' >> points_all").c_str());
+        system(("echo '" + to_string(B_vector[p].getX()) + " " + to_string(B_vector[p].getY()) + "' >> points_all").c_str());
         for (double t = 0; t <= 50; t++) {
             system(("echo '" + to_string(A_vector[p].getX()) + " " + to_string(A_vector[p].getY()) + "' >> points_a").c_str());
             system(("echo '" + to_string(B_vector[p].getX()) + " " + to_string(B_vector[p].getY()) + "' >> points_b").c_str());
-
-            system(("echo '" + to_string(A_vector[p].getX()) + " " + to_string(A_vector[p].getY()) + "' >> points_all").c_str());
-            system(("echo '" + to_string(B_vector[p].getX()) + " " + to_string(B_vector[p].getY()) + "' >> points_all").c_str());
 
             system(("echo '" + to_string(bezier.getPoint(t / 50).getX()) + " " + to_string(bezier.getPoint(t / 50).getY()) + "' >> temp").c_str());
         }
