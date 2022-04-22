@@ -197,16 +197,13 @@ public:
         y *= b;
     }
 
+    void operator-=(Vector2 b) {
+        x -= b.x;
+        y -= b.y;
+    }
+
     Vector2 operator/(double b) {
         return { x / b, y / b };
-    }
-
-    Vector2 operator*(Vector2 b) {
-        return { x * b.x, y * b.y };
-    }
-
-    Vector2 operator/(Vector2 b) {
-        return { x / b.x, y / b.y };
     }
 };
 
@@ -224,7 +221,7 @@ public:
     Vector2 getPoint(double t) {
         return
             a * pow(1 - t, 3) +
-            b * 3 * pow(1 - t, 2) * t +
+            b * 3 * t * pow(1 - t, 2) +
             c * 3 * (1 - t) * pow(t, 2) +
             d * pow(t, 3);
     }
@@ -587,25 +584,52 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
     }
 }
 
-Vector2 getCubicBezierACoef(std::vector<Vector2> points, int index) {
-    Vector2 a;
-    if (index == 0) {
-        a = points[0] + points[1] * 2;
-    } else {
-        a = points[index] * 2 + points[index + 1];
-        a *= 2;
+std::vector<Vector2> getPVector(std::vector<Vector2> points) {
+    std::vector<Vector2> P_vector;
+    for (int i = 0; i < points.size() - 1; i++) {
+        P_vector.push_back((points[i] * 2 + points[i + 1]) * 2);
     }
-    return a;
+    P_vector[0] = points[0] + points[1] * 2;
+    P_vector[points.size() - 2] = points[points.size() - 2] * 8 + points[points.size() - 1];
+    return P_vector;
 }
 
-Vector2 getCubicBezierBCoef(std::vector<Vector2> points, int index) {
-    Vector2 b;
-    if (index == points.size() - 2) {
-        b = (getCubicBezierACoef(points, index) + points[index + 1]) / 2;
-    } else {
-        b = points[index + 1] * 2 - getCubicBezierACoef(points, index + 1);
+std::vector<Vector2> getBvector(std::vector<Vector2> points, std::vector<Vector2> A_vector) {
+    std::vector<Vector2> B_vector;
+
+    for (int i = 0; i < A_vector.size() - 1; i++) {
+        B_vector.push_back(points[i + 1] - A_vector[i + 1] * 2);
     }
-    return b;
+    B_vector.push_back((A_vector[A_vector.size() - 1] + points[A_vector.size()]) / 2);
+    return B_vector;
+}
+
+void solve_tridiagonal_in_place_destructive(std::vector<Vector2> P_vector, float* a, float* b, float* c) {
+    /*
+     solves Ax = v where A is a tridiagonal matrix consisting of vectors a, b, c
+     P_vector - initially contains the input vector v, and returns the solution x. indexed from 0 to X - 1 inclusive
+     a - subdiagonal (means it is the diagonal below the main diagonal), indexed from 1 to X - 1 inclusive
+     b - the main diagonal, indexed from 0 to X - 1 inclusive
+     c - superdiagonal (means it is the diagonal above the main diagonal), indexed from 0 to X - 2 inclusive
+
+     Note: contents of input vector c will be modified, making this a one-time-use function (scratch space can be allocated instead for this purpose to make it reusable)
+     Note 2: We don't check for diagonal dominance, etc.; this is not guaranteed stable
+     */
+
+    c[0] = c[0] / b[0];
+    P_vector[0] = P_vector[0] / b[0];
+
+    /* loop from 1 to X - 1 inclusive, performing the forward sweep */
+    for (size_t ix = 1; ix < P_vector.size(); ix++) {
+        const float m = 1.0f / (b[ix] - a[ix] * c[ix - 1]);
+        c[ix] = c[ix] * m;
+        P_vector[ix] = (P_vector[ix] - P_vector[ix - 1] * a[ix]) * m;
+    }
+
+    /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
+    for (size_t ix = P_vector.size() - 1; ix-- > 0; )
+        P_vector[ix] -= P_vector[ix + 1] * c[ix];
+    P_vector[0] -= P_vector[1] * c[0];
 }
 
 void test() {
@@ -617,25 +641,40 @@ void test() {
     points.push_back({ 4, 7 });
     points.push_back({ 9, 0 });
 
+    vector<Vector2> Pvector = getPVector(points);
+
+    float* diagonal = new float[Pvector.size()];
+    float* sub_diagonal = new float[Pvector.size()];
+    float* super_diagonal = new float[Pvector.size()];
+
+    for (int i = 1; i < Pvector.size() - 1; i++) {
+        diagonal[i] = 4;
+    }
+    diagonal[0] = 2;
+    diagonal[Pvector.size() - 1] = 7;
+
+    for (int i = 1; i < Pvector.size() - 1; i++) {
+        sub_diagonal[i] = 1;
+    }
+    sub_diagonal[Pvector.size() - 1] = 2;
+
+    for (int i = 0; i < Pvector.size() - 1; i++) {
+        super_diagonal[i] = 1;
+    }
+
+    solve_tridiagonal_in_place_destructive(Pvector, sub_diagonal, diagonal, super_diagonal);
+
+    vector<Vector2> Bvector = getBvector(Pvector, points);
+
     CubicBezier bezier = {
         points[0],
-    getCubicBezierACoef(points, 0),
-    getCubicBezierBCoef(points, 0),
+        Pvector[0],
+        Bvector[0],
         points[1] };
-
-    CubicBezier bezier2 = {
-        points[1],
-    getCubicBezierACoef(points, 1),
-    getCubicBezierBCoef(points, 1),
-        points[2] };
 
     for (double t = 0; t <= 100; t++) {
         cout << bezier.getPoint(t / 100).getX() << "    ";
         cout << bezier.getPoint(t / 100).getY() << endl;
-    }
-    for (double t = 0; t <= 100; t++) {
-        cout << bezier2.getPoint(t / 100).getX() << "    ";
-        cout << bezier2.getPoint(t / 100).getY() << endl;
     }
 }
 
