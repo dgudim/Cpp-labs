@@ -664,7 +664,7 @@ void test() {
 
     solve_tridiagonal_in_place_destructive(Pvector, sub_diagonal, diagonal, super_diagonal);
 
-    vector<Vector2> Bvector = getBvector(Pvector, points);
+    vector<Vector2> Bvector = getBvector(points, Pvector);
 
     CubicBezier bezier = {
         points[0],
