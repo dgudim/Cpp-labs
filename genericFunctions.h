@@ -594,7 +594,7 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
 std::vector<Vector2> getPVector(std::vector<Vector2> points) {
     std::vector<Vector2> P_vector;
     P_vector.push_back(points[0] + points[1] * 2);
-    for (int i = 1; i < points.size() - 1; i++) {
+    for (int i = 1; i < points.size() - 2; i++) {
         P_vector.push_back(points[i] * 4 + points[i + 1] * 2);
     }
     P_vector.push_back(points[points.size() - 2] * 8 + points[points.size() - 1]);
@@ -641,33 +641,35 @@ void test() {
 
     for(double i = 0; i < 30; i+= 2){
         points.push_back({i, sin(i)});
-        cout << i << " " << sin(i) << endl;
     }
+    
+    vector<Vector2> P_vector = getPVector(points);
 
-    vector<Vector2> Pvector = getPVector(points);
+    int size = P_vector.size();
 
-    float* diagonal = new float[Pvector.size()];
-    float* sub_diagonal = new float[Pvector.size()];
-    float* super_diagonal = new float[Pvector.size()];
+    float* diagonal = new float[size];
+    float* sub_diagonal = new float[size];
+    float* super_diagonal = new float[size];
 
-    for (int i = 1; i < Pvector.size() - 1; i++) {
+    for (int i = 1; i < size - 1; i++) {
         diagonal[i] = 4;
     }
     diagonal[0] = 2;
-    diagonal[Pvector.size() - 1] = 7;
+    diagonal[size - 1] = 7;
 
-    for (int i = 1; i < Pvector.size() - 1; i++) {
+    for (int i = 1; i < size - 1; i++) {
         sub_diagonal[i] = 1;
     }
-    sub_diagonal[Pvector.size() - 1] = 2;
+    sub_diagonal[size - 1] = 2;
 
-    for (int i = 0; i < Pvector.size() - 1; i++) {
+    for (int i = 0; i < size - 1; i++) {
         super_diagonal[i] = 1;
     }
 
-    solve_tridiagonal_in_place_destructive(Pvector, sub_diagonal, diagonal, super_diagonal);
+    solve_tridiagonal_in_place_destructive(P_vector, sub_diagonal, diagonal, super_diagonal);
 
-    vector<Vector2> Bvector = getBVector(points, Pvector);
+    vector<Vector2> A_vector = P_vector;
+    vector<Vector2> B_vector = getBVector(points, P_vector);
 
     CubicBezier bezier = {};
 
@@ -676,19 +678,24 @@ void test() {
     delete[] super_diagonal;
 
     for(int p = 0 ; p < points.size() - 1; p++) {
-        bezier.set(points[p], Pvector[p], Bvector[p], points[p + 1]);
-        for (double t = 0; t <= 10; t++) {
-            cout << bezier.getPoint(t / 10).getX() << " " << bezier.getPoint(t / 10).getY() << endl;
-            system(("echo '" + to_string(Pvector[p].getX()) + " " + to_string(Pvector[p].getY()) + "' >> points_a").c_str());
-            system(("echo '" + to_string(Bvector[p].getX()) + " " + to_string(Bvector[p].getY()) + "' >> points_b").c_str());
-            system(("echo '" + to_string(bezier.getPoint(t / 10).getX()) + " " + to_string(bezier.getPoint(t / 10).getY()) + "' >> temp").c_str());
+        bezier.set(points[p], A_vector[p], B_vector[p], points[p + 1]);
+        system(("echo '" + to_string(points[p].getX()) + " " + to_string(points[p].getY()) + "' >> points_all").c_str());
+        for (double t = 0; t <= 50; t++) {
+            system(("echo '" + to_string(A_vector[p].getX()) + " " + to_string(A_vector[p].getY()) + "' >> points_a").c_str());
+            system(("echo '" + to_string(B_vector[p].getX()) + " " + to_string(B_vector[p].getY()) + "' >> points_b").c_str());
+
+            system(("echo '" + to_string(A_vector[p].getX()) + " " + to_string(A_vector[p].getY()) + "' >> points_all").c_str());
+            system(("echo '" + to_string(B_vector[p].getX()) + " " + to_string(B_vector[p].getY()) + "' >> points_all").c_str());
+
+            system(("echo '" + to_string(bezier.getPoint(t / 50).getX()) + " " + to_string(bezier.getPoint(t / 50).getY()) + "' >> temp").c_str());
         }
     }
 
-    system("echo 'plot \"temp\" with lines, \"points_a\", \"points_b\"' | gnuplot --persist");
+    system("echo 'plot \"temp\" with lines, \"points_a\", \"points_b\", \"points_all\" with lines' | gnuplot --persist");
     system("rm temp");
     system("rm points_a");
     system("rm points_b");
+    system("rm points_all");
 }
 
 void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, std::string gnuplotTitle = "") {
