@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #ifdef __linux__
 #include <termios.h>
 #include <unistd.h>
@@ -159,9 +160,9 @@ enum class colors
 
 class Vector2 {
 private:
-    float x, y;
+    double x, y;
 public:
-    Vector2(float x_, float y_) {
+    Vector2(double x_, double y_) {
         x = x_;
         y = y_;
     }
@@ -169,6 +170,14 @@ public:
     Vector2() {
         x = 0;
         y = 0;
+    }
+
+    double getX() {
+        return x;
+    }
+
+    double getY() {
+        return y;
     }
 
     Vector2 operator+(Vector2 b) {
@@ -179,11 +188,16 @@ public:
         return { x - b.x, y - b.y };
     }
 
-    Vector2 operator*(float b) {
+    Vector2 operator*(double b) {
         return { x * b, y * b };
     }
 
-    Vector2 operator/(float b) {
+    void operator*=(double b) {
+        x *= b;
+        y *= b;
+    }
+
+    Vector2 operator/(double b) {
         return { x / b, y / b };
     }
 
@@ -199,17 +213,20 @@ public:
 class CubicBezier {
 private:
     Vector2 a, b, c, d;
-    float t;
 public:
     CubicBezier(Vector2 a_ = {}, Vector2 b_ = {}, Vector2 c_ = {}, Vector2 d_ = {}) {
-        a = a_; 
-        b = b_; 
-        c = c_; 
+        a = a_;
+        b = b_;
+        c = c_;
         d = d_;
     }
 
-    Vector2 getPoint(float t) {
-        return pow(1 - t, 3) * a + 3 * pow(1 - t, 2) * t * b + 3 * (1 - t) * pow(t, 2) * c + pow(t, 3) * d;
+    Vector2 getPoint(double t) {
+        return
+            a * pow(1 - t, 3) +
+            b * 3 * pow(1 - t, 2) * t +
+            c * 3 * (1 - t) * pow(t, 2) +
+            d * pow(t, 3);
     }
 };
 
@@ -570,8 +587,56 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
     }
 }
 
-Vector2 getCubicBezier(float a, float b, float c, float d) {
+Vector2 getCubicBezierACoef(std::vector<Vector2> points, int index) {
+    Vector2 a;
+    if (index == 0) {
+        a = points[0] + points[1] * 2;
+    } else {
+        a = points[index] * 2 + points[index + 1];
+        a *= 2;
+    }
+    return a;
+}
 
+Vector2 getCubicBezierBCoef(std::vector<Vector2> points, int index) {
+    Vector2 b;
+    if (index == points.size() - 2) {
+        b = (getCubicBezierACoef(points, index) + points[index + 1]) / 2;
+    } else {
+        b = points[index + 1] * 2 - getCubicBezierACoef(points, index + 1);
+    }
+    return b;
+}
+
+void test() {
+    using namespace std;
+    vector<Vector2> points;
+
+    points.push_back({ 1, 1 });
+    points.push_back({ 2, 4 });
+    points.push_back({ 4, 7 });
+    points.push_back({ 9, 0 });
+
+    CubicBezier bezier = {
+        points[0],
+    getCubicBezierACoef(points, 0),
+    getCubicBezierBCoef(points, 0),
+        points[1] };
+
+    CubicBezier bezier2 = {
+        points[1],
+    getCubicBezierACoef(points, 1),
+    getCubicBezierBCoef(points, 1),
+        points[2] };
+
+    for (double t = 0; t <= 100; t++) {
+        cout << bezier.getPoint(t / 100).getX() << "    ";
+        cout << bezier.getPoint(t / 100).getY() << endl;
+    }
+    for (double t = 0; t <= 100; t++) {
+        cout << bezier2.getPoint(t / 100).getX() << "    ";
+        cout << bezier2.getPoint(t / 100).getY() << endl;
+    }
 }
 
 void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, std::string gnuplotTitle = "") {
@@ -592,7 +657,7 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
         vector<double> x;
         vector<double> y;
         point = 0;
-        for (long double i = from; i * (step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
+        for (double i = from; i * (step < 0 ? -1 : 1) <= to * (step < 0 ? -1 : 1); i += step) {
             x.push_back(i);
             y.push_back(graphs[g](i));
             maxY = max(maxY, y.back());

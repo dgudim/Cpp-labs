@@ -30,6 +30,9 @@ double root_level(double x) {
 constexpr int field_size = 45;
 
 int main() {
+    test();
+    _getch();
+
     double a = 2, b = 6, e = 0.001;
     double res;
     int iter;
