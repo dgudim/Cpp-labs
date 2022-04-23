@@ -9,7 +9,7 @@ double F(double x) {
 void displayGraph(double a, double b, double step, double interpolation_muliplier);
 
 int main() {
-    double a = -7, b = 10;
+    int a = -7, b = 10;
     int choice;
     bool balancedByStep = true;
     double step = 1;
@@ -42,7 +42,7 @@ int main() {
                 coutWithColor(colors::LIGHT_RED, "b должен быть больше a, повторите ввод\n");
             }
             if (!balancedByStep) {
-                step = (b - a) / temp;
+                step = (b - a) /  (double)(temp - 1);
             }
             break;
         case 2:
@@ -53,7 +53,7 @@ int main() {
                 }
                 coutWithColor(colors::LIGHT_RED, "Слишком маленькое количество известных точек, повторите ввод\n");
             }
-            step = (b - a) / temp;
+            step = (b - a) / (double)(temp - 1);
             balancedByStep = false;
             break;
         case 3:
