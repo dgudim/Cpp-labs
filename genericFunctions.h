@@ -610,40 +610,7 @@ std::vector<Vector2> getBVector(std::vector<Vector2> points, std::vector<Vector2
     return B_vector;
 }
 
-void solve_tridiagonal_in_place_destructive(std::vector<Vector2>& P_vector, float* a, float* b, float* c) {
-    /*
-     solves Ax = v where A is a tridiagonal matrix consisting of vectors a, b, c
-     P_vector - initially contains the input vector v, and returns the solution x. indexed from 0 to X - 1 inclusive
-     a - subdiagonal (means it is the diagonal below the main diagonal), indexed from 1 to X - 1 inclusive
-     b - the main diagonal, indexed from 0 to X - 1 inclusive
-     c - superdiagonal (means it is the diagonal above the main diagonal), indexed from 0 to X - 2 inclusive
-     */
-
-    c[0] = c[0] / b[0];
-    P_vector[0] = P_vector[0] / b[0];
-
-    /* loop from 1 to X - 1 inclusive, performing the forward sweep */
-    for (size_t ix = 1; ix < P_vector.size(); ix++) {
-        const float m = 1.0f / (b[ix] - a[ix] * c[ix - 1]);
-        c[ix] = c[ix] * m;
-        P_vector[ix] = (P_vector[ix] - P_vector[ix - 1] * a[ix]) * m;
-    }
-
-    /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
-    for (size_t ix = P_vector.size() - 1; ix-- > 0; )
-        P_vector[ix] -= P_vector[ix + 1] * c[ix];
-    P_vector[0] -= P_vector[1] * c[0];
-}
-
-void test() {
-    using namespace std;
-    vector<Vector2> points;
-
-    for(double i = 0; i < 30; i+= 2){
-        points.push_back({i, sin(i)});
-    }
-    
-    vector<Vector2> P_vector = getPVector(points);
+std::vector<Vector2> solve_tridiagonal_bezier(std::vector<Vector2>& P_vector) {
 
     int size = P_vector.size();
 
@@ -666,45 +633,38 @@ void test() {
         super_diagonal[i] = 1;
     }
 
-    solve_tridiagonal_in_place_destructive(P_vector, sub_diagonal, diagonal, super_diagonal);
+    float* a = sub_diagonal;
+    float* b = diagonal;
+    float* c = super_diagonal;
 
-    vector<Vector2> A_vector = P_vector;
-    vector<Vector2> B_vector = getBVector(points, P_vector);
+    /*
+     solves Ax = v where A is a tridiagonal matrix consisting of vectors a, b, c
+     P_vector - initially contains the input vector v, and returns the solution x. indexed from 0 to X - 1 inclusive
+     a - subdiagonal (means it is the diagonal below the main diagonal), indexed from 1 to X - 1 inclusive
+     b - the main diagonal, indexed from 0 to X - 1 inclusive
+     c - superdiagonal (means it is the diagonal above the main diagonal), indexed from 0 to X - 2 inclusive
+     */
 
-    for (int i = 0; i < A_vector.size(); i++) {
-        cout << A_vector.at(i).getX() << " " << A_vector.at(i).getY() << endl;
+    c[0] = c[0] / b[0];
+    P_vector[0] = P_vector[0] / b[0];
+
+    /* loop from 1 to X - 1 inclusive, performing the forward sweep */
+    for (size_t ix = 1; ix < P_vector.size(); ix++) {
+        const float m = 1.0f / (b[ix] - a[ix] * c[ix - 1]);
+        c[ix] = c[ix] * m;
+        P_vector[ix] = (P_vector[ix] - P_vector[ix - 1] * a[ix]) * m;
     }
 
-    cout << endl << endl;
-
-    for (int i = 0; i < B_vector.size(); i++) {
-        cout << B_vector.at(i).getX() << " " << B_vector.at(i).getY() << endl;
+    /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
+    for (size_t ix = P_vector.size() - 1; ix-- > 0; ) {
+        P_vector[ix] -= P_vector[ix + 1] * c[ix];
     }
-
-    CubicBezier bezier;
 
     delete[] diagonal;
     delete[] sub_diagonal;
     delete[] super_diagonal;
 
-    for(int p = 0 ; p < points.size() - 1; p++) {
-        bezier.set(points[p], A_vector[p], B_vector[p], points[p + 1]);
-        system(("echo '" + to_string(points[p].getX()) + " " + to_string(points[p].getY()) + "' >> points_all").c_str());
-        system(("echo '" + to_string(A_vector[p].getX()) + " " + to_string(A_vector[p].getY()) + "' >> points_all").c_str());
-        system(("echo '" + to_string(B_vector[p].getX()) + " " + to_string(B_vector[p].getY()) + "' >> points_all").c_str());
-        for (double t = 0; t <= 50; t++) {
-            system(("echo '" + to_string(A_vector[p].getX()) + " " + to_string(A_vector[p].getY()) + "' >> points_a").c_str());
-            system(("echo '" + to_string(B_vector[p].getX()) + " " + to_string(B_vector[p].getY()) + "' >> points_b").c_str());
-
-            system(("echo '" + to_string(bezier.getPoint(t / 50).getX()) + " " + to_string(bezier.getPoint(t / 50).getY()) + "' >> temp").c_str());
-        }
-    }
-
-    system("echo 'plot \"temp\" with lines, \"points_a\", \"points_b\", \"points_all\" with lines' | gnuplot --persist");
-    system("rm temp");
-    system("rm points_a");
-    system("rm points_b");
-    system("rm points_all");
+    return P_vector;
 }
 
 void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, std::string gnuplotTitle = "") {
