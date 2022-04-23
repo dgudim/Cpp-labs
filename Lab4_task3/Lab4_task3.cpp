@@ -97,7 +97,7 @@ int main()
         for (int i = 0; i < functions_len; i++) {
             selectedFunctionsCount += selectedFunctions[i];
         }
-
+        
         if (selectedFunctionsCount == 0) {
             coutWithColor(colors::GRAY, "\nВы не выбрали ни одной функции(\n");
         }
