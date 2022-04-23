@@ -64,6 +64,7 @@ int main() {
                 }
                 coutWithColor(colors::LIGHT_RED, "Слишком большой шаг, повторите ввод\n");
             }
+            balancedByStep = true;
             break;
         case 4:
             while (true) {
