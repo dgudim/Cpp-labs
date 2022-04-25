@@ -85,16 +85,12 @@ int main() {
 }
 
 
-void displayTable(vector<Vector2> points, vector<bool> points_interpolated_highlight_flags = {}) {
-    bool hightlight_enabled = points_interpolated_highlight_flags.size() == points.size();
+void displayTableOrig(vector<Vector2> points) {
     coutWithColor(colors::YELLOW, "╭───┬───────────┬───────────╮\n");
     coutWithColor(colors::YELLOW, "│ I │     X     │     Y     │\n");
     coutWithColor(colors::YELLOW, "├───┼───────────┼───────────┤\n");
     colors currentColor = colors::DEFAULT;
     for (int i = 0; i < points.size(); i++) {
-        currentColor = hightlight_enabled ?
-            (points_interpolated_highlight_flags[i] ? colors::LIGHT_GREEN : colors::DEFAULT)
-            : colors::DEFAULT;
         coutWithColor(colors::YELLOW, "│");
         coutWithColor(currentColor, addSpaces(to_string(i + 1), 3));
         coutWithColor(colors::YELLOW, "│");
@@ -106,6 +102,38 @@ void displayTable(vector<Vector2> points, vector<bool> points_interpolated_highl
     coutWithColor(colors::YELLOW, "╰───┴───────────┴───────────╯\n");
 }
 
+void displayTableInterpolated(vector<Vector2> points, vector<bool> highlight_flags) {
+    coutWithColor(colors::YELLOW, "╭───┬───────────┬───────────┬───────────┬───────────╮\n");
+    coutWithColor(colors::YELLOW, "│ I │     X     │     Y*    │     Y     │ abs(Y-Y*) │\n");
+    coutWithColor(colors::YELLOW, "├───┼───────────┼───────────┼───────────┼───────────┤\n");
+    colors currentColor = colors::DEFAULT;
+    double x, y, y_real;
+    double max_deviation = 0;
+    for (int i = 0; i < points.size(); i++) {
+        x = points[i].getX();
+        y = points[i].getY();
+        y_real = F(x);
+        currentColor = highlight_flags[i] ? colors::LIGHT_GREEN : colors::DEFAULT;
+        coutWithColor(colors::YELLOW, "│");
+        coutWithColor(currentColor, addSpaces(to_string(i + 1), 3));
+        coutWithColor(colors::YELLOW, "│");
+        coutWithColor(currentColor, addSpaces(to_string(points[i].getX()), 11));
+        coutWithColor(colors::YELLOW, "│");
+        coutWithColor(currentColor, addSpaces(to_string(points[i].getY()), 11));
+        coutWithColor(colors::YELLOW, "│");
+        coutWithColor(currentColor, addSpaces(to_string(y_real), 11));
+        coutWithColor(colors::YELLOW, "│");
+        coutWithColor(currentColor, addSpaces(to_string(abs(y - y_real)), 11));
+        coutWithColor(colors::YELLOW, "│\n");
+        max_deviation = max(max_deviation, abs(y - y_real));
+    }
+    coutWithColor(colors::YELLOW, "├───┴───────────┴───────────┴───────────┴───────────┤\n");
+    coutWithColor(colors::YELLOW, "│");
+    coutWithColor(colors::CYAN, "Максимальное отлонение: " + addSpaces(to_string(max_deviation), 27));
+    coutWithColor(colors::YELLOW, "│\n");
+    coutWithColor(colors::YELLOW, "╰───────────────────────────────────────────────────╯\n");
+}
+
 void displayGraph(double a, double b, double step, double interpolation_muliplier) {
     vector<Vector2> points;
     vector<Vector2> points_interpolated;
@@ -115,7 +143,7 @@ void displayGraph(double a, double b, double step, double interpolation_muliplie
         points.push_back({ i, F(i) });
     }
     coutWithColor(colors::LIGHT_YELLOW, "До интерполяции\n");
-    displayTable(points);
+    displayTableOrig(points);
     vector<Vector2> P_vector = getPVector(points);
     vector<Vector2> A_vector = solve_tridiagonal_bezier(P_vector);
     vector<Vector2> B_vector = getBVector(points, A_vector);
@@ -143,14 +171,12 @@ void displayGraph(double a, double b, double step, double interpolation_muliplie
     }
 
     coutWithColor(colors::LIGHT_YELLOW, "После интерполяции\n");
-    displayTable(points_interpolated, points_interpolated_highlight_flags);
+    displayTableInterpolated(points_interpolated, points_interpolated_highlight_flags);
 
-    double delta_error = 0;
     double x, y;
     for (int i = 0; i < points_interpolated.size(); i++) {
         x = points_interpolated[i].getX();
         y = F(x);
-        delta_error = max(delta_error, abs(points_interpolated[i].getY() - y));
         system(("echo '"
             + to_string(x) + " "
             + to_string(y) + "' >> real").c_str());
@@ -162,7 +188,6 @@ void displayGraph(double a, double b, double step, double interpolation_muliplie
     system("rm points_a");
     system("rm points_b");
     system("rm points_all");
-    coutWithColor(colors::CYAN, "Максимальное отклонение: " + to_string(delta_error) + "\n");
     coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
     _getch();
 }
