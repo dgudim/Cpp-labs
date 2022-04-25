@@ -450,12 +450,16 @@ std::string doubleToString(double value) {
     return doubleToString(value, 5);
 }
 
-std::string addSpaces(std::string input, unsigned int targetLength) {
+std::string addSymbols(std::string input, unsigned int targetLength, std::string symbol) {
     int spaces = targetLength - input.length();
     for (int i = 0; i < spaces; i++) {
-        input.append(" ");
+        input.append(symbol);
     }
     return input;
+}
+
+std::string addSpaces(std::string input, unsigned int targetLength) {
+    return addSymbols(input, targetLength, " ");
 }
 
 std::string ltrim(const std::string s) {
@@ -771,10 +775,18 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
     delete[] field;
 }
 
-void printTable(std::vector<vector<double>> columns, std::vector<string> titles, std::vector<double> highlight_flags = {},
+void printLayer(std::vector<int> column_widths, std::vector<std::string> elems, char start, char middle, char end) {
+
+}
+
+void printLayer(std::vector<int> column_widths, std::string elem, char start, char middle, char end) {
+
+}
+
+void printTable(std::vector<std::vector<double>> columns, std::vector<std::string> titles, std::vector<double> highlight_flags = {},
     colors border_color = colors::YELLOW, colors text_color = colors::DEFAULT,
     colors highlight_color = colors::LIGHT_GREEN,
-    std::string bottom_info, colors bottom_info_color = colors::CYAN) {
+    std::string bottom_info = "", colors bottom_info_color = colors::CYAN) {
     using namespace std;
 
     int columns_len = columns.size();
@@ -792,19 +804,35 @@ void printTable(std::vector<vector<double>> columns, std::vector<string> titles,
         for (int elem = 0; elem < elems; elem++) {
             maxWidth = max(maxWidth, (int)to_string(columns[column][elem]).length());
         }
-        column_widths.push_back(maxWidth + 2);
+        column_widths.push_back(max((int)titles[column].length(), maxWidth) + 2);
         coutWithColor(border_color, column == 0 ? "╭" : "┬");
-        for (int i = 0; i < maxWidth + 2; i++) {
+        for (int i = 0; i < column_widths.back(); i++) {
             coutWithColor(border_color, "─");
         }
     }
-    coutWithColor(border_color, "╮");
-    
-    for (int elem = 0; elem < elems; elem++) {
+    coutWithColor(border_color, "╮\n");
+
+    for (int column = 0; column < columns_len; column++) {
         coutWithColor(border_color, "│");
-        for (int column = 0; column < columns_len; column++) {
-            coutWithColor(text_color, addSpaces(to_string(columns[column][elem]), column_widths[column]));
+        coutWithColor(text_color, addSpaces(titles[column], column_widths[column]));
+    }
+    coutWithColor(border_color, "│\n");
+
+    coutWithColor(border_color, "├");
+    for (int column = 0; column < columns_len; column++) {
+        coutWithColor(text_color, addSymbols("", column_widths[column], "─"));
+        if (column < columns_len - 1) {
+            coutWithColor(border_color, "┼");
         }
     }
-    coutWithColor(border_color, "│");
+    coutWithColor(border_color, "┤\n");
+
+    for (int elem = 0; elem < elems; elem++) {
+        for (int column = 0; column < columns_len; column++) {
+            coutWithColor(border_color, "│");
+            coutWithColor(text_color, addSpaces(to_string(columns[column][elem]), column_widths[column]));
+        }
+        coutWithColor(border_color, "│\n");
+    }
+   
 }

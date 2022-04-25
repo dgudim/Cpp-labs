@@ -9,6 +9,26 @@ double F(double x) {
 void displayGraph(double a, double b, double step, double interpolation_muliplier);
 
 int main() {
+    vector<vector<double>> columns;
+    vector<double> __I, __a, __b, __c;
+    vector<string> titles;
+    titles.push_back("I");
+    titles.push_back("a");
+    titles.push_back("b");
+    titles.push_back("c");
+    for(int i = 0; i < 10; i++){
+        __I.push_back(i);
+        __a.push_back(i + 10);
+        __b.push_back(i * i);
+        __c.push_back(i / 4);
+    }
+    columns.push_back(__I);
+    columns.push_back(__a);
+    columns.push_back(__b);
+    columns.push_back(__c);
+    printTable(columns, titles);
+    _getch();
+
     int a = -7, b = 10;
     int choice;
     bool balancedByStep = true;
