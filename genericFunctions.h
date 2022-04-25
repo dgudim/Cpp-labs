@@ -9,6 +9,9 @@
 #ifdef __linux__
 #include <termios.h>
 #include <unistd.h>
+
+using std::string, std::vector;
+
 int _getch(void)
 {
     struct termios oldattr, newattr;
@@ -313,7 +316,7 @@ void setConsoleColor(colors color) {
     setConsoleColor((int)color);
 }
 
-void coutWithColor(colors color, std::string message, int delay = 0)
+void coutWithColor(colors color, string message, int delay = 0)
 {
     setConsoleColor(color);
     std::cout << message << std::flush;
@@ -321,12 +324,12 @@ void coutWithColor(colors color, std::string message, int delay = 0)
     usleep(delay * 1000);
 }
 
-void coutWithColorAtPos(colors color, std::string message, int x, int y, int delay = 0) {
+void coutWithColorAtPos(colors color, string message, int x, int y, int delay = 0) {
     setConsoleCursorPosition(x, y);
     coutWithColor(color, message, delay);
 }
 
-std::string* split(std::string* input, bool print_count, unsigned int* len) {
+string* split(string* input, bool print_count, unsigned int* len) {
     unsigned int numberOfWords = 0;
     unsigned int strLen = (*input).length();
     for (unsigned int i = 0; i < strLen; i++) {
@@ -341,11 +344,11 @@ std::string* split(std::string* input, bool print_count, unsigned int* len) {
 
     (*len) = numberOfWords;
 
-    std::string* words = new std::string[numberOfWords];
+    string* words = new string[numberOfWords];
     int pos = 0;
     unsigned int index = 0;
 
-    while ((pos = (*input).find(' ')) != std::string::npos) {
+    while ((pos = (*input).find(' ')) != string::npos) {
         if (pos > 0) {
             words[index] = (*input).substr(0, pos);
             index++;
@@ -355,14 +358,14 @@ std::string* split(std::string* input, bool print_count, unsigned int* len) {
     return words;
 }
 
-std::string displayWarningWithInput(colors color, std::string message) {
+string displayWarningWithInput(colors color, string message) {
     coutWithColor(color, message);
-    std::string input;
+    string input;
     std::cin >> input;
     return input;
 }
 
-double inputData(std::string message, bool allowWhiteSpaces) {
+double inputData(string message, bool allowWhiteSpaces) {
     std::cout << message << std::flush;
     double toReturn;
     while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
@@ -373,13 +376,13 @@ double inputData(std::string message, bool allowWhiteSpaces) {
     return toReturn;
 }
 
-double inputData(std::string message) {
+double inputData(string message) {
     return inputData(message, true);
 }
 
-std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern, std::string previousBuffer) {
+string inputData(string message, char* allowedChars, int allowedChars_size, std::regex pattern, string previousBuffer) {
     printf("%s", (message + previousBuffer).c_str());
-    std::string buffer = previousBuffer;
+    string buffer = previousBuffer;
     while (true) {
         char currChar = _getch();
         bool addToBuffer = false;
@@ -416,25 +419,25 @@ std::string inputData(std::string message, char* allowedChars, int allowedChars_
     return buffer;
 }
 
-std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::string previousBuffer) {
+string inputData(string message, char* allowedChars, int allowedChars_size, string previousBuffer) {
     std::regex str_expr(".*");
     return inputData(message, allowedChars, allowedChars_size, str_expr, previousBuffer);
 }
 
-std::string inputData(std::string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
+string inputData(string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
     return inputData(message, allowedChars, allowedChars_size, pattern, "");
 }
 
-std::string inputData(std::string message, char* allowedChars, int allowedChars_size) {
+string inputData(string message, char* allowedChars, int allowedChars_size) {
     std::regex str_expr(".*");
     return inputData(message, allowedChars, allowedChars_size, str_expr);
 }
 
-std::string doubleToString(double value, int precision) {
+string doubleToString(double value, int precision) {
     std::ostringstream out;
     out.precision(precision);
     out << std::fixed << value;
-    std::string strOut = out.str();
+    string strOut = out.str();
     char currChar = strOut[strOut.length() - 1];
     while ((currChar == '0' || currChar == '.') && strOut.length() > 1) {
         strOut.erase(strOut.length() - 1, 1);
@@ -446,36 +449,47 @@ std::string doubleToString(double value, int precision) {
     return strOut;
 }
 
-std::string doubleToString(double value) {
+string doubleToString(double value) {
     return doubleToString(value, 5);
 }
 
-std::string addSymbols(std::string input, unsigned int targetLength, std::string symbol) {
+string addSymbols(string input, unsigned int targetLength, string symbol, bool center = false) {
     int spaces = targetLength - input.length();
-    for (int i = 0; i < spaces; i++) {
-        input.append(symbol);
+    if (center) {
+        int left = spaces / 2;
+        int right = spaces - left;
+        for (int i = 0; i < left; i++) {
+            input.insert(0, symbol);
+        }
+        for (int i = 0; i < right; i++) {
+            input.append(symbol);
+        }
+    } else {
+        for (int i = 0; i < spaces; i++) {
+            input.append(symbol);
+        }
     }
     return input;
 }
 
-std::string addSpaces(std::string input, unsigned int targetLength) {
+string addSpaces(string input, unsigned int targetLength) {
     return addSymbols(input, targetLength, " ");
 }
 
-std::string ltrim(const std::string s) {
-    return std::regex_replace(s, std::regex("^\\s+"), std::string(""));
+string ltrim(const string s) {
+    return std::regex_replace(s, std::regex("^\\s+"), string(""));
 }
 
-std::string rtrim(const std::string s) {
-    return std::regex_replace(s, std::regex("\\s+$"), std::string(""));
+string rtrim(const string s) {
+    return std::regex_replace(s, std::regex("\\s+$"), string(""));
 }
 
-std::string trim(const std::string s) {
+string trim(const string s) {
     return ltrim(rtrim(s));
 }
 
 void continueOrExit() {
-    std::string input = displayWarningWithInput(colors::DEFAULT, "Продолжить?\n");
+    string input = displayWarningWithInput(colors::DEFAULT, "Продолжить?\n");
     if (!(input == "yes" || input == "y" || input == "1")) {
         exit(-15);
     }
@@ -485,7 +499,7 @@ double lerp(double from, double to, double progress) {
     return from * (1 - progress) + to * progress;
 }
 
-int displaySelection(std::string* options, int optionCount) {
+int displaySelection(string* options, int optionCount) {
 
     int offset = getConsoleCursorPosition().Y;
     int counter = 0;
@@ -535,7 +549,7 @@ int displaySelection(std::string* options, int optionCount) {
     }
 }
 
-bool* displayMultiSelection(std::string* options, int optionCount) {
+bool* displayMultiSelection(string* options, int optionCount) {
 
     bool* selectedFunctions = new bool[optionCount];
     for (int i = 0; i < optionCount; i++) {
@@ -595,8 +609,8 @@ bool* displayMultiSelection(std::string* options, int optionCount) {
     }
 }
 
-std::vector<Vector2> getPVector(std::vector<Vector2> points) {
-    std::vector<Vector2> P_vector;
+vector<Vector2> getPVector(vector<Vector2> points) {
+    vector<Vector2> P_vector;
     P_vector.push_back(points[0] + points[1] * 2);
     for (int i = 1; i < points.size() - 2; i++) {
         P_vector.push_back(points[i] * 4 + points[i + 1] * 2);
@@ -605,8 +619,8 @@ std::vector<Vector2> getPVector(std::vector<Vector2> points) {
     return P_vector;
 }
 
-std::vector<Vector2> getBVector(std::vector<Vector2> points, std::vector<Vector2> A_vector) {
-    std::vector<Vector2> B_vector;
+vector<Vector2> getBVector(vector<Vector2> points, vector<Vector2> A_vector) {
+    vector<Vector2> B_vector;
     for (int i = 0; i < A_vector.size() - 1; i++) {
         B_vector.push_back(points[i + 1] * 2 - A_vector[i + 1]);
     }
@@ -614,7 +628,7 @@ std::vector<Vector2> getBVector(std::vector<Vector2> points, std::vector<Vector2
     return B_vector;
 }
 
-std::vector<Vector2> solve_tridiagonal_bezier(std::vector<Vector2>& P_vector) {
+vector<Vector2> solve_tridiagonal_bezier(vector<Vector2>& P_vector) {
 
     int size = P_vector.size();
 
@@ -671,7 +685,7 @@ std::vector<Vector2> solve_tridiagonal_bezier(std::vector<Vector2>& P_vector) {
     return P_vector;
 }
 
-void printGraph(std::vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, std::string gnuplotTitle = "") {
+void printGraph(vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, string gnuplotTitle = "") {
     using namespace std;
 
     vector<vector<double>> x_points;
@@ -775,22 +789,26 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
     delete[] field;
 }
 
-void printLayer(std::vector<int> column_widths, std::vector<std::string> elems, char start, char middle, char end) {
-
+void printLayer(vector<int> column_widths, vector<string> column_elems,
+    string start, string middle, string end,
+    colors border_color, colors text_color, string fillWith = " ") {
+    bool noElems = column_elems.empty();
+    for (int column = 0; column < column_widths.size(); column++) {
+        coutWithColor(border_color, column == 0 ? start : middle);
+        coutWithColor(text_color, addSymbols(noElems ? "" : column_elems[column], column_widths[column], fillWith, true));
+    }
+    coutWithColor(border_color, end + "\n");
 }
 
-void printLayer(std::vector<int> column_widths, std::string elem, char start, char middle, char end) {
-
-}
-
-void printTable(std::vector<std::vector<double>> columns, std::vector<std::string> titles, std::vector<double> highlight_flags = {},
+void printTable(vector<string> titles, vector<vector<string>> columns, vector<bool> highlight_flags = {},
     colors border_color = colors::YELLOW, colors text_color = colors::DEFAULT,
     colors highlight_color = colors::LIGHT_GREEN,
-    std::string bottom_info = "", colors bottom_info_color = colors::CYAN) {
+    string bottom_info = "", colors bottom_info_color = colors::CYAN) {
     using namespace std;
 
     int columns_len = columns.size();
     int elems = columns[0].size();
+
     for (int column = 1; column < columns_len; column++) {
         if (elems != columns[column].size()) {
             coutWithColor(colors::LIGHT_RED, "Несоотвествие размера колонок\n");
@@ -802,37 +820,42 @@ void printTable(std::vector<std::vector<double>> columns, std::vector<std::strin
     for (int column = 0; column < columns_len; column++) {
         int maxWidth = 0;
         for (int elem = 0; elem < elems; elem++) {
-            maxWidth = max(maxWidth, (int)to_string(columns[column][elem]).length());
+            maxWidth = max(maxWidth, (int)columns[column][elem].length());
         }
-        column_widths.push_back(max((int)titles[column].length(), maxWidth) + 2);
-        coutWithColor(border_color, column == 0 ? "╭" : "┬");
-        for (int i = 0; i < column_widths.back(); i++) {
-            coutWithColor(border_color, "─");
+        maxWidth = max((int)titles[column].length(), maxWidth) + 2;
+        if ((maxWidth - titles[column].length()) % 2 != 0) {
+            maxWidth --;
         }
+        column_widths.push_back(maxWidth);
     }
-    coutWithColor(border_color, "╮\n");
 
-    for (int column = 0; column < columns_len; column++) {
-        coutWithColor(border_color, "│");
-        coutWithColor(text_color, addSpaces(titles[column], column_widths[column]));
-    }
-    coutWithColor(border_color, "│\n");
+    printLayer(column_widths, {    }, "╭", "┬", "╮", border_color, border_color, "─");
+    printLayer(column_widths, titles, "│", "│", "│", border_color, text_color);
+    printLayer(column_widths, {    }, "├", "┼", "┤", border_color, border_color, "─");
 
-    coutWithColor(border_color, "├");
-    for (int column = 0; column < columns_len; column++) {
-        coutWithColor(text_color, addSymbols("", column_widths[column], "─"));
-        if (column < columns_len - 1) {
-            coutWithColor(border_color, "┼");
-        }
-    }
-    coutWithColor(border_color, "┤\n");
-
+    bool highlight = !highlight_flags.empty();
     for (int elem = 0; elem < elems; elem++) {
         for (int column = 0; column < columns_len; column++) {
             coutWithColor(border_color, "│");
-            coutWithColor(text_color, addSpaces(to_string(columns[column][elem]), column_widths[column]));
+            coutWithColor(highlight && highlight_flags[elem] ? highlight_color : text_color, addSpaces(columns[column][elem], column_widths[column]));
         }
         coutWithColor(border_color, "│\n");
     }
-   
+
+    if (!bottom_info.empty()) {
+        int fullWidth = 0;
+        for (auto& n : column_widths)
+            fullWidth += n;
+        std::cout << fullWidth << std::endl;
+        std::cout << bottom_info.size() << std::endl;
+        fullWidth += column_widths.size() - 1;
+        printLayer(column_widths, {    }, "├", "┴", "┤", border_color, border_color, "─");
+        coutWithColor(border_color, "│");
+        coutWithColor(bottom_info_color, addSpaces(bottom_info, fullWidth));
+        coutWithColor(border_color, "│\n");
+        printLayer(column_widths, {    }, "╰", "─", "╯", border_color, border_color, "─");
+    } else {
+        printLayer(column_widths, {    }, "╰", "┴", "╯", border_color, border_color, "─");
+    }
+
 }
