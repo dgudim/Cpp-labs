@@ -1,5 +1,9 @@
 #include <sstream>
+
 #include <string>
+#include <locale>
+#include <codecvt>
+
 #include <limits>
 #include <regex>
 #include <iostream>
@@ -454,7 +458,8 @@ string doubleToString(double value) {
 }
 
 string addSymbols(string input, unsigned int targetLength, string symbol, bool center = false) {
-    int spaces = targetLength - input.length();
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    int spaces = targetLength - converter.from_bytes(input).length();
     if (center) {
         int left = spaces / 2;
         int right = spaces - left;
@@ -846,8 +851,6 @@ void printTable(vector<string> titles, vector<vector<string>> columns, vector<bo
         int fullWidth = 0;
         for (auto& n : column_widths)
             fullWidth += n;
-        std::cout << fullWidth << std::endl;
-        std::cout << bottom_info.size() << std::endl;
         fullWidth += column_widths.size() - 1;
         printLayer(column_widths, {    }, "├", "┴", "┤", border_color, border_color, "─");
         coutWithColor(border_color, "│");

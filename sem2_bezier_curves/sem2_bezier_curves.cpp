@@ -86,20 +86,13 @@ int main() {
 
 
 void displayTableOrig(vector<Vector2> points) {
-    coutWithColor(colors::YELLOW, "╭───┬───────────┬───────────╮\n");
-    coutWithColor(colors::YELLOW, "│ I │     X     │     Y     │\n");
-    coutWithColor(colors::YELLOW, "├───┼───────────┼───────────┤\n");
-    colors currentColor = colors::DEFAULT;
+    vector<string> I, X, Y;
     for (int i = 0; i < points.size(); i++) {
-        coutWithColor(colors::YELLOW, "│");
-        coutWithColor(currentColor, addSpaces(to_string(i + 1), 3));
-        coutWithColor(colors::YELLOW, "│");
-        coutWithColor(currentColor, addSpaces(to_string(points[i].getX()), 11));
-        coutWithColor(colors::YELLOW, "│");
-        coutWithColor(currentColor, addSpaces(to_string(points[i].getY()), 11));
-        coutWithColor(colors::YELLOW, "│\n");
+        I.push_back(to_string(i + 1));
+        X.push_back(to_string(points[i].getX()));
+        Y.push_back(to_string(points[i].getY()));
     }
-    coutWithColor(colors::YELLOW, "╰───┴───────────┴───────────╯\n");
+    printTable({ "I", "X", "Y" }, { I, X, Y });
 }
 
 void displayTableInterpolated(vector<Vector2> points, vector<bool> highlight_flags) {
