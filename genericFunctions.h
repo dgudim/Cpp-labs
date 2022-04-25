@@ -770,3 +770,41 @@ void printGraph(std::vector<Converter> graphs, double from, double to, double st
     }
     delete[] field;
 }
+
+void printTable(std::vector<vector<double>> columns, std::vector<string> titles, std::vector<double> highlight_flags = {},
+    colors border_color = colors::YELLOW, colors text_color = colors::DEFAULT,
+    colors highlight_color = colors::LIGHT_GREEN,
+    std::string bottom_info, colors bottom_info_color = colors::CYAN) {
+    using namespace std;
+
+    int columns_len = columns.size();
+    int elems = columns[0].size();
+    for (int column = 1; column < columns_len; column++) {
+        if (elems != columns[column].size()) {
+            coutWithColor(colors::LIGHT_RED, "Несоотвествие размера колонок\n");
+        }
+        elems = min(elems, (int)columns[column].size());
+    }
+
+    vector<int> column_widths;
+    for (int column = 0; column < columns_len; column++) {
+        int maxWidth = 0;
+        for (int elem = 0; elem < elems; elem++) {
+            maxWidth = max(maxWidth, (int)to_string(columns[column][elem]).length());
+        }
+        column_widths.push_back(maxWidth + 2);
+        coutWithColor(border_color, column == 0 ? "╭" : "┬");
+        for (int i = 0; i < maxWidth + 2; i++) {
+            coutWithColor(border_color, "─");
+        }
+    }
+    coutWithColor(border_color, "╮");
+    
+    for (int elem = 0; elem < elems; elem++) {
+        coutWithColor(border_color, "│");
+        for (int column = 0; column < columns_len; column++) {
+            coutWithColor(text_color, addSpaces(to_string(columns[column][elem]), column_widths[column]));
+        }
+    }
+    coutWithColor(border_color, "│");
+}
