@@ -11,32 +11,36 @@ GREEN='\033[1;34m'
 MAGENTA='\033[1;35m'
 NC='\033[0m' # No Color
 
-echo "" > hashes.txt
-
 hash_generic_functions=$(md5sum ./genericFunctions.h | cut -d" " -f1)
 
-if ! grep -q $hash_generic_functions "hashes_old.txt"; then
+if ! grep -q $hash_generic_functions "header_hash"; then
     printf " ${MAGENTA}global header changed, recompiling all\n"
-    echo "" > hashes_old.txt
+    echo $hash_generic_functions > header_hash
+
+    for elem in $(find ./$1 -type f -iregex ".*\.cpp")
+    do
+        name=$(echo "$elem" | cut -f2 -d'/')
+        echo "" > $name/hash
+    done
+
 fi
 
-for elem in $(find . -type f -iregex ".*\.cpp")
+for elem in $(find ./$1 -type f -iregex ".*\.cpp")
 do
     name=$(echo "$elem" | cut -f2 -d'/')
     printf "${YELLOW}compiling: $name\n${NC}"
     hash=$(md5sum $elem | cut -d" " -f1)
     
-    if grep -q $hash "hashes_old.txt"; then
+    if grep -q $hash "$name/hash"; then
         printf " ${MAGENTA}up-to-date, skipping\n"
         skipped=$((skipped+1))
-        echo "$hash" >> hashes.txt
         continue
     fi
     
     ( if g++ $elem -o ./compiled_binaries_linux/$name -I $name -I . ; then
             printf "${GREEN}compiled: $name\n${NC}"
             echo -n "c" >> compiled_tmp
-            echo "$hash" >> hashes.txt
+            echo "$hash" > $name/hash
         else
             printf "${RED}failed: $name\n${NC}"
             echo -n "f" >> failed_tmp
@@ -45,9 +49,6 @@ done
 
 # wait for all async compilations to finish
 wait
-
-echo "$hash_generic_functions" >> hashes.txt
-cat hashes.txt > hashes_old.txt
 
 compiled=$(wc -m < compiled_tmp)
 failed=$(wc -m < failed_tmp)

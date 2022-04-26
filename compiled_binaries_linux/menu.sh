@@ -1,6 +1,6 @@
 #!/bin/bash
 cd ..
-./compile_all.sh
+./compile_all.sh $1
 cd compiled_binaries_linux
 
 printf "\033[0m"
