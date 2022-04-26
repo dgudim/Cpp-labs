@@ -1,7 +1,6 @@
 #include "../genericFunctions.h"
 #include <iostream>
 #include <math.h>
-#include <sys/ioctl.h>
 
 using namespace std;
 
@@ -281,11 +280,10 @@ void printTreeVertical(TreeNode* root, bool animate = false) {
     }
     int layers = getHeight(root);
 
-    winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-
+    COORD size = getConsoleDimensions();
     COORD pos = getConsoleCursorPosition();
-    printNode(w.ws_col / 2, pos.Y + 1, root, 0, 1 << layers, animate);
+    
+    printNode(size.X / 2, pos.Y + 1, root, 0, 1 << layers, animate);
     setConsoleCursorPosition(0, pos.Y + layers * 2 + 1);
 }
 

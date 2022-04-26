@@ -84,7 +84,6 @@ int main() {
     }
 }
 
-
 void displayTableOrig(vector<Vector2> points) {
     vector<string> I, X, Y;
     for (int i = 0; i < points.size(); i++) {

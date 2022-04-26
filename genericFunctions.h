@@ -13,6 +13,7 @@
 #ifdef __linux__
 #include <termios.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 using std::string, std::vector;
 
@@ -285,6 +286,23 @@ COORD getConsoleCursorPosition() {
 #endif
 }
 
+COORD getConsoleDimensions() {
+#ifdef __linux__
+    winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return { w.ws_col, w.ws_row };
+#elif _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int columns, rows;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+    return {rows, columns};
+#endif
+}
+
 colors mapToColor(int n, int min = 0, int max = colors_count - 1, bool loop = true) {
     max = std::max(min, max);
     if (!loop) {
@@ -325,7 +343,11 @@ void coutWithColor(colors color, string message, int delay = 0)
     setConsoleColor(color);
     std::cout << message << std::flush;
     setConsoleColor(colors::DEFAULT);
+#ifdef __linux__
     usleep(delay * 1000);
+#elif _WIN32
+    Sleep(delay);
+#endif
 }
 
 void coutWithColorAtPos(colors color, string message, int x, int y, int delay = 0) {
@@ -829,7 +851,7 @@ void printTable(vector<string> titles, vector<vector<string>> columns, vector<bo
         }
         maxWidth = max((int)titles[column].length(), maxWidth) + 2;
         if ((maxWidth - titles[column].length()) % 2 != 0) {
-            maxWidth --;
+            maxWidth--;
         }
         column_widths.push_back(maxWidth);
     }
