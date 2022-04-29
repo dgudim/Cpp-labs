@@ -49,6 +49,7 @@ int main() {
             while (true) {
                 divisions = inputData("Введите шаг: ");
                 if (divisions > 0) {
+                    divisions += divisions % 2 != 0;
                     break;
                 }
                 coutWithColor(colors::LIGHT_RED, "Количество разбиений не может быть меньше или = 0, повторите ввод\n");
@@ -92,7 +93,6 @@ int main() {
 double simpson_rule(double a, double b, int n) {
     double h = (b - a) / n;
 
-    // Internal sample points, there should be n - 1 of them
     double sum_odds = 0;
     for (int i = 1; i < n; i += 2) {
         sum_odds += F(a + i * h);
