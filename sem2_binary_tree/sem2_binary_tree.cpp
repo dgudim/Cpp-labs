@@ -253,7 +253,7 @@ TreeNode* generateSampleTree(int layers) {
     int nodes_count = (1 << layers) - 1; // 1 << layers = pow(2, layers)
     vector<TreeNode*> nodes;
     for (int i = 0; i < nodes_count; i++) {
-        nodes.push_back(new TreeNode(to_string(i), "data" + to_string(i)));
+        nodes.push_back(new TreeNode("key" + to_string(i), "data" + to_string(i)));
     }
     return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
 }
@@ -267,8 +267,12 @@ void printNode(int x, int y, TreeNode* node, int layer, int width, bool animate)
         coutWithColorAtPos(colors::RED, "◈", x, y, delay_);
         return;
     }
-    int num_offset = (node->key_str.length() - 1) / 2;
-    coutWithColorAtPos(colors::LIGHT_YELLOW, node->key_str, x - num_offset, y, delay_);
+    string data_to_print = node->key_str;
+    if (data_to_print.length() > 6) {
+        data_to_print = data_to_print.substr(0, 6) + "-";
+    }
+    int num_offset = (data_to_print.length() - 1) / 2;
+    coutWithColorAtPos(colors::LIGHT_YELLOW, data_to_print, x - num_offset, y, delay_);
     if (layer >= 0) {
         coutWithColorAtPos(trunk_color, "┴", x, y + 1, delay_);
         for (int i = 1; i < width; i++) {
