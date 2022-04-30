@@ -3,7 +3,7 @@
 
 using namespace std;
 
-long hash__(string str) {
+uint32_t hash__(string str) {
     uint32_t hash = 3323198485ul;
     for (char ch : str) {
         hash ^= ch;
@@ -50,6 +50,7 @@ int main() {
 
     for (char a = 'a'; a <= 'z'; a++) {
         thread thread_object = thread(test, a);
+        thread_object.join();
         cout << "." << flush;
     }
    

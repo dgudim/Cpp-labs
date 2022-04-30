@@ -4,26 +4,34 @@
 
 using namespace std;
 
+uint32_t hash_string(string str);
+
 struct TreeNode {
-    TreeNode(int k = -100, string dat = "") {
+    TreeNode(string k = "", string dat = "") {
         right = nullptr;
         left = nullptr;
-        key = k;
+        key_str = k;
+        key_hash = hash_string(key_str);
         data = dat;
     }
-    int key;
+    uint32_t key_hash;
+    string key_str;
     string data;
     TreeNode* right;
     TreeNode* left;
 };
 
-TreeNode* findByKey(TreeNode* root, int key);
+TreeNode* findByKey(TreeNode* root, uint32_t key);
+
+string inputKey(string message){
+    return inputData(message, new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
+}
 
 TreeNode* addElement(TreeNode* root, bool& success) {
 
-    int key = (int)inputData("Ключ: ");
+    string key = inputKey("Ключ: ");
 
-    if (findByKey(root, key)) {
+    if (findByKey(root, hash_string(key))) {
         coutWithColor(colors::LIGHT_RED, "Дубликат ключа, повторите ввод\n");
         success = false;
         return root;
@@ -35,7 +43,7 @@ TreeNode* addElement(TreeNode* root, bool& success) {
 
     if (root) {
         while (temp) {
-            if (elem->key > temp->key) {
+            if (elem->key_hash > temp->key_hash) {
                 if (temp->right) {
                     temp = temp->right;
                 } else {
@@ -66,14 +74,14 @@ TreeNode* getMinNode(TreeNode* node) {
     return current;
 }
 
-TreeNode* deleteByKey(TreeNode* root, int key) {
+TreeNode* deleteByKey(TreeNode* root, uint32_t key) {
 
     if (!root) return root;
 
-    if (key < root->key)
+    if (key < root->key_hash)
         root->left = deleteByKey(root->left, key);
 
-    else if (key > root->key)
+    else if (key > root->key_hash)
         root->right = deleteByKey(root->right, key);
 
     else {
@@ -93,9 +101,10 @@ TreeNode* deleteByKey(TreeNode* root, int key) {
 
         TreeNode* temp = getMinNode(root->right);
 
-        root->key = temp->key;
+        root->key_hash = temp->key_hash;
+        root->key_str = temp->key_str;
 
-        root->right = deleteByKey(root->right, temp->key);
+        root->right = deleteByKey(root->right, temp->key_hash);
     }
     return root;
 }
@@ -114,7 +123,7 @@ void printTreeHorizontal(const string& prefix, const TreeNode* node, bool isLeft
         coutWithColor(colors::LIGHTER_BLUE, prefix);
         coutWithColor(colors::LIGHT_BLUE, isLeft ? "├──" : "└──");
 
-        coutWithColor(colors::LIGHT_YELLOW, to_string(node->key) + "\n");
+        coutWithColor(colors::LIGHT_YELLOW, node->key_str + "\n");
 
         printTreeHorizontal(prefix + (isLeft ? "│   " : "    "), node->left, true);
         printTreeHorizontal(prefix + (isLeft ? "│   " : "    "), node->right, false);
@@ -149,7 +158,7 @@ void inorderLeftRootRight_infix(TreeNode* root)
 {
     if (root) {
         inorderLeftRootRight_infix(root->left);
-        cout << root->key << " | ";
+        cout << root->key_str << " | ";
         inorderLeftRootRight_infix(root->right);
     }
 }
@@ -157,7 +166,7 @@ void inorderLeftRootRight_infix(TreeNode* root)
 void inorderRootLeftRight_prefix(TreeNode* root)
 {
     if (root) {
-        cout << root->key << " | ";
+        cout << root->key_str << " | ";
         inorderRootLeftRight_prefix(root->left);
         inorderRootLeftRight_prefix(root->right);
     }
@@ -168,7 +177,7 @@ void inorderLeftRightRoot_postfix(TreeNode* root)
     if (root) {
         inorderLeftRightRoot_postfix(root->left);
         inorderLeftRightRoot_postfix(root->right);
-        cout << root->key << " | ";
+        cout << root->key_str << " | ";
     }
 }
 
@@ -178,25 +187,25 @@ int getHeight(TreeNode* root)
     return max(getHeight(root->left), getHeight(root->right)) + 1;
 }
 
-TreeNode* findByKey(TreeNode* root, int key) {
+TreeNode* findByKey(TreeNode* root, uint32_t key) {
     if (!root) return nullptr;
-    if (root->key == key) return root;
-    return findByKey(key < root->key ? root->left : root->right, key);
+    if (root->key_hash == key) return root;
+    return findByKey(key < root->key_hash ? root->left : root->right, key);
 }
 
-TreeNode* findByKey(TreeNode* root, TreeNode*& parent, int key) {
+TreeNode* findByKey(TreeNode* root, TreeNode*& parent, uint32_t key) {
     if (!root) return nullptr;
-    if (root->key == key) return root;
+    if (root->key_hash == key) return root;
     parent = root;
-    return findByKey(key < root->key ? root->left : root->right, parent, key);
+    return findByKey(key < root->key_hash ? root->left : root->right, parent, key);
 }
 
-void printByKey(TreeNode* root, int key) {
+void printByKey(TreeNode* root, string key) {
     TreeNode* r = nullptr;
-    TreeNode* node = findByKey(root, r, key);
+    TreeNode* node = findByKey(root, r, hash_string(key));
     clearScreen();
     if (node) {
-        coutWithColor(colors::LIGHTER_BLUE, "Информация по ключу " + to_string(key) + ": " + node->data + " (родитель: " + (r ? to_string(r->key) : string("null")) + ")\n");
+        coutWithColor(colors::LIGHTER_BLUE, "Информация по ключу " + key + ": " + node->data + " (родитель: " + (r ? r->key_str : string("null")) + ")\n");
         return;
     }
     coutWithColor(colors::LIGHT_RED, "В дереве нет такого ключа\n");
@@ -244,7 +253,7 @@ TreeNode* generateSampleTree(int layers) {
     int nodes_count = (1 << layers) - 1; // 1 << layers = pow(2, layers)
     vector<TreeNode*> nodes;
     for (int i = 0; i < nodes_count; i++) {
-        nodes.push_back(new TreeNode(i, to_string(i)));
+        nodes.push_back(new TreeNode(to_string(i), "data" + to_string(i)));
     }
     return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
 }
@@ -258,8 +267,8 @@ void printNode(int x, int y, TreeNode* node, int layer, int width, bool animate)
         coutWithColorAtPos(colors::RED, "◈", x, y, delay_);
         return;
     }
-    int num_offset = (to_string(node->key).length() - 1) / 2;
-    coutWithColorAtPos(colors::LIGHT_YELLOW, to_string(node->key), x - num_offset, y, delay_);
+    int num_offset = (node->key_str.length() - 1) / 2;
+    coutWithColorAtPos(colors::LIGHT_YELLOW, node->key_str, x - num_offset, y, delay_);
     if (layer >= 0) {
         coutWithColorAtPos(trunk_color, "┴", x, y + 1, delay_);
         for (int i = 1; i < width; i++) {
@@ -327,8 +336,8 @@ int main()
             }
             y_offset = getHeight(root) * 2 + 2;
             coutWithColorAtPos(colors::LIGHT_BLUE, "Информация о дереве", 70, y_offset + 1);
-            coutWithColorAtPos(colors::LIGHT_GREEN, "Максимальный элемент: " + to_string(max->key), 70, y_offset + 2);
-            coutWithColorAtPos(colors::LIGHT_GREEN, "Минимальный элемент: " + to_string(min->key), 70, y_offset + 3);
+            coutWithColorAtPos(colors::LIGHT_GREEN, "Максимальный элемент : " + max->key_str + " (" + to_string(max->key_hash) + ")", 70, y_offset + 2);
+            coutWithColorAtPos(colors::LIGHT_GREEN, "Минимальный элемент: " + min->key_str + " (" + to_string(min->key_hash) + ")", 70, y_offset + 3);
             coutWithColorAtPos(colors::LIGHT_GREEN, "Глубина дерева: " + to_string(getHeight(root)), 70, y_offset + 4);
             coutWithColorAtPos(colors::LIGHT_GREEN, "Количество листьев: " + to_string(countLeaves(root)), 70, y_offset + 5);
             coutWithColorAtPos(colors::LIGHT_GREEN, "Количество элементов: " + to_string(countNodes(root)), 70, y_offset + 6);
@@ -372,13 +381,13 @@ int main()
 
             printOldTreeVertical(root);
 
-            root = deleteByKey(root, (int)inputData("Введите ключ для удаления: "));
+            root = deleteByKey(root, hash_string(inputKey("Введите ключ для удаления: ")));
             break;
         case 3:
 
             printOldTreeVertical(root);
 
-            temp = findByKey(root, temp2, (int)inputData("Введите ключ для удаления: "));
+            temp = findByKey(root, temp2, hash_string(inputKey("Введите ключ для удаления: ")));
 
             if (!temp) {
                 coutWithColor(colors::LIGHT_RED, "В дереве нет такого ключа\n");
@@ -402,7 +411,7 @@ int main()
             clearScreen();
             break;
         case 5:
-            printByKey(root, (int)inputData("Ключ: "));
+            printByKey(root, inputKey("Ключ: "));
             break;
         case 6:
             clearScreen();
@@ -429,4 +438,14 @@ int main()
         }
     }
 
+}
+
+uint32_t hash_string(string str) {
+    uint32_t hash = 3323198485ul;
+    for (char ch : str) {
+        hash ^= ch;
+        hash *= 0x5bd1e995;
+        hash ^= hash >> 15;
+    }
+    return hash;
 }
