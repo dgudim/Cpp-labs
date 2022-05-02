@@ -299,7 +299,7 @@ COORD getConsoleDimensions() {
     columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
-    return {rows, columns};
+    return { rows, columns };
 #endif
 }
 
@@ -883,4 +883,32 @@ void printTable(vector<string> titles, vector<vector<string>> columns, vector<bo
         printLayer(column_widths, {    }, "╰", "┴", "╯", border_color, border_color, "─");
     }
 
+}
+
+void printBarChart(vector<int> values, int maxHeightSubpixels, int bar_width, int gap) {
+    using namespace std;
+    vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"};
+    int bar_height = 8;
+    int maxHeightPixels = maxHeightSubpixels / bar_height;
+    int maxValue = *max_element(values.begin(), values.end());
+    COORD cursor_pos = getConsoleCursorPosition();
+    int wholePart, restPart, currentValue;
+
+    int barXPos;
+    colors barColor;
+
+    for (int i = 0; i < values.size(); i++) {
+        currentValue = (int)((values[i] * maxHeightSubpixels) / (float)maxValue);
+        wholePart = currentValue / bar_height;
+        restPart = currentValue - wholePart * bar_height;
+        for (int w = 0; w < bar_width; w++) {
+            barXPos = cursor_pos.X + w + i * (bar_width + gap);
+            barColor = mapToColor(i, 0, values.size());
+            coutWithColorAtPos(barColor, bars[restPart], barXPos, cursor_pos.Y - wholePart + 1);
+            for (int p = 0; p < wholePart; p++) {
+                coutWithColorAtPos(barColor, bars[bar_height - 1], barXPos, cursor_pos.Y + maxHeightPixels - p);
+            }
+        }
+    }
+    setConsoleCursorPosition(cursor_pos.X, cursor_pos.Y + maxHeightPixels + 1);
 }
