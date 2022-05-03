@@ -13,6 +13,17 @@ struct ArrayStruct {
     string data;
 };
 
+struct Metrics {
+    int iterations;
+    int changes;
+    unsigned int time;
+    Metrics(int iterations_, int changes_, unsigned int time_) {
+        iterations = iterations_;
+        changes = changes_;
+        time = time_;
+    }
+};
+
 typedef vector<ArrayStruct>(*SortFunction)(vector<ArrayStruct>, unsigned int&, unsigned int&);
 
 bool checkIfSorted(vector<ArrayStruct> array) {
@@ -130,7 +141,7 @@ vector<ArrayStruct> shellSort(vector<ArrayStruct> orig, unsigned int& iterations
     return orig;
 }
 
-Vector2 benchmarkSort(SortFunction sortFunction, string name, vector<ArrayStruct>& orig) {
+Metrics benchmarkSort(SortFunction sortFunction, string name, vector<ArrayStruct>& orig) {
     unsigned int iterations = 0, changes = 0;
     auto start = high_resolution_clock::now();
     vector<ArrayStruct> sorted = sortFunction(orig, iterations, changes);
@@ -151,30 +162,42 @@ Vector2 benchmarkSort(SortFunction sortFunction, string name, vector<ArrayStruct
     } else {
         coutWithColor(colors::LIGHT_RED, "Ошибка сортировки для " + name + "!\n");
     }
-    return { iterations, changes };
+    return { iterations, changes, duration.count()};
 }
 
 int main() {
+    int n = 4;
 
+start:
     vector<ArrayStruct> orig;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < n; i++) {
         orig.push_back(ArrayStruct(rand(), ""));
     }
-    Vector2 bubble = benchmarkSort(bubbleSort, "сортировки пузырьком", orig);
-    Vector2 shaker = benchmarkSort(shakerSort, "шейкерной сортировки", orig);
-    Vector2 directSelection = benchmarkSort(directSelectionSort, "сортировки прямым выбором", orig);
-    Vector2 quick = benchmarkSort(quickSortWrapper, "быстрой сортировки", orig);
-    Vector2 shell = benchmarkSort(shellSort, "сортировки Шелла", orig);
+    Metrics bubble = benchmarkSort(bubbleSort, "сортировки пузырьком", orig);
+    Metrics shaker = benchmarkSort(shakerSort, "шейкерной сортировки", orig);
+    Metrics directSelection = benchmarkSort(directSelectionSort, "сортировки прямым выбором", orig);
+    Metrics quick = benchmarkSort(quickSortWrapper, "быстрой сортировки", orig);
+    Metrics shell = benchmarkSort(shellSort, "сортировки Шелла", orig);
 
     vector<int> values;
-    values.push_back(1);
-    values.push_back(2);
-    values.push_back(3);
+    values.push_back(bubble.time);
+    values.push_back(shaker.time);
+    values.push_back(directSelection.time);
+    values.push_back(quick.time);
+    values.push_back(shell.time);
 
-    printBarChart(values, 16, 4, 2);
+    printBarChart(values, 64, 4, 2);
 
     coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы выйти\n");
-    _getch();
+    char w = _getch();
+    if(w == '\n'){
+        n*=2;
+        if(n > 500){
+            n = 4;
+        }
+        clearScreen();
+        goto start;
+    }
 
     return 0;
 }

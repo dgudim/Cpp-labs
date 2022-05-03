@@ -894,19 +894,19 @@ void printBarChart(vector<int> values, int maxHeightSubpixels, int bar_width, in
     COORD cursor_pos = getConsoleCursorPosition();
     int wholePart, restPart, currentValue;
 
-    int barXPos;
+    int barXPos, barYOffset = cursor_pos.Y + maxHeightPixels;
     colors barColor;
 
     for (int i = 0; i < values.size(); i++) {
-        currentValue = (int)((values[i] * maxHeightSubpixels) / (float)maxValue);
+        currentValue = (int)(values[i] / (float)maxValue * maxHeightSubpixels);
         wholePart = currentValue / bar_height;
         restPart = currentValue - wholePart * bar_height;
         for (int w = 0; w < bar_width; w++) {
             barXPos = cursor_pos.X + w + i * (bar_width + gap);
             barColor = mapToColor(i, 0, values.size());
-            coutWithColorAtPos(barColor, bars[restPart], barXPos, cursor_pos.Y - wholePart + 1);
+            coutWithColorAtPos(barColor, bars[restPart], barXPos, barYOffset - wholePart);
             for (int p = 0; p < wholePart; p++) {
-                coutWithColorAtPos(barColor, bars[bar_height - 1], barXPos, cursor_pos.Y + maxHeightPixels - p);
+                coutWithColorAtPos(barColor, bars[bar_height - 1], barXPos, barYOffset - p);
             }
         }
     }
