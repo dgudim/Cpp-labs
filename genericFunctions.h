@@ -499,8 +499,8 @@ string addSymbols(string input, unsigned int targetLength, string symbol, bool c
     return input;
 }
 
-string addSpaces(string input, unsigned int targetLength) {
-    return addSymbols(input, targetLength, " ");
+string addSpaces(string input, unsigned int targetLength, bool center = false) {
+    return addSymbols(input, targetLength, " ", center);
 }
 
 string ltrim(const string s) {
@@ -885,8 +885,19 @@ void printTable(vector<string> titles, vector<vector<string>> columns, vector<bo
 
 }
 
-void printBarChart(vector<int> values, int maxHeightSubpixels, int bar_width, int gap) {
+void printBarChart(vector<int> values, vector<string> titles, int maxHeightSubpixels, int bar_width, int gap) {
     using namespace std;
+
+    int elems;
+
+    if (values.size() != titles.size()) {
+        coutWithColor(colors::LIGHT_RED, "Несоотвествие размера колонок\n");
+    }
+    elems = min(values.size(), titles.size());
+    for (int i = 0; i < elems; i++) {
+        bar_width = max(bar_width, (int)titles[i].size());
+    }
+
     vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"};
     int bar_height = 8;
     int maxHeightPixels = maxHeightSubpixels / bar_height;
@@ -897,18 +908,19 @@ void printBarChart(vector<int> values, int maxHeightSubpixels, int bar_width, in
     int barXPos, barYOffset = cursor_pos.Y + maxHeightPixels;
     colors barColor;
 
-    for (int i = 0; i < values.size(); i++) {
+    for (int i = 0; i < elems; i++) {
         currentValue = (int)(values[i] / (float)maxValue * maxHeightSubpixels);
         wholePart = currentValue / bar_height;
         restPart = currentValue - wholePart * bar_height;
+        barXPos = cursor_pos.X + i * (bar_width + gap);
+        coutWithColorAtPos(colors::DEFAULT, addSpaces(titles[i], bar_width, true), barXPos, barYOffset + 1);
         for (int w = 0; w < bar_width; w++) {
-            barXPos = cursor_pos.X + w + i * (bar_width + gap);
-            barColor = mapToColor(i, 0, values.size());
-            coutWithColorAtPos(barColor, bars[restPart], barXPos, barYOffset - wholePart);
+            barColor = mapToColor(i, 0, elems);
+            coutWithColorAtPos(barColor, bars[restPart], barXPos + w, barYOffset - wholePart);
             for (int p = 0; p < wholePart; p++) {
-                coutWithColorAtPos(barColor, bars[bar_height - 1], barXPos, barYOffset - p);
+                coutWithColorAtPos(barColor, bars[bar_height - 1], barXPos + w, barYOffset - p);
             }
         }
     }
-    setConsoleCursorPosition(cursor_pos.X, cursor_pos.Y + maxHeightPixels + 1);
+    setConsoleCursorPosition(cursor_pos.X, cursor_pos.Y + maxHeightPixels + 3);
 }

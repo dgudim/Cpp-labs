@@ -14,10 +14,10 @@ struct ArrayStruct {
 };
 
 struct Metrics {
-    int iterations;
-    int changes;
-    unsigned int time;
-    Metrics(int iterations_, int changes_, unsigned int time_) {
+    unsigned int iterations;
+    unsigned int changes;
+    long int time;
+    Metrics(unsigned int iterations_ = 0, unsigned int changes_ = 0, long int time_ = 0) {
         iterations = iterations_;
         changes = changes_;
         time = time_;
@@ -123,7 +123,7 @@ vector<ArrayStruct> shellSort(vector<ArrayStruct> orig, unsigned int& iterations
     unsigned int n = orig.size();
     for (int gap = n / 2; gap > 0; gap /= 2) {
         for (int i = gap; i < n; i += 1) {
-            
+
             ArrayStruct temp = orig[i];
 
             int j;
@@ -162,42 +162,152 @@ Metrics benchmarkSort(SortFunction sortFunction, string name, vector<ArrayStruct
     } else {
         coutWithColor(colors::LIGHT_RED, "Ошибка сортировки для " + name + "!\n");
     }
-    return { iterations, changes, duration.count()};
+    return { iterations, changes, duration.count() };
+}
+
+void refillArray(vector<ArrayStruct>& values, int n) {
+    values.clear();
+    for (int i = 0; i < n; i++) {
+        values.push_back(ArrayStruct(rand(), ""));
+    }
 }
 
 int main() {
-    int n = 4;
-
-start:
+    int n = 25;
     vector<ArrayStruct> orig;
-    for (int i = 0; i < n; i++) {
-        orig.push_back(ArrayStruct(rand(), ""));
-    }
-    Metrics bubble = benchmarkSort(bubbleSort, "сортировки пузырьком", orig);
-    Metrics shaker = benchmarkSort(shakerSort, "шейкерной сортировки", orig);
-    Metrics directSelection = benchmarkSort(directSelectionSort, "сортировки прямым выбором", orig);
-    Metrics quick = benchmarkSort(quickSortWrapper, "быстрой сортировки", orig);
-    Metrics shell = benchmarkSort(shellSort, "сортировки Шелла", orig);
-
     vector<int> values;
-    values.push_back(bubble.time);
-    values.push_back(shaker.time);
-    values.push_back(directSelection.time);
-    values.push_back(quick.time);
-    values.push_back(shell.time);
+    vector<string> titles;
 
-    printBarChart(values, 64, 4, 2);
+    Metrics bubble, shaker, directSelection, quick, shell;
 
-    coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы выйти\n");
-    char w = _getch();
-    if(w == '\n'){
-        n*=2;
-        if(n > 500){
-            n = 4;
-        }
+    vector<SortFunction> sortingFunctions = { 
+        bubbleSort, 
+        shakerSort, 
+        directSelectionSort, 
+        quickSortWrapper, 
+        shellSort };
+    vector<string> sortingFunctions_displayNames = { 
+        "сортировки пузырьком", 
+        "шейкерной сортировки",
+        "сортировки прямым выбором",
+        "быстрой сортировки",
+        "сортировки Шелла"};
+    vector<string> sortingFunctions_fileNames = {
+        "bubble",
+        "shaker",
+        "directSelection",
+        "quick",
+        "shell" };
+
+    while (true) {
+        refillArray(orig, n);
         clearScreen();
-        goto start;
-    }
+        coutWithColor(colors::LIGHT_BLUE, "Текущий размер массива: " + to_string(n) + "\n");
+        coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
+        switch (displaySelection(new string[4]{
+                 "1.Ввести размер массива",
+                 "2.Отсортировать и посмотреть результаты",
+                 "3.График зависимости времени выполнения и измений массива от количества элементов",
+                 "4.Выйти"
+            }, 4)) {
+        case 1:
+            while (true) {
+                n = inputData("Введите размер: ");
+                if (n > 0) {
+                    break;
+                }
+                coutWithColor(colors::LIGHT_RED, "размер должен быть больше 0, повторите ввод\n");
+            }
+            break;
+        case 2:
 
+            values.clear();
+            titles.clear();
+
+            for (int i = 0; i < sortingFunctions.size(); i++) {
+
+            }
+
+            coutWithColor(mapToColor(0, 0, 5), "█");
+            bubble = benchmarkSort(bubbleSort, "сортировки пузырьком", orig);
+            coutWithColor(mapToColor(1, 0, 5), "█");
+            shaker = benchmarkSort(shakerSort, "шейкерной сортировки", orig);
+            coutWithColor(mapToColor(2, 0, 5), "█");
+            directSelection = benchmarkSort(directSelectionSort, "сортировки прямым выбором", orig);
+            coutWithColor(mapToColor(3, 0, 5), "█");
+            quick = benchmarkSort(quickSortWrapper, "быстрой сортировки", orig);
+            coutWithColor(mapToColor(4, 0, 5), "█");
+            shell = benchmarkSort(shellSort, "сортировки Шелла", orig);
+
+            values.clear();
+            values.push_back(bubble.time);
+            values.push_back(shaker.time);
+            values.push_back(directSelection.time);
+            values.push_back(quick.time);
+            values.push_back(shell.time);
+
+            titles.clear();
+            titles.push_back(doubleToString(bubble.time / (float)1000) + "ms");
+            titles.push_back(doubleToString(shaker.time / (float)1000) + "ms");
+            titles.push_back(doubleToString(directSelection.time / (float)1000) + "ms");
+            titles.push_back(doubleToString(quick.time / (float)1000) + "ms");
+            titles.push_back(doubleToString(shell.time / (float)1000) + "ms");
+
+            coutWithColor(colors::LIGHT_PURPLE, "\nВремя выполнения\n");
+            printBarChart(values, titles, 64, 8, 2);
+
+            values.clear();
+            values.push_back(bubble.changes);
+            values.push_back(shaker.changes);
+            values.push_back(directSelection.changes);
+            values.push_back(quick.changes);
+            values.push_back(shell.changes);
+
+            titles.clear();
+            titles.push_back(to_string(bubble.changes));
+            titles.push_back(to_string(shaker.changes));
+            titles.push_back(to_string(directSelection.changes));
+            titles.push_back(to_string(quick.changes));
+            titles.push_back(to_string(shell.changes));
+
+            coutWithColor(colors::LIGHT_PURPLE, "Количество изменений массива\n");
+            printBarChart(values, titles, 64, 8, 2);
+
+            coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
+            _getch();
+            break;
+        case 3:
+            for (int i = 10; i < 1500; i += 4) {
+                refillArray(orig, i);
+                bubble = benchmarkSort(bubbleSort, "сортировки пузырьком", orig);
+                shaker = benchmarkSort(shakerSort, "шейкерной сортировки", orig);
+                directSelection = benchmarkSort(directSelectionSort, "сортировки прямым выбором", orig);
+                quick = benchmarkSort(quickSortWrapper, "быстрой сортировки", orig);
+                shell = benchmarkSort(shellSort, "сортировки Шелла", orig);
+
+                system(("echo '" + to_string(i) + " " + to_string(bubble.time / (double)1000) + "' >> bubble").c_str());
+                system(("echo '" + to_string(i) + " " + to_string(shaker.time / (double)1000) + "' >> shaker").c_str());
+                system(("echo '" + to_string(i) + " " + to_string(directSelection.time / (double)1000) + "' >> directSelection").c_str());
+                system(("echo '" + to_string(i) + " " + to_string(quick.time / (double)1000) + "' >> quick").c_str());
+                system(("echo '" + to_string(i) + " " + to_string(shell.time / (double)1000) + "' >> shell").c_str());
+
+                clearScreen();
+            }
+            system("echo 'plot \
+            \"bubble\" smooth bezier,\
+            \"shaker\" smooth bezier,\
+             \"directSelection\" smooth bezier,\
+             \"quick\" smooth bezier,\
+             \"shell\" smooth bezier' | gnuplot --persist");
+            system("rm bubble");
+            system("rm shaker");
+            system("rm directSelection");
+            system("rm quick");
+            system("rm shell");
+            break;
+        case 4:
+            return 0;
+        };
+    }
     return 0;
 }
