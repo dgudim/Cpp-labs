@@ -174,19 +174,22 @@ void refillArray(vector<ArrayStruct>& values, int n) {
 
 int main() {
     int n = 25;
+
+    srand(time(NULL));
+
     vector<ArrayStruct> orig;
-    vector<int> values;
-    vector<string> titles;
+    vector<int> values_time, values_changes;
+    vector<string> titles_time, titles_changes;
 
-    Metrics bubble, shaker, directSelection, quick, shell;
+    Metrics algo_metrics;
 
-    vector<SortFunction> sortingFunctions = { 
-        bubbleSort, 
-        shakerSort, 
-        directSelectionSort, 
-        quickSortWrapper, 
+    vector<SortFunction> sortingFunctions = {
+        bubbleSort,
+        shakerSort,
+        directSelectionSort,
+        quickSortWrapper,
         shellSort };
-    vector<string> sortingFunctions_displayNames = { 
+    vector<string> sortingFunctions_displayNames = {
         "сортировки пузырьком", 
         "шейкерной сортировки",
         "сортировки прямым выбором",
@@ -198,6 +201,10 @@ int main() {
         "directSelection",
         "quick",
         "shell" };
+
+    unsigned int elems = min(min(sortingFunctions.size(), sortingFunctions_displayNames.size()), sortingFunctions_fileNames.size());
+
+    string plot_string, plot_string2;
 
     while (true) {
         refillArray(orig, n);
@@ -221,89 +228,63 @@ int main() {
             break;
         case 2:
 
-            values.clear();
-            titles.clear();
+            values_time.clear();
+            titles_time.clear();
+            values_changes.clear();
+            titles_changes.clear();
 
-            for (int i = 0; i < sortingFunctions.size(); i++) {
+            for (int i = 0; i < elems; i++) {
+                coutWithColor(mapToColor(i, 0, elems), "█");
+                algo_metrics = benchmarkSort(sortingFunctions[i], sortingFunctions_displayNames[i], orig);
 
+                values_time.push_back(algo_metrics.time);
+                titles_time.push_back(doubleToString(algo_metrics.time / (float)1000) + "ms");
+
+                values_changes.push_back(algo_metrics.changes);
+                titles_changes.push_back(to_string(algo_metrics.changes));
             }
 
-            coutWithColor(mapToColor(0, 0, 5), "█");
-            bubble = benchmarkSort(bubbleSort, "сортировки пузырьком", orig);
-            coutWithColor(mapToColor(1, 0, 5), "█");
-            shaker = benchmarkSort(shakerSort, "шейкерной сортировки", orig);
-            coutWithColor(mapToColor(2, 0, 5), "█");
-            directSelection = benchmarkSort(directSelectionSort, "сортировки прямым выбором", orig);
-            coutWithColor(mapToColor(3, 0, 5), "█");
-            quick = benchmarkSort(quickSortWrapper, "быстрой сортировки", orig);
-            coutWithColor(mapToColor(4, 0, 5), "█");
-            shell = benchmarkSort(shellSort, "сортировки Шелла", orig);
-
-            values.clear();
-            values.push_back(bubble.time);
-            values.push_back(shaker.time);
-            values.push_back(directSelection.time);
-            values.push_back(quick.time);
-            values.push_back(shell.time);
-
-            titles.clear();
-            titles.push_back(doubleToString(bubble.time / (float)1000) + "ms");
-            titles.push_back(doubleToString(shaker.time / (float)1000) + "ms");
-            titles.push_back(doubleToString(directSelection.time / (float)1000) + "ms");
-            titles.push_back(doubleToString(quick.time / (float)1000) + "ms");
-            titles.push_back(doubleToString(shell.time / (float)1000) + "ms");
-
             coutWithColor(colors::LIGHT_PURPLE, "\nВремя выполнения\n");
-            printBarChart(values, titles, 64, 8, 2);
-
-            values.clear();
-            values.push_back(bubble.changes);
-            values.push_back(shaker.changes);
-            values.push_back(directSelection.changes);
-            values.push_back(quick.changes);
-            values.push_back(shell.changes);
-
-            titles.clear();
-            titles.push_back(to_string(bubble.changes));
-            titles.push_back(to_string(shaker.changes));
-            titles.push_back(to_string(directSelection.changes));
-            titles.push_back(to_string(quick.changes));
-            titles.push_back(to_string(shell.changes));
+            printBarChart(values_time, titles_time, 64, 8, 2);
 
             coutWithColor(colors::LIGHT_PURPLE, "Количество изменений массива\n");
-            printBarChart(values, titles, 64, 8, 2);
+            printBarChart(values_changes, titles_changes, 64, 8, 2);
 
             coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
             _getch();
             break;
         case 3:
-            for (int i = 10; i < 1500; i += 4) {
+            for (int i = 1; i < 300; i += 1) {
                 refillArray(orig, i);
-                bubble = benchmarkSort(bubbleSort, "сортировки пузырьком", orig);
-                shaker = benchmarkSort(shakerSort, "шейкерной сортировки", orig);
-                directSelection = benchmarkSort(directSelectionSort, "сортировки прямым выбором", orig);
-                quick = benchmarkSort(quickSortWrapper, "быстрой сортировки", orig);
-                shell = benchmarkSort(shellSort, "сортировки Шелла", orig);
-
-                system(("echo '" + to_string(i) + " " + to_string(bubble.time / (double)1000) + "' >> bubble").c_str());
-                system(("echo '" + to_string(i) + " " + to_string(shaker.time / (double)1000) + "' >> shaker").c_str());
-                system(("echo '" + to_string(i) + " " + to_string(directSelection.time / (double)1000) + "' >> directSelection").c_str());
-                system(("echo '" + to_string(i) + " " + to_string(quick.time / (double)1000) + "' >> quick").c_str());
-                system(("echo '" + to_string(i) + " " + to_string(shell.time / (double)1000) + "' >> shell").c_str());
+                for (int el = 0; el < elems; el++) {
+                    algo_metrics = benchmarkSort(sortingFunctions[el], sortingFunctions_displayNames[el], orig);
+                    system(("echo '" + to_string(i) + " " + to_string(algo_metrics.time / (double)1000) + "' >> " + sortingFunctions_fileNames[el]).c_str());
+                    system(("echo '" + to_string(i) + " " + to_string(algo_metrics.changes) + "' >> " + sortingFunctions_fileNames[el] + "_changes").c_str());
+                }
 
                 clearScreen();
             }
-            system("echo 'plot \
-            \"bubble\" smooth bezier,\
-            \"shaker\" smooth bezier,\
-             \"directSelection\" smooth bezier,\
-             \"quick\" smooth bezier,\
-             \"shell\" smooth bezier' | gnuplot --persist");
-            system("rm bubble");
-            system("rm shaker");
-            system("rm directSelection");
-            system("rm quick");
-            system("rm shell");
+            plot_string.clear();
+            plot_string2.clear();
+
+            plot_string += "echo 'plot ";
+            plot_string2 += "echo 'plot ";
+            for (int el = 0; el < elems; el++) {
+                if (el > 0) {
+                    plot_string += ", ";
+                    plot_string2 += ", ";
+                }
+                plot_string += "\"" + sortingFunctions_fileNames[el] + "\" smooth bezier";
+                plot_string2 += "\"" + sortingFunctions_fileNames[el] + "_changes" + "\" smooth bezier";
+            }
+            plot_string += "' | gnuplot --persist";
+            plot_string2 += "' | gnuplot --persist";
+            system(plot_string.c_str());
+            system(plot_string2.c_str());
+            for (int el = 0; el < elems; el++) {
+                system(("rm " + sortingFunctions_fileNames[el]).c_str());
+                system(("rm " + sortingFunctions_fileNames[el] + "_changes").c_str());
+            }
             break;
         case 4:
             return 0;
