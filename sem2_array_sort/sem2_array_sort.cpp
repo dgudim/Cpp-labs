@@ -173,6 +173,7 @@ void refillArray(vector<ArrayStruct>& values, int n) {
 }
 
 int main() {
+    int a, b;
     int n = 25;
 
     srand(time(NULL));
@@ -254,7 +255,23 @@ int main() {
             _getch();
             break;
         case 3:
-            for (int i = 1; i < 300; i += 1) {
+            while (true) {
+                a = inputData("Введите начало промежутка: ");
+                if (a > 0) {
+                    break;
+                }
+                coutWithColor(colors::LIGHT_RED, "начало должно быть больше 0, повторите ввод\n");
+            }
+            
+            while (true) {
+                b = inputData("Введите конец промежутка: ");
+                if (b > a) {
+                    break;
+                }
+                coutWithColor(colors::LIGHT_RED, "конец должен быть больше начала, повторите ввод\n");
+            }
+
+            for (int i = a; i < b; i ++) {
                 refillArray(orig, i);
                 for (int el = 0; el < elems; el++) {
                     algo_metrics = benchmarkSort(sortingFunctions[el], sortingFunctions_displayNames[el], orig);
