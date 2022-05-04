@@ -97,7 +97,7 @@ double simpson_rule(double a, double b, int n) {
     for (int i = 1; i < n; i += 2) {
         sum_odds += F(a + i * h);
     }
-    double sum_evens = 0.0;
+    double sum_evens = 0;
     for (int i = 2; i < n; i += 2) {
         sum_evens += F(a + i * h);
     }
