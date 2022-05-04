@@ -36,34 +36,21 @@ int main() {
             }, 5);
         switch (choice) {
         case 1:
-            a = inputData("Введите a: ");
-            while (true) {
-                b = inputData("Введите b: ");
-                if (b > a) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "b должен быть больше a, повторите ввод\n");
-            }
+            a = inputData("Введите начало промежутка: ", false);
+            b = inputData("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;}, 
+                "Конец должен быть больше начала, повторите ввод: ");
             break;
         case 2:
-            while (true) {
-                divisions = inputData("Введите шаг: ");
-                if (divisions > 0) {
-                    divisions += divisions % 2 != 0;
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "Количество разбиений не может быть меньше или = 0, повторите ввод\n");
-            }
+            divisions = inputData("Введите шаг: ", false, strictPositive,
+                "Количество разбиений не может быть меньше или = 0, повторите ввод: ");
+            divisions += divisions % 2 != 0;
+            
             balanceByEps = false;
             break;
         case 3:
-            while (true) {
-                eps = inputData("Введите точность: ");
-                if (eps > 0.00001 && eps < 0.5) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "Точность слишком маленькая или слишком большая, повторите ввод\n");
-            }
+            eps = inputData("Введите новую точность: ", false, [](int input) -> bool {return input < 0.5 && input >= 0.000001;},
+                "Точность слишком большая или слишком маленькая (от 0.5 до 0.000001), повторите ввод: ");
+                
             balanceByEps = true;
             break;
         case 4:
@@ -80,8 +67,7 @@ int main() {
             } else {
                 coutWithColor(colors::CYAN, "Результат с количеством разбиений " + to_string(divisions) + " | " + to_string(simpson_rule(a, b, divisions)) + "\n");
             }
-            coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
-            _getch();
+            waitForButtonInput("Нажмите любую кнопку, чтобы вернуться в меню\n");
             break;
         case 5:
             return 0;

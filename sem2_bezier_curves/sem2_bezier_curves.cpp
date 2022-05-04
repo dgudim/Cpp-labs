@@ -33,47 +33,31 @@ int main() {
             }, 6);
         switch (choice) {
         case 1:
-            a = inputData("Введите a: ");
-            while (true) {
-                b = inputData("Введите b: ");
-                if (b > a) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "b должен быть больше a, повторите ввод\n");
-            }
+
+            a = inputData("Введите начало промежутка: ", false);
+            b = inputData("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;}, 
+                "Конец должен быть больше начала, повторите ввод: ");
+
             if (!balancedByStep) {
                 step = (b - a) / (double)(temp - 1);
             }
             break;
         case 2:
-            while (true) {
-                temp = inputData("Введите количество известных точек: ");
-                if (temp >= 2) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "Слишком маленькое количество известных точек, повторите ввод\n");
-            }
+            temp = inputData("Введите количество известных точек: ", false, [](int input) -> bool {return input >= 2;}, 
+                "Слишком маленькое количество известных точек, повторите ввод: ");
+
             step = (b - a) / (double)(temp - 1);
             balancedByStep = false;
             break;
         case 3:
-            while (true) {
-                step = inputData("Введите шаг: ");
-                if (step < (b - a) / 2) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "Слишком большой шаг, повторите ввод\n");
-            }
+            step = inputData("Введите шаг: ", false, [a, b](int input) -> bool {return input < (b - a) / 2;}, 
+                "Слишком большой шаг, повторите ввод: ");
+
             balancedByStep = true;
             break;
         case 4:
-            while (true) {
-                interpolation_muliplier = inputData("Введите множитель: ");
-                if (interpolation_muliplier > 0) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "Множитель должен быть больше 0, повторите ввод\n");
-            }
+            interpolation_muliplier = inputData("Введите множитель: ", false, strictPositive,
+                "Множитель должен быть больше 0, повторите ввод: ");
             break;
         case 5:
             displayGraph(a, b, step, interpolation_muliplier);
@@ -169,6 +153,5 @@ void displayGraph(double a, double b, double step, double interpolation_muliplie
     system("rm points_a");
     system("rm points_b");
     system("rm points_all");
-    coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
-    _getch();
+    waitForButtonInput("Нажмите любую кнопку, чтобы вернуться в меню\n");
 }

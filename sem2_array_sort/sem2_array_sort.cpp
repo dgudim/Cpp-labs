@@ -219,13 +219,8 @@ int main() {
                  "4.Выйти"
             }, 4)) {
         case 1:
-            while (true) {
-                n = inputData("Введите размер: ");
-                if (n > 0) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "размер должен быть больше 0, повторите ввод\n");
-            }
+            n = inputData("Введите размер: ", false, strictPositive, 
+                "Размер должен быть больше 0, повторите ввод: ");
             break;
         case 2:
 
@@ -251,25 +246,14 @@ int main() {
             coutWithColor(colors::LIGHT_PURPLE, "Количество изменений массива\n");
             printBarChart(values_changes, titles_changes, 64, 8, 2);
 
-            coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
-            _getch();
+            waitForButtonInput("Нажмите любую кнопку, чтобы вернуться в меню\n");
             break;
         case 3:
-            while (true) {
-                a = inputData("Введите начало промежутка: ");
-                if (a > 0) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "начало должно быть больше 0, повторите ввод\n");
-            }
-            
-            while (true) {
-                b = inputData("Введите конец промежутка: ");
-                if (b > a) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "конец должен быть больше начала, повторите ввод\n");
-            }
+
+            a = inputData("Введите начало промежутка: ", false, strictPositive, 
+                "Начало должно быть больше 0, повторите ввод: ");
+            b = inputData("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;}, 
+                "Конец должен быть больше начала, повторите ввод: ");
 
             for (int i = a; i < b; i ++) {
                 refillArray(orig, i);

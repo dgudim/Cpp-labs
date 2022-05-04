@@ -9,6 +9,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include <math.h>
 #ifdef __linux__
 #include <termios.h>
@@ -391,15 +392,28 @@ string displayWarningWithInput(colors color, string message) {
     return input;
 }
 
-double inputData(string message, bool allowWhiteSpaces) {
+bool acceptAll(int n){
+    return true;
+}
+
+bool strictPositive(int n) {
+    return n > 0;
+}
+
+double inputData(string message, bool allowWhiteSpaces, std::function<bool(int)> limit_function = acceptAll, string limitExcededMessage = "") {
     std::cout << message << std::flush;
     double toReturn;
-    while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
-        std::cin.clear();
-        while (std::cin.get() != '\n');
-        std::cout << "Пожалуйста, используйте числа" << std::endl;
+    while(true){
+        while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
+            std::cin.clear();
+            while (std::cin.get() != '\n');
+            std::cout << "Пожалуйста, используйте числа" << std::endl;
+        }
+        if (limit_function(toReturn)) {
+            return toReturn;
+        }
+        coutWithColor(colors::LIGHT_RED, limitExcededMessage);
     }
-    return toReturn;
 }
 
 double inputData(string message) {
@@ -520,6 +534,11 @@ void continueOrExit() {
     if (!(input == "yes" || input == "y" || input == "1")) {
         exit(-15);
     }
+}
+
+void waitForButtonInput(string message){
+    coutWithColor(colors::LIGHTER_BLUE, message);
+    _getch();
 }
 
 double lerp(double from, double to, double progress) {

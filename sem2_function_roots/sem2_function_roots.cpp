@@ -52,13 +52,8 @@ int main() {
             }, 4);
         switch (choice) {
         case 1:
-            while (true) {
-                e = inputData("Введите новую точность: ");
-                if (e < 0.5 && e >= 0.000001) {
-                    break;
-                }
-                coutWithColor(colors::LIGHT_RED, "Точность слишком большая или слишком маленькая, повторите ввод\n");
-            }
+            e = inputData("Введите новую точность: ", false, [](int input) -> bool {return input < 0.5 && input >= 0.000001;},
+                "Точность слишком большая или слишком маленькая (от 0.5 до 0.000001), повторите ввод: ");
             break;
         case 2:
         case 3:
@@ -88,8 +83,7 @@ int main() {
                     printGraph({ convergence, root_level }, 0, root_convergence.size() - 1, 1, field_size, graphingBackend, Interpolation::LINEAR, "Схождение");
                 }
             }
-            coutWithColor(colors::LIGHTER_BLUE, "Нажмите любую кнопку, чтобы вернуться в меню\n");
-            _getch();
+            waitForButtonInput("Нажмите любую кнопку, чтобы вернуться в меню\n");
             break;
         case 4:
             return 0;
