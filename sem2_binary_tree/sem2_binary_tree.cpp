@@ -249,12 +249,18 @@ TreeNode* balanceTree(TreeNode* root)
     return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
 }
 
+bool compareNodes(TreeNode* n1, TreeNode* n2)
+{
+    return n1->key_hash < n2->key_hash;
+}
+
 TreeNode* generateSampleTree(int layers) {
     int nodes_count = (1 << layers) - 1; // 1 << layers = pow(2, layers)
     vector<TreeNode*> nodes;
     for (int i = 0; i < nodes_count; i++) {
         nodes.push_back(new TreeNode("key" + to_string(i), "data" + to_string(i)));
     }
+    sort(nodes.begin(), nodes.end(), compareNodes);
     return vectorToBalancedTree(nodes, 0, nodes.size() - 1);
 }
 
