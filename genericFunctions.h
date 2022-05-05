@@ -18,9 +18,8 @@
 
 using std::string, std::vector;
 
-int _getch(void)
-{
-    struct termios oldattr, newattr;
+int _getch(void) {
+    termios oldattr, newattr;
     int ch;
 
     tcgetattr(STDIN_FILENO, &oldattr);
@@ -32,8 +31,7 @@ int _getch(void)
     return ch;
 }
 
-int get_pos(int* y, int* x)
-{
+int get_pos(int* y, int* x) {
 
     char buf[30] = { 0 };
     int ret, i, pow;
@@ -42,7 +40,7 @@ int get_pos(int* y, int* x)
     *y = 0;
     *x = 0;
 
-    struct termios term, restore;
+    termios term, restore;
 
     tcgetattr(0, &term);
     tcgetattr(0, &restore);
@@ -51,8 +49,7 @@ int get_pos(int* y, int* x)
 
     write(1, "\033[6n", 4);
 
-    for (i = 0, ch = 0; ch != 'R'; i++)
-    {
+    for (i = 0, ch = 0; ch != 'R'; i++) {
         ret = read(0, &ch, 1);
         if (!ret)
         {
@@ -64,8 +61,7 @@ int get_pos(int* y, int* x)
         // printf("buf[%d]: \t%c \t%d\n", i, ch, ch);
     }
 
-    if (i < 2)
-    {
+    if (i < 2) {
         tcsetattr(0, TCSANOW, &restore);
         // printf("i < 2\n");
         return (1);
@@ -81,11 +77,9 @@ int get_pos(int* y, int* x)
     return 0;
 }
 
-struct COORD
-{
+struct COORD {
     int X, Y;
-    COORD(int x, int y)
-    {
+    COORD(int x, int y) {
         X = x;
         Y = y;
     }
@@ -102,15 +96,13 @@ struct COORD
 constexpr int colors_count = 12;
 
 #ifdef __linux__
-enum class keys
-{
+enum class keys {
     ARROW_UP = 65,
     ARROW_DOWN = 66,
     ENTER = '\n',
     BACKSPACE = 127
 };
-enum class colors
-{
+enum class colors {
     DEFAULT = 39,
     WHITE = 97,
     GRAY = 90,
@@ -134,15 +126,13 @@ enum class colors
     PURPLE = 35
 };
 #elif _WIN32
-enum class keys
-{
+enum class keys {
     ARROW_UP = 72,
     ARROW_DOWN = 80,
     ENTER = 13,
     BACKSPACE = '\b'
 };
-enum class colors
-{
+enum class colors {
     DEFAULT = 7,
     WHITE = 15,
     GRAY = 8,
@@ -326,8 +316,7 @@ void clearScreen() {
 #endif
 }
 
-void setConsoleColor(int color)
-{
+void setConsoleColor(int color) {
 #ifdef __linux__
     std::cout << "\033[" << color << "m";
 #elif _WIN32
@@ -339,8 +328,7 @@ void setConsoleColor(colors color) {
     setConsoleColor((int)color);
 }
 
-void coutWithColor(colors color, string message, int delay = 0)
-{
+void coutWithColor(colors color, string message, int delay = 0) {
     setConsoleColor(color);
     std::cout << message << std::flush;
     setConsoleColor(colors::DEFAULT);
@@ -392,7 +380,7 @@ string displayWarningWithInput(colors color, string message) {
     return input;
 }
 
-bool acceptAll(int n){
+bool acceptAll(int n) {
     return true;
 }
 
@@ -403,7 +391,7 @@ bool strictPositive(int n) {
 double inputData(string message, bool allowWhiteSpaces, std::function<bool(int)> limit_function = acceptAll, string limitExcededMessage = "") {
     std::cout << message << std::flush;
     double toReturn;
-    while(true){
+    while (true) {
         while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
             std::cin.clear();
             while (std::cin.get() != '\n');
@@ -536,7 +524,7 @@ void continueOrExit() {
     }
 }
 
-void waitForButtonInput(string message){
+void waitForButtonInput(string message) {
     coutWithColor(colors::LIGHTER_BLUE, message);
     _getch();
 }
