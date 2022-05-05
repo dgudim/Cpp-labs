@@ -73,5 +73,8 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp"
+    },
+    "code-runner.executorMap": {
+        "cpp": "lxterminal -e bash -c 'cd compiled_binaries_linux && ./menu.sh $fileNameWithoutExt'"
     }
 }
