@@ -939,22 +939,25 @@ enum class loadingIconStyle {
 
 vector<string> simple_spinner = { "-", "\\", "|", "/" };
 vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸", "⠴", "⠦"};
-vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆ ", "▇", "█", "▇", "▆", "▅", "▄", "▃", "▂"};
+vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", "▌", "▍", "▎", "▏"};
+vector<string> circle_spinner = { "⠇", "⠋", "⠙", "⠸",  "⠴", "⠦"};
 
 void displayLoadingIcon(loadingIconStyle style, colors color, float progress, int x, int y) {
     COORD orig_pos = getConsoleCursorPosition();
     progress -= (int)(progress);
     setConsoleCursorPosition(x, y);
+    vector<string> anim_array;
     switch (style) {
         case loadingIconStyle::SIMPLE:
-            coutWithColor(color, simple_spinner[simple_spinner.size() * progress]);
+            anim_array = simple_spinner;
             break;
         case loadingIconStyle::DOTS:
-            coutWithColor(color, dot_spinner[dot_spinner.size() * progress]);
+            anim_array = dot_spinner;
             break;
         case loadingIconStyle::BAR:
-            coutWithColor(color, bar_spinner[bar_spinner.size() * progress]);
+            anim_array = bar_spinner;
             break;
     }
+    coutWithColor(color, anim_array[std::clamp(anim_array.size() * progress, (float)0, (float)(anim_array.size() - 1))]);
     setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
 }

@@ -179,7 +179,8 @@ int main() {
     float f = 0;
 
     while(true){
-        displayLoadingIcon(loadingIconStyle::BAR, colors::LIGHT_BLUE, f, 10, 10);
+        cout << "\033[1m";
+        displayLoadingIcon(loadingIconStyle::BAR, colors::RED, f, 10, 10);
         f += 0.03;
     }
 
