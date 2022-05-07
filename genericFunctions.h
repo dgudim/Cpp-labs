@@ -934,13 +934,14 @@ void printBarChart(vector<int> values, vector<string> titles, int maxHeightSubpi
 }
 
 enum class loadingIconStyle {
-    SIMPLE, DOTS, BAR
+    SIMPLE, DOTS, BAR, CIRCLE, SHAPES
 };
 
 vector<string> simple_spinner = { "-", "\\", "|", "/" };
 vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸", "⠴", "⠦"};
-vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", "▌", "▍", "▎", "▏"};
-vector<string> circle_spinner = { "⠇", "⠋", "⠙", "⠸",  "⠴", "⠦"};
+vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", "▌", "▍", "▎", "▏", " "};
+vector<string> circle_spinner = { "◐", "◓", "◑", "◒"};
+vector<string> shapes_spinner = {"⧫", "◆", "■", "●", "◀", "▲ ", "▶", "▼"};
 
 void displayLoadingIcon(loadingIconStyle style, colors color, float progress, int x, int y) {
     COORD orig_pos = getConsoleCursorPosition();
@@ -957,7 +958,35 @@ void displayLoadingIcon(loadingIconStyle style, colors color, float progress, in
         case loadingIconStyle::BAR:
             anim_array = bar_spinner;
             break;
+        case loadingIconStyle::CIRCLE:
+            anim_array = circle_spinner;
+        case loadingIconStyle::SHAPES:
+            anim_array = shapes_spinner;
+            break;
     }
-    coutWithColor(color, anim_array[std::clamp(anim_array.size() * progress, (float)0, (float)(anim_array.size() - 1))]);
+    coutWithColor(color, anim_array[anim_array.size() * progress]);
+    setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
+}
+
+vector<string> bars_horizontal = { "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
+
+void displayLoadingBar(colors bg_color, colors fg_color, int width, float progress, int x, int y) {
+    width *= 8;
+    COORD orig_pos = getConsoleCursorPosition();
+    int progress_ff = progress * 100;
+    progress *= width;
+    int wholeParts = progress / 8;
+    int left_part = progress - wholeParts * 8;
+    setConsoleCursorPosition(x, y);
+    for (int i = 0; i < wholeParts; i++) {
+        coutWithColor(fg_color, "█");
+    }
+    coutWithColor(fg_color, bars_horizontal[left_part]);
+    setConsoleCursorPosition(x, y + 1);
+    for (int i = 0; i < width / 8; i++) {
+        coutWithColor(bg_color, "▔");
+    }
+    setConsoleCursorPosition(x + width / 8, y);
+    coutWithColor(fg_color, std::to_string(progress_ff) + "%");
     setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
 }

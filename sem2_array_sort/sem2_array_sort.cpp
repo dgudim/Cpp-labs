@@ -141,26 +141,28 @@ vector<ArrayStruct> shellSort(vector<ArrayStruct> orig, unsigned int& iterations
     return orig;
 }
 
-Metrics benchmarkSort(SortFunction sortFunction, string name, vector<ArrayStruct>& orig) {
+Metrics benchmarkSort(SortFunction sortFunction, string name, vector<ArrayStruct>& orig, bool print = true) {
     unsigned int iterations = 0, changes = 0;
     auto start = high_resolution_clock::now();
     vector<ArrayStruct> sorted = sortFunction(orig, iterations, changes);
     auto duration = duration_cast<microseconds>(high_resolution_clock::now() - start);
     bool sorted_s = checkIfSorted(sorted);
-    if (sorted_s) {
-        coutWithColor(colors::LIGHT_GREEN, "Результат для ");
-        coutWithColor(colors::CYAN, name);
-        coutWithColor(colors::LIGHT_GREEN, " на ");
-        coutWithColor(colors::PURPLE, to_string(orig.size()));
-        coutWithColor(colors::LIGHT_GREEN, " элементах: ");
-        coutWithColor(colors::YELLOW, to_string(iterations));
-        coutWithColor(colors::LIGHT_GREEN, " итераций, ");
-        coutWithColor(colors::YELLOW, to_string(changes));
-        coutWithColor(colors::LIGHT_GREEN, " изменений массива, ");
-        coutWithColor(colors::YELLOW, doubleToString(duration.count() / 1000.0));
-        coutWithColor(colors::LIGHT_GREEN, "ms\n");
-    } else {
-        coutWithColor(colors::LIGHT_RED, "Ошибка сортировки для " + name + "!\n");
+    if(print) {
+        if (sorted_s) {
+            coutWithColor(colors::LIGHT_GREEN, "Результат для ");
+            coutWithColor(colors::CYAN, name);
+            coutWithColor(colors::LIGHT_GREEN, " на ");
+            coutWithColor(colors::PURPLE, to_string(orig.size()));
+            coutWithColor(colors::LIGHT_GREEN, " элементах: ");
+            coutWithColor(colors::YELLOW, to_string(iterations));
+            coutWithColor(colors::LIGHT_GREEN, " итераций, ");
+            coutWithColor(colors::YELLOW, to_string(changes));
+            coutWithColor(colors::LIGHT_GREEN, " изменений массива, ");
+            coutWithColor(colors::YELLOW, doubleToString(duration.count() / 1000.0));
+            coutWithColor(colors::LIGHT_GREEN, "ms\n");
+        } else {
+            coutWithColor(colors::LIGHT_RED, "Ошибка сортировки для " + name + "!\n");
+        }
     }
     return { iterations, changes, duration.count() };
 }
@@ -175,14 +177,6 @@ void refillArray(vector<ArrayStruct>& values, int n) {
 int main() {
     int a, b;
     int n = 25;
-
-    float f = 0;
-
-    while(true){
-        cout << "\033[1m";
-        displayLoadingIcon(loadingIconStyle::BAR, colors::RED, f, 10, 10);
-        f += 0.03;
-    }
 
     srand(time(NULL));
 
@@ -263,15 +257,17 @@ int main() {
             b = inputData("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;}, 
                 "Конец должен быть больше начала, повторите ввод: ");
 
-            for (int i = a; i < b; i ++) {
+            clearScreen();
+
+            for (int i = a; i <= b; i ++) {
                 refillArray(orig, i);
+                displayLoadingIcon(loadingIconStyle::SHAPES, colors::RED, i / 30.0, 1, 1);
+                displayLoadingBar(colors::GRAY, colors::CYAN, 25, (i - a) / (float)(b - a), 3, 1);
                 for (int el = 0; el < elems; el++) {
-                    algo_metrics = benchmarkSort(sortingFunctions[el], sortingFunctions_displayNames[el], orig);
+                    algo_metrics = benchmarkSort(sortingFunctions[el], sortingFunctions_displayNames[el], orig, false);
                     system(("echo '" + to_string(i) + " " + to_string(algo_metrics.time / (double)1000) + "' >> " + sortingFunctions_fileNames[el]).c_str());
                     system(("echo '" + to_string(i) + " " + to_string(algo_metrics.changes) + "' >> " + sortingFunctions_fileNames[el] + "_changes").c_str());
                 }
-
-                clearScreen();
             }
             plot_string.clear();
             plot_string2.clear();
