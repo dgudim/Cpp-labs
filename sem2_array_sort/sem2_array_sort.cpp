@@ -176,6 +176,13 @@ int main() {
     int a, b;
     int n = 25;
 
+    float f = 0;
+
+    while(true){
+        displayLoadingIcon(loadingIconStyle::BAR, colors::LIGHT_BLUE, f, 10, 10);
+        f += 0.03;
+    }
+
     srand(time(NULL));
 
     vector<ArrayStruct> orig;

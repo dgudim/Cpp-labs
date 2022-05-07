@@ -892,6 +892,8 @@ void printTable(vector<string> titles, vector<vector<string>> columns, vector<bo
 
 }
 
+vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"};
+
 void printBarChart(vector<int> values, vector<string> titles, int maxHeightSubpixels, int bar_width, int gap) {
     using namespace std;
 
@@ -905,7 +907,6 @@ void printBarChart(vector<int> values, vector<string> titles, int maxHeightSubpi
         bar_width = max(bar_width, (int)titles[i].size());
     }
 
-    vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"};
     int bar_height = 8;
     int maxHeightPixels = maxHeightSubpixels / bar_height;
     int maxValue = *max_element(values.begin(), values.end());
@@ -930,4 +931,30 @@ void printBarChart(vector<int> values, vector<string> titles, int maxHeightSubpi
         }
     }
     setConsoleCursorPosition(cursor_pos.X, cursor_pos.Y + maxHeightPixels + 3);
+}
+
+enum class loadingIconStyle {
+    SIMPLE, DOTS, BAR
+};
+
+vector<string> simple_spinner = { "-", "\\", "|", "/" };
+vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸", "⠴", "⠦"};
+vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆ ", "▇", "█", "▇", "▆", "▅", "▄", "▃", "▂"};
+
+void displayLoadingIcon(loadingIconStyle style, colors color, float progress, int x, int y) {
+    COORD orig_pos = getConsoleCursorPosition();
+    progress -= (int)(progress);
+    setConsoleCursorPosition(x, y);
+    switch (style) {
+        case loadingIconStyle::SIMPLE:
+            coutWithColor(color, simple_spinner[simple_spinner.size() * progress]);
+            break;
+        case loadingIconStyle::DOTS:
+            coutWithColor(color, dot_spinner[dot_spinner.size() * progress]);
+            break;
+        case loadingIconStyle::BAR:
+            coutWithColor(color, bar_spinner[bar_spinner.size() * progress]);
+            break;
+    }
+    setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
 }
