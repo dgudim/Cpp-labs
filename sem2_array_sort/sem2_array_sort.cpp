@@ -141,7 +141,7 @@ vector<ArrayStruct> shellSort(vector<ArrayStruct> orig, unsigned int& iterations
     return orig;
 }
 
-Metrics benchmarkSort(SortFunction sortFunction, string name, vector<ArrayStruct>& orig, bool print = true) {
+Metrics benchmarkSort(SortFunction sortFunction, const string& name, const vector<ArrayStruct>& orig, bool print = true) {
     unsigned int iterations = 0, changes = 0;
     auto start = high_resolution_clock::now();
     vector<ArrayStruct> sorted = sortFunction(orig, iterations, changes);
@@ -261,7 +261,7 @@ int main() {
 
             for (int i = a; i <= b; i ++) {
                 refillArray(orig, i);
-                displayLoadingIcon(loadingIconStyle::SHAPES, colors::RED, i / 30.0, 1, 1);
+                displayLoadingIcon(loadingIconStyle::DOTS_TALL, colors::RED, i / 20.0, 1, 1);
                 displayLoadingBar(colors::GRAY, colors::CYAN, 25, (i - a) / (float)(b - a), 3, 1);
                 for (int el = 0; el < elems; el++) {
                     algo_metrics = benchmarkSort(sortingFunctions[el], sortingFunctions_displayNames[el], orig, false);

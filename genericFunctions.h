@@ -344,6 +344,14 @@ void coutWithColorAtPos(colors color, string message, int x, int y, int delay = 
     coutWithColor(color, message, delay);
 }
 
+void setTextBold(){
+    cout << "\e[1m";
+}
+
+void setTextNormal() {
+    cout << "\e[0m";
+}
+
 string* split(string* input, bool print_count, unsigned int* len) {
     unsigned int numberOfWords = 0;
     unsigned int strLen = (*input).length();
@@ -934,11 +942,12 @@ void printBarChart(const vector<int>& values, const vector<string>& titles, int 
 }
 
 enum class loadingIconStyle {
-    SIMPLE, DOTS, BAR, CIRCLE, SHAPES
+    SIMPLE, DOTS, DOTS_TALL, BAR, CIRCLE, SHAPES
 };
 
 const vector<string> simple_spinner = { "-", "\\", "|", "/" };
 const vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸",  "⠴", "⠦"};
+const vector<string> dot_spinner_tall = { "⢸", "⣰", "⣤ ", "⣆", "⡇", "⠏", "⠛", "⠹"};
 const vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", " ▌", "▍", "▎", "▏", " "};
 const vector<string> circle_spinner = { "◐", "◓", "◑ ", "◒"};
 const vector<string> shapes_spinner = { "⧫", "◆", "■", "●", "◀", "▲  ", "▶", "▼"};
@@ -955,6 +964,9 @@ void displayLoadingIcon(loadingIconStyle style, colors color, float progress, in
         case loadingIconStyle::DOTS:
             anim_array = dot_spinner;
             break;
+        case loadingIconStyle::DOTS_TALL:
+            anim_array = dot_spinner_tall;
+            break;
         case loadingIconStyle::BAR:
             anim_array = bar_spinner;
             break;
@@ -964,7 +976,9 @@ void displayLoadingIcon(loadingIconStyle style, colors color, float progress, in
             anim_array = shapes_spinner;
             break;
     }
+    setTextBold();
     coutWithColor(color, anim_array[anim_array.size() * progress]);
+    setTextNormal();
     setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
 }
 
