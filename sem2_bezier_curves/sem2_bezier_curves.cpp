@@ -68,7 +68,7 @@ int main() {
     }
 }
 
-void displayTableOrig(vector<Vector2> points) {
+void displayTableOrig(vector<Vector2>& points) {
     vector<string> I, X, Y;
     for (int i = 0; i < points.size(); i++) {
         I.push_back(to_string(i + 1));
@@ -78,7 +78,7 @@ void displayTableOrig(vector<Vector2> points) {
     printTable({ "I", "X", "Y" }, { I, X, Y });
 }
 
-void displayTableInterpolated(vector<Vector2> points, vector<bool> highlight_flags) {
+void displayTableInterpolated(vector<Vector2>& points, vector<bool> highlight_flags) {
     vector<string> I, X, Y_interpolated, Y_real, Y_delta, titles;
     double x, y, y_real;
     double max_deviation = 0;

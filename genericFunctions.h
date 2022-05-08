@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-using std::string, std::vector;
+using std::string, std::vector, std::regex, std::function, std::cin, std::cout;
 
 int _getch(void) {
     termios oldattr, newattr;
@@ -388,7 +388,7 @@ bool strictPositive(int n) {
     return n > 0;
 }
 
-double inputData(string message, bool allowWhiteSpaces, std::function<bool(int)> limit_function = acceptAll, string limitExcededMessage = "") {
+double inputData(const string& message, bool allowWhiteSpaces, function<bool(int)> limit_function = acceptAll, const string& limitExcededMessage = "") {
     std::cout << message << std::flush;
     double toReturn;
     while (true) {
@@ -404,20 +404,20 @@ double inputData(string message, bool allowWhiteSpaces, std::function<bool(int)>
     }
 }
 
-double inputData(string message) {
+double inputData(const string& message) {
     return inputData(message, true);
 }
 
-string inputData(string message, char* allowedChars, int allowedChars_size, std::regex pattern, string previousBuffer) {
+string inputData(const string& message, char* allowedChars, int allowedChars_size, const regex& pattern, const string& previousBuffer) {
     printf("%s", (message + previousBuffer).c_str());
     string buffer = previousBuffer;
     while (true) {
         char currChar = _getch();
         bool addToBuffer = false;
         if (currChar == (int)keys::ENTER) {
-            if (!std::regex_match(buffer, pattern)) {
+            if (!regex_match(buffer, pattern)) {
                 coutWithColor(colors::YELLOW, "\nВведеные данные не соответствуют шаблону\n");
-                std::cout << buffer;
+                cout << buffer;
             } else {
                 break;
             }
@@ -447,17 +447,17 @@ string inputData(string message, char* allowedChars, int allowedChars_size, std:
     return buffer;
 }
 
-string inputData(string message, char* allowedChars, int allowedChars_size, string previousBuffer) {
-    std::regex str_expr(".*");
+string inputData(const string& message, char* allowedChars, int allowedChars_size, const string& previousBuffer) {
+    regex str_expr(".*");
     return inputData(message, allowedChars, allowedChars_size, str_expr, previousBuffer);
 }
 
-string inputData(string message, char* allowedChars, int allowedChars_size, std::regex pattern) {
+string inputData(const string& message, char* allowedChars, int allowedChars_size, const regex& pattern) {
     return inputData(message, allowedChars, allowedChars_size, pattern, "");
 }
 
-string inputData(string message, char* allowedChars, int allowedChars_size) {
-    std::regex str_expr(".*");
+string inputData(const string& message, char* allowedChars, int allowedChars_size) {
+    regex str_expr(".*");
     return inputData(message, allowedChars, allowedChars_size, str_expr);
 }
 
@@ -481,7 +481,7 @@ string doubleToString(double value) {
     return doubleToString(value, 5);
 }
 
-string addSymbols(string input, unsigned int targetLength, string symbol, bool center = false) {
+string addSymbols(string input, unsigned int targetLength, const string& symbol, bool center = false) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     int spaces = targetLength - converter.from_bytes(input).length();
     if (center) {
@@ -501,7 +501,7 @@ string addSymbols(string input, unsigned int targetLength, string symbol, bool c
     return input;
 }
 
-string addSpaces(string input, unsigned int targetLength, bool center = false) {
+string addSpaces(const string input, unsigned int targetLength, bool center = false) {
     return addSymbols(input, targetLength, " ", center);
 }
 
@@ -524,7 +524,7 @@ void continueOrExit() {
     }
 }
 
-void waitForButtonInput(string message) {
+void waitForButtonInput(const string& message) {
     coutWithColor(colors::LIGHTER_BLUE, message);
     _getch();
 }
@@ -643,7 +643,7 @@ bool* displayMultiSelection(string* options, int optionCount) {
     }
 }
 
-vector<Vector2> getPVector(vector<Vector2> points) {
+vector<Vector2> getPVector(vector<Vector2>& points) {
     vector<Vector2> P_vector;
     P_vector.push_back(points[0] + points[1] * 2);
     for (int i = 1; i < points.size() - 2; i++) {
@@ -653,7 +653,7 @@ vector<Vector2> getPVector(vector<Vector2> points) {
     return P_vector;
 }
 
-vector<Vector2> getBVector(vector<Vector2> points, vector<Vector2> A_vector) {
+vector<Vector2> getBVector(vector<Vector2>& points, vector<Vector2>& A_vector) {
     vector<Vector2> B_vector;
     for (int i = 0; i < A_vector.size() - 1; i++) {
         B_vector.push_back(points[i + 1] * 2 - A_vector[i + 1]);
@@ -719,7 +719,7 @@ vector<Vector2> solve_tridiagonal_bezier(vector<Vector2>& P_vector) {
     return P_vector;
 }
 
-void printGraph(vector<Converter> graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, string gnuplotTitle = "") {
+void printGraph(const vector<Converter>& graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, const string& gnuplotTitle = "") {
     using namespace std;
 
     vector<vector<double>> x_points;
@@ -823,9 +823,9 @@ void printGraph(vector<Converter> graphs, double from, double to, double step, i
     delete[] field;
 }
 
-void printLayer(vector<int> column_widths, vector<string> column_elems,
-    string start, string middle, string end,
-    colors border_color, colors text_color, string fillWith = " ") {
+void printLayer(vector<int> column_widths, const vector<string>& column_elems,
+    const string& start, const string& middle, const string& end,
+    colors border_color, colors text_color, const string& fillWith = " ") {
     bool noElems = column_elems.empty();
     for (int column = 0; column < column_widths.size(); column++) {
         coutWithColor(border_color, column == 0 ? start : middle);
@@ -834,10 +834,10 @@ void printLayer(vector<int> column_widths, vector<string> column_elems,
     coutWithColor(border_color, end + "\n");
 }
 
-void printTable(vector<string> titles, vector<vector<string>> columns, vector<bool> highlight_flags = {},
+void printTable(const vector<string>& titles, const vector<vector<string>>& columns, const vector<bool>& highlight_flags = {},
     colors border_color = colors::YELLOW, colors text_color = colors::DEFAULT,
     colors highlight_color = colors::LIGHT_GREEN,
-    string bottom_info = "", colors bottom_info_color = colors::CYAN) {
+    const string& bottom_info = "", colors bottom_info_color = colors::CYAN) {
     using namespace std;
 
     int columns_len = columns.size();
@@ -892,9 +892,9 @@ void printTable(vector<string> titles, vector<vector<string>> columns, vector<bo
 
 }
 
-vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"};
+const vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆ ", "▇", "█"};
 
-void printBarChart(vector<int> values, vector<string> titles, int maxHeightSubpixels, int bar_width, int gap) {
+void printBarChart(const vector<int>& values, const vector<string>& titles, int maxHeightSubpixels, int bar_width, int gap) {
     using namespace std;
 
     int elems;
@@ -937,11 +937,11 @@ enum class loadingIconStyle {
     SIMPLE, DOTS, BAR, CIRCLE, SHAPES
 };
 
-vector<string> simple_spinner = { "-", "\\", "|", "/" };
-vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸", "⠴", "⠦"};
-vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", "▌", "▍", "▎", "▏", " "};
-vector<string> circle_spinner = { "◐", "◓", "◑", "◒"};
-vector<string> shapes_spinner = {"⧫", "◆", "■", "●", "◀", "▲ ", "▶", "▼"};
+const vector<string> simple_spinner = { "-", "\\", "|", "/" };
+const vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸",  "⠴", "⠦"};
+const vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", " ▌", "▍", "▎", "▏", " "};
+const vector<string> circle_spinner = { "◐", "◓", "◑ ", "◒"};
+const vector<string> shapes_spinner = { "⧫", "◆", "■", "●", "◀", "▲  ", "▶", "▼"};
 
 void displayLoadingIcon(loadingIconStyle style, colors color, float progress, int x, int y) {
     COORD orig_pos = getConsoleCursorPosition();
@@ -968,7 +968,7 @@ void displayLoadingIcon(loadingIconStyle style, colors color, float progress, in
     setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
 }
 
-vector<string> bars_horizontal = { "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
+const vector<string> bars_horizontal = { "▏", "▎", "▍", "▌", "▋", "▊ ", "▉", "█"};
 
 void displayLoadingBar(colors bg_color, colors fg_color, int width, float progress, int x, int y) {
     width *= 8;
