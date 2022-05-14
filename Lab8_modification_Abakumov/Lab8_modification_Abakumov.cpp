@@ -528,17 +528,19 @@ void printGroupSummary(vector<student_entry>* entries) {
 
     unsigned int maxNameLength = max(findMaxNameLength(entries, students), (unsigned int)7);
     cout << "Student" << addSpaces("", maxNameLength - 7) << "|Group number" << "|Debts        " << "|Average grade" << endl;
-    for (unsigned int i = 0; i < students; i++) {
-        cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).group), 12) << "|";
+    for (unsigned int i = 0; i < entries->size(); i++) {
+        if (group_match(entries->at(i), groups_selection[selection])) {
+            cout << addSpaces(entries->at(i).fio, maxNameLength) << "|" << addSpaces(to_string(entries->at(i).group), 12) << "|";
 
-        double average = 0;
-        for (int k = 0; k < lessons_size; k++) {
-            average += entries->at(i).exam_grades.at(k);
-            globalAverage += entries->at(i).exam_grades.at(k);
+            double average = 0;
+            for (int k = 0; k < lessons_size; k++) {
+                average += entries->at(i).exam_grades.at(k);
+                globalAverage += entries->at(i).exam_grades.at(k);
+            }
+            average /= lessons_size;
+
+            cout << addSpaces(to_string(entries->at(i).debts), 13) << "|" << addSpaces(to_string(average), 12) << endl;
         }
-        average /= lessons_size;
-
-        cout << addSpaces(to_string(entries->at(i).debts), 13) << "|" << addSpaces(to_string(average), 12) << endl;
     }
     cout << "\nGroup average grade: " << globalAverage / (students * lessons_size) << endl;
 
