@@ -48,7 +48,7 @@ int main() {
             balanceByEps = false;
             break;
         case 3:
-            eps = inputData("Введите новую точность: ", false, [](int input) -> bool {return input < 0.5 && input >= 0.000001;},
+            eps = inputData("Введите новую точность: ", false, [](double input) -> bool {return input < 0.5 && input >= 0.000001;},
                 "Точность слишком большая или слишком маленькая (от 0.5 до 0.000001), повторите ввод: ");
                 
             balanceByEps = true;

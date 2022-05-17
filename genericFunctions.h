@@ -388,15 +388,15 @@ string displayWarningWithInput(colors color, string message) {
     return input;
 }
 
-bool acceptAll(int n) {
+bool acceptAll(double n) {
     return true;
 }
 
-bool strictPositive(int n) {
+bool strictPositive(double n) {
     return n > 0;
 }
 
-double inputData(const string& message, bool allowWhiteSpaces, function<bool(int)> limit_function = acceptAll, const string& limitExcededMessage = "") {
+double inputData(const string& message, bool allowWhiteSpaces, function<bool(double)> limit_function = acceptAll, const string& limitExcededMessage = "") {
     std::cout << message << std::flush;
     double toReturn;
     while (true) {
