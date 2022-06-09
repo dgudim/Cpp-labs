@@ -52,14 +52,14 @@ int remove_between_min_max(StackNode* node) {
     StackNode* curr_node = node;
     bool minFirst = false;
     while (curr_node) {
-        if (curr_node-> data < min->data) {
+        if (curr_node->data < min->data) {
             min = curr_node;
             minFirst = false;
-        }else
-        if (curr_node->data > max->data) {
-            max = curr_node;
-            minFirst = true;
-        }
+        } else
+            if (curr_node->data > max->data) {
+                max = curr_node;
+                minFirst = true;
+            }
         curr_node = curr_node->next;
     }
     if (min == max || min->next == max || max->next == min) {
@@ -85,6 +85,30 @@ int remove_between_min_max(StackNode* node) {
     return deletedElems;
 }
 
+void removeOdd(StackNode*& node) {
+    StackNode* prev = nullptr;
+    StackNode* curr = node;
+    while (curr) {
+        if (curr->data % 2 == 0) {
+            if (prev) {
+                prev->next = curr->next;
+                StackNode* temp = curr->next;
+                delete curr;
+                curr = temp;
+                continue;
+            } else {
+                node = node->next;
+                StackNode* temp = curr;
+                curr = curr->next;
+                delete temp;
+                continue;
+            }
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+}
+
 int main()
 {
     StackNode* root = nullptr;
@@ -93,8 +117,7 @@ int main()
     while (true) {
         if (!root) {
             coutWithColor(colors::LIGHT_RED, "Стек пустой\n");
-        }
-        else {
+        } else {
             coutWithColor(colors::LIGHT_BLUE, "--- Стек --- (" + to_string(size) + ")\n");
             coutWithColor(colors::LIGHT_GREEN, "Обычный вывод ---\n");
             view(root);
@@ -105,8 +128,13 @@ int main()
         }
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        switch (displaySelection(new string[4]{ "1.Добавить данные в стек", "2.Удалить n элементов", "3.Удалить элементы между максимальным и минимальным элементами", "4.Выйти"}, 4)) {
-        case 1: 
+        switch (displaySelection(new string[5]{
+            "1.Добавить данные в стек",
+        "2.Удалить n элементов",
+        "3.Удалить элементы между максимальным и минимальным элементами",
+        "4.Удалить все четные элементы",
+        "5.Выйти" }, 5)) {
+        case 1:
             n = (int)inputData("Сколько элементов добавить? : ", false);
             if (n <= 0) {
                 clearScreen();
@@ -119,8 +147,7 @@ int main()
             for (int i = 0; i < n; i++) {
                 if (manual) {
                     root = add(root, inputData(""));
-                }
-                else {
+                } else {
                     root = add(root, rand() % 100 / 2 - 25);
                 }
             }
@@ -139,8 +166,7 @@ int main()
                 n = min(n, size);
                 size -= n;
                 coutWithColor(colors::LIGHTER_BLUE, "Удалил " + to_string(n) + " элементов\n");
-            }
-            else {
+            } else {
                 clearScreen();
                 coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
             }
@@ -149,12 +175,16 @@ int main()
             clearScreen();
             if (root) {
                 size -= remove_between_min_max(root);
-            }
-            else {
+            } else {
                 coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
-            }    
+            }
             break;
-        case 4: 
+        case 4:
+            if (root) {
+                removeOdd(root);
+            }
+            break;
+        case 5:
             if (root)
                 del(root, size);
             return 0;
