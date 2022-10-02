@@ -1,4 +1,5 @@
 #include <string>
+#include <cstring>
 
 char* inputData_char(const char* message, char* allowedChars, int allowedChars_size, const int maxStringSize);
 void alphabeticSort_char(char** words, unsigned int numberOfWords);
