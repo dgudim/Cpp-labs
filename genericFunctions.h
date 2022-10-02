@@ -344,7 +344,7 @@ void coutWithColorAtPos(colors color, string message, int x, int y, int delay = 
     coutWithColor(color, message, delay);
 }
 
-void setTextBold(){
+void setTextBold() {
     cout << "\e[1m";
 }
 
@@ -362,7 +362,7 @@ string* split(string* input, bool print_count, unsigned int* len) {
     }
 
     if (print_count) {
-        coutWithColor(colors::LIGHTER_BLUE, "Количество слов: " + std::to_string(numberOfWords));
+        coutWithColor(colors::LIGHTER_BLUE, "Word count: " + std::to_string(numberOfWords));
     }
 
     (*len) = numberOfWords;
@@ -403,7 +403,7 @@ double inputData(const string& message, bool allowWhiteSpaces, function<bool(dou
         while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
             std::cin.clear();
             while (std::cin.get() != '\n');
-            std::cout << "Пожалуйста, используйте числа" << std::endl;
+            std::cout << "Please use numbers" << std::endl;
         }
         if (limit_function(toReturn)) {
             return toReturn;
@@ -424,7 +424,7 @@ string inputData(const string& message, char* allowedChars, int allowedChars_siz
         bool addToBuffer = false;
         if (currChar == (int)keys::ENTER) {
             if (!regex_match(buffer, pattern)) {
-                coutWithColor(colors::YELLOW, "\nВведеные данные не соответствуют шаблону\n");
+                coutWithColor(colors::YELLOW, "\nInputted data does not match the template\n");
                 cout << buffer;
             } else {
                 break;
@@ -526,7 +526,7 @@ string trim(const string s) {
 }
 
 void continueOrExit() {
-    string input = displayWarningWithInput(colors::DEFAULT, "Продолжить?\n");
+    string input = displayWarningWithInput(colors::DEFAULT, "Continue?\n");
     if (!(input == "yes" || input == "y" || input == "1")) {
         exit(-15);
     }
@@ -585,7 +585,7 @@ int displaySelection(string* options, int optionCount) {
         key = _getch();
         if (key == (int)keys::ENTER) {
             setConsoleCursorPosition(0, offset + optionCount);
-            coutWithColor(colors::GRAY, "\nВы выбрали: " + options[counter] + "\n");
+            coutWithColor(colors::GRAY, "\nYou chose: " + options[counter] + "\n");
             return counter + 1;
         }
     }
@@ -853,7 +853,7 @@ void printTable(const vector<string>& titles, const vector<vector<string>>& colu
 
     for (int column = 1; column < columns_len; column++) {
         if (elems != columns[column].size()) {
-            coutWithColor(colors::LIGHT_RED, "Несоотвествие размера колонок\n");
+            coutWithColor(colors::LIGHT_RED, "Column size mismatch\n");
         }
         elems = min(elems, (int)columns[column].size());
     }
@@ -900,7 +900,7 @@ void printTable(const vector<string>& titles, const vector<vector<string>>& colu
 
 }
 
-const vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆ ", "▇", "█"};
+const vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆ ", "▇", "█" };
 
 void printBarChart(const vector<int>& values, const vector<string>& titles, int maxHeightSubpixels, int bar_width, int gap) {
     using namespace std;
@@ -908,7 +908,7 @@ void printBarChart(const vector<int>& values, const vector<string>& titles, int 
     int elems;
 
     if (values.size() != titles.size()) {
-        coutWithColor(colors::LIGHT_RED, "Несоотвествие размера колонок\n");
+        coutWithColor(colors::LIGHT_RED, "Column size mismatch\n");
     }
     elems = min(values.size(), titles.size());
     for (int i = 0; i < elems; i++) {
@@ -946,11 +946,11 @@ enum class loadingIconStyle {
 };
 
 const vector<string> simple_spinner = { "-", "\\", "|", "/" };
-const vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸",  "⠴", "⠦"};
-const vector<string> dot_spinner_tall = { "⢸", "⣰", "⣤ ", "⣆", "⡇", "⠏", "⠛", "⠹"};
-const vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", " ▌", "▍", "▎", "▏", " "};
-const vector<string> circle_spinner = { "◐", "◓", "◑ ", "◒"};
-const vector<string> shapes_spinner = { "⧫", "◆", "■", "●", "◀", "▲  ", "▶", "▼"};
+const vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸",  "⠴", "⠦" };
+const vector<string> dot_spinner_tall = { "⢸", "⣰", "⣤ ", "⣆", "⡇", "⠏", "⠛", "⠹" };
+const vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", " ▌", "▍", "▎", "▏", " " };
+const vector<string> circle_spinner = { "◐", "◓", "◑ ", "◒" };
+const vector<string> shapes_spinner = { "⧫", "◆", "■", "●", "◀", "▲  ", "▶", "▼" };
 
 void displayLoadingIcon(loadingIconStyle style, colors color, float progress, int x, int y) {
     COORD orig_pos = getConsoleCursorPosition();
@@ -958,23 +958,23 @@ void displayLoadingIcon(loadingIconStyle style, colors color, float progress, in
     setConsoleCursorPosition(x, y);
     vector<string> anim_array;
     switch (style) {
-        case loadingIconStyle::SIMPLE:
-            anim_array = simple_spinner;
-            break;
-        case loadingIconStyle::DOTS:
-            anim_array = dot_spinner;
-            break;
-        case loadingIconStyle::DOTS_TALL:
-            anim_array = dot_spinner_tall;
-            break;
-        case loadingIconStyle::BAR:
-            anim_array = bar_spinner;
-            break;
-        case loadingIconStyle::CIRCLE:
-            anim_array = circle_spinner;
-        case loadingIconStyle::SHAPES:
-            anim_array = shapes_spinner;
-            break;
+    case loadingIconStyle::SIMPLE:
+        anim_array = simple_spinner;
+        break;
+    case loadingIconStyle::DOTS:
+        anim_array = dot_spinner;
+        break;
+    case loadingIconStyle::DOTS_TALL:
+        anim_array = dot_spinner_tall;
+        break;
+    case loadingIconStyle::BAR:
+        anim_array = bar_spinner;
+        break;
+    case loadingIconStyle::CIRCLE:
+        anim_array = circle_spinner;
+    case loadingIconStyle::SHAPES:
+        anim_array = shapes_spinner;
+        break;
     }
     setTextBold();
     coutWithColor(color, anim_array[anim_array.size() * progress]);
@@ -982,7 +982,7 @@ void displayLoadingIcon(loadingIconStyle style, colors color, float progress, in
     setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
 }
 
-const vector<string> bars_horizontal = { "▏", "▎", "▍", "▌", "▋", "▊ ", "▉", "█"};
+const vector<string> bars_horizontal = { "▏", "▎", "▍", "▌", "▋", "▊ ", "▉", "█" };
 
 void displayLoadingBar(colors bg_color, colors fg_color, int width, float progress, int x, int y) {
     width *= 8;
