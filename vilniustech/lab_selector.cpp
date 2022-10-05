@@ -32,7 +32,6 @@ int main() {
 
 // pack 1
 void labs1() {
-    int i = 0;
     while (true) {
         clearScreen();
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=LABS 1=-=-=-=-=-=-=-\n");
@@ -227,7 +226,148 @@ void labs2() {
 
 // pack 3
 void labs3() {
-    coutWithColor(colors::RED, "Not implemented\n");
-    waitForButtonInput("Press any key to return\n");
+    while (true) {
+        clearScreen();
+        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=LABS 1=-=-=-=-=-=-=-\n");
+        coutWithColor(colors::LIGHT_PURPLE, "Choose task\n");
+
+        char ch;
+        string str;
+        double a, b, c;
+        int choice = displaySelection(new string[8]{
+            "1.Min",
+            "2.Print char n times",
+            "3.Harmonic mean",
+            "4.Larger of",
+            "5.3 doubles swap",
+            "6.Report letters",
+            "7.Fibonachi",
+            "8.Exit to main menu"
+            }, 8);
+
+        switch (choice) {
+        case 1:
+            a = inputData("a = ", false);
+            b = inputData("b = ", false);
+            cout << "min(a, b) = " << mmin(a, b) << std::endl;
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 2:
+            ch = inputData("char = ", new char[54] { "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53)[0];
+            a = inputData("width = ", false);
+            b = inputData("height = ", false);
+            for(int h = 0; h < b; h++) {
+                for (int w = 0; w < a; w++) {
+                    cout << ch;
+                }
+                cout << "\n";
+            }
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 3:
+            a = inputData("a = ", false);
+            b = inputData("b = ", false);
+            cout << "harmonic mean of a and b = " << harmonic_mean(a, b) << std::endl;
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 4:
+            a = inputData("a = ", false);
+            b = inputData("b = ", false);
+            larger_of(a, b);
+            cout << "calling 'larger_of'\n";
+            cout << "a = " << a << std::endl;
+            cout << "b = " << b << std::endl;
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 5:
+            a = inputData("a = ", false);
+            b = inputData("b = ", false);
+            c = inputData("c = ", false);
+            cout << "calling 'swap_doubles'\n";
+            swap_doubles(&a, &b, &c);
+            cout << "a = " << a << std::endl;
+            cout << "b = " << b << std::endl;
+            cout << "c = " << c << std::endl;
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 6:
+            cout << "Input string: ";
+            cin >> str;
+            int index;
+            for(char ch: str) {
+                index = getAlphaIndex(ch);
+                cout << ch << ((index == -1) ? " is not a letter" : (" is a letter, index is " + std::to_string(index))) << "\n";
+            }
+            std::cin.clear();
+            while (std::cin.get() != '\n');
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 7:
+            fibonachi();
+            break;
+        case 8:
+            return;
+        }
+    }
     return;
+}
+
+int getAlphaIndex(char ch) {
+    string alphabet = "abcdefghijklmnopqrstuvwxyz";
+    for(int i = 0; i < alphabet.length(); i++) {
+        if (alphabet[i] == std::tolower(ch)) {
+            return i + 1;
+        }
+    }
+    return -1;
+}
+
+double harmonic_mean(double a, double b) {
+    return (a * b * 2) / (a + b);
+}
+
+template<typename T>
+double mmin(T a, T b) {
+    return a < b ? a : b;
+}
+
+void larger_of(double &a, double &b) {
+    double max = std::max(a, b);
+    a = max;
+    b = max;
+}
+
+void swap_doubles(double* a, double* b, double* c) {
+    double min_val = std::min(std::min(*a, *b), *c);
+    double max_val = std::max(std::max(*a, *b), *c);
+
+    bool a_is_not_max_min = !(*a == min_val || *a == max_val);
+    bool b_is_not_max_min = !(*b == min_val || *b == max_val);
+    bool c_is_not_max_min = !(*c == min_val || *c == max_val);
+
+    double middle_value = *a * a_is_not_max_min + *b * b_is_not_max_min + *c * c_is_not_max_min;
+
+    *a = min_val;
+    *b = middle_value;
+    *c = max_val;
+}
+
+void fibonachi() {
+    double num1 = 0;
+    double num2 = 1;
+    while (true) {
+        int nums = inputData("Input how many numbers to calculate: ", false);
+        if (nums <= 0) {
+            return;
+        }
+        double temp = 0;
+        cout << num1 << " " << num2 << " ";
+        for (int i = 0; i < nums; i++) {
+            temp = num1;
+            num1 = num2;
+            num2 = temp + num2;
+            cout << num2 << " ";
+        }
+        cout << std::endl;
+    }
 }

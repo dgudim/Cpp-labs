@@ -11,3 +11,15 @@ void fahrenheitToCelsiusKelvin();
 
 void labs2();
 void labs3();
+
+void fibonachi();
+
+template<typename T>
+double mmin(T a, T b);
+
+void larger_of(double& a, double& b);
+
+double harmonic_mean(double a, double b);
+void swap_doubles(double* a, double* b, double* c);
+
+int getAlphaIndex(char ch);
