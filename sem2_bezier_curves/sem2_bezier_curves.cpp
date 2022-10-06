@@ -23,19 +23,19 @@ int main() {
         coutWithColor(colors::LIGHT_BLUE, "Текущий шаг: " + to_string(step) + "\n");
         coutWithColor(colors::LIGHT_GREEN, "Балансирова по " +  string(balancedByStep ? "шагу" : "количеству точек") + " \n");
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        choice = displaySelection(new string[6]{
+        choice = displaySelection({
                 "1.Ввести промежуток",
                 "2.Ввести количество известных точек",
                 "3.Ввести шаг",
                 "4.Ввести множитель интерполяции",
                 "5.Показать график + таблицу",
                 "6.Выйти"
-            }, 6);
+            });
         switch (choice) {
         case 1:
 
-            a = inputData("Введите начало промежутка: ", false);
-            b = inputData("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;}, 
+            a = (int)inputDouble("Введите начало промежутка: ", false);
+            b = (int)inputDouble("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;},
                 "Конец должен быть больше начала, повторите ввод: ");
 
             if (!balancedByStep) {
@@ -43,20 +43,20 @@ int main() {
             }
             break;
         case 2:
-            temp = inputData("Введите количество известных точек: ", false, [](int input) -> bool {return input >= 2;}, 
+            temp = (int)inputDouble("Введите количество известных точек: ", false, [](int input) -> bool {return input >= 2;},
                 "Слишком маленькое количество известных точек, повторите ввод: ");
 
             step = (b - a) / (double)(temp - 1);
             balancedByStep = false;
             break;
         case 3:
-            step = inputData("Введите шаг: ", false, [a, b](int input) -> bool {return input < (b - a) / 2;}, 
+            step = inputDouble("Введите шаг: ", false, [a, b](int input) -> bool {return input < (b - a) / 2;},
                 "Слишком большой шаг, повторите ввод: ");
 
             balancedByStep = true;
             break;
         case 4:
-            interpolation_muliplier = inputData("Введите множитель: ", false, strictPositive,
+            interpolation_muliplier = (int)inputDouble("Введите множитель: ", false, strictPositive,
                 "Множитель должен быть больше 0, повторите ввод: ");
             break;
         case 5:

@@ -7,7 +7,7 @@ int dynamic_array_size;
 void fillArray(bool manual) {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (manual) {
-            dynamic_array[i] = (int)inputData("");
+            dynamic_array[i] = (int)inputDouble("");
         }
         else {
             dynamic_array[i] = rand() % 100 - 49;
@@ -40,7 +40,7 @@ void initializeArray(double size_double) {
     dynamic_array = (int*)malloc(size * 4 + 1);
     dynamic_array_size = size;
     coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели проинициализировать массив?\n");
-    switch (displaySelection(new string[2]{ "1. Случайными числами", "2. Вручную" }, 2)) {
+    switch (displaySelection({ "1. Случайными числами", "2. Вручную" })) {
     case 1:
         cout << "Заполняю ваш массив случайными числами..." << endl;
         fillArray(false);
@@ -90,7 +90,7 @@ int main()
 {
    
     while (true) {
-        initializeArray(inputData("Введите размер массива: "));
+        initializeArray(inputDouble("Введите размер массива: "));
         quickSort(dynamic_array, 0, dynamic_array_size - 1);
 
         cout << "Сортированный массив: " << endl;

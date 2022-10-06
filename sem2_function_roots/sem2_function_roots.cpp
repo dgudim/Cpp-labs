@@ -44,25 +44,25 @@ int main() {
         clearScreen();
         coutWithColor(colors::LIGHT_BLUE, "Текущая точность: " + to_string(e) + "\n");
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        choice = displaySelection(new string[4]{
+        choice = displaySelection({
             "1.Ввести e (точность)",
             "2.Вычислить с помощью метода деления отрезка пополам",
             "3.Вычислить с помощью метода парабол",
             "4.Выйти"
-            }, 4);
+            });
         switch (choice) {
         case 1:
-            e = inputData("Введите новую точность: ", false, [](int input) -> bool {return input < 0.5 && input >= 0.000001;},
+            e = inputDouble("Введите новую точность: ", false, [](int input) -> bool {return input < 0.5 && input >= 0.000001;},
                 "Точность слишком большая или слишком маленькая (от 0.5 до 0.000001), повторите ввод: ");
             break;
         case 2:
         case 3:
 
             coutWithColor(colors::LIGHT_YELLOW, "\nВыберите как рисовать графики\n");
-            graphingBackend = displaySelection(new string[2]{
+            graphingBackend = displaySelection({
             "1.Gnuplot (в отдельном окне)",
             "2.В консоли"
-                }, 2) == 1 ? GraphingBackend::GNUPLOT : GraphingBackend::CONSOLE;
+                }) == 1 ? GraphingBackend::GNUPLOT : GraphingBackend::CONSOLE;
 
             coutWithColor(colors::YELLOW, "График:\n");
 

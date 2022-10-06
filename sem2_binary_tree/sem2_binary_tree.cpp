@@ -24,7 +24,7 @@ struct TreeNode {
 TreeNode* findByKey(TreeNode* root, uint32_t key);
 
 string inputKey(string message){
-    return inputData(message, new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
+    return inputString(message, "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890");
 }
 
 TreeNode* addElement(TreeNode* root, bool& success) {
@@ -38,7 +38,7 @@ TreeNode* addElement(TreeNode* root, bool& success) {
     }
 
     TreeNode* temp = root;
-    TreeNode* elem = new TreeNode(key, inputData("Данные: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64));
+    TreeNode* elem = new TreeNode(key, inputString("Данные: ", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890"));
     success = true;
 
     if (root) {
@@ -356,7 +356,7 @@ int main()
         printInfoOnNextPrint = false;
 
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection(new string[9]{
+        int choise = displaySelection({
             "1.Добавить элементы в дерево",
             "2.Удалить элемент по ключу",
             "3.Удалить ветвь с вершиной по ключу",
@@ -365,10 +365,10 @@ int main()
             "6.Сбалансировать дерево",
             "7.Сгенерировать дерево по количеству слоев",
             "8.Информация о дереве",
-            "9.Выйти" }, 9);
+            "9.Выйти" });
         switch (choise) {
         case 1:
-            n = (int)inputData("Сколько элементов добавить? : ", false);
+            n = (int)inputDouble("Сколько элементов добавить? : ", false);
             n2 = n;
             if (n <= 0) {
                 clearScreen();
@@ -429,7 +429,7 @@ int main()
             root = balanceTree(root);
             break;
         case 7:
-            n = (int)inputData("Сколько слоев? : ", false);
+            n = (int)inputDouble("Сколько слоев? : ", false);
             if (n <= 0) {
                 clearScreen();
                 coutWithColor(colors::LIGHT_RED, "Не могу создать 0 или отрицательное количество слоев\n");

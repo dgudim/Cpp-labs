@@ -7,7 +7,7 @@ int dynamic_array_size;
 void fillArray(bool manual) {
     for (int i = 0; i < dynamic_array_size; i++) {
         if (manual) {
-            dynamic_array[i] = (int)inputData("");
+            dynamic_array[i] = (int)inputDouble("");
         }
         else {
             dynamic_array[i] = rand() % 10 - 4;
@@ -38,7 +38,7 @@ void initializeArray (double size_double) {
     dynamic_array = (int*)malloc(size * 4 + 1);
     dynamic_array_size = size;
     coutWithColor(colors::LIGHT_YELLOW, "\nКак бы вы хотели проинициализировать массив?\n");
-    switch (displaySelection(new string[2]{ "1. Случайными числами", "2. Вручную" }, 2)) {
+    switch (displaySelection({ "1. Случайными числами", "2. Вручную" })) {
     case 1:
         cout << "Заполняю ваш массив случайными числами..." << endl;
         fillArray(false);
@@ -207,11 +207,11 @@ int main()
     srand((size_t)time(NULL));
 
     while (true) {
-        initializeArray(inputData("Введите размер массива: "));
+        initializeArray(inputDouble("Введите размер массива: "));
         coutWithColor(colors::LIGHT_YELLOW, "\nВыберите что вычислить\n");
         try
         {
-            switch (displaySelection(new string[16]{ 
+            switch (displaySelection({ 
                 " 1. Произведение элементов массива, расположенных между максимальным и минимальным элементами",
                 " 2. Сумму элементов массива, расположенных между первым и последним нулевыми элементами",
                 " 3. Сумму элементов массива, расположенных до последнего положительного элемента",
@@ -227,7 +227,7 @@ int main()
                 "13. Сумму модулей элементов массива, расположенных после первого отрицательного элемента",
                 "14. Сумму модулей элементов массива, расположенных после первого элемента, равного нулю",
                 "15. Сумму положительных элементов массива, расположенных до максимального элемента",
-                "16. Произведение элементов массива, расположенных между первым и последним отрицательными элементами" }, 16)) {
+                "16. Произведение элементов массива, расположенных между первым и последним отрицательными элементами" })) {
             case 1:
                 printResult(caclulateProductBetweenTwoIndexes(findMaxElementIndex(), findMinElementIndex(false)));
                 break;

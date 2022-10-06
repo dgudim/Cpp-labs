@@ -24,10 +24,10 @@ double calculateSum(double x, int n) {
 int main() {
 
     while (true) {
-        double from = inputData("Введите начальный x: ");
-        double to = inputData("Введите конечный x: ");
-        double step = inputData("Введите шаг: ");
-        int n = (int)inputData("Введите n для суммы: ");
+        double from = inputDouble("Введите начальный x: ");
+        double to = inputDouble("Введите конечный x: ");
+        double step = inputDouble("Введите шаг: ");
+        int n = (int)inputDouble("Введите n для суммы: ");
         if (from > to && step > 0) {
             cout << "Начальный индекс не может быть меньше конечного, меняю местами" << endl;
             swap(from, to);

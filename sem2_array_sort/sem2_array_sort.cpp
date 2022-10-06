@@ -214,14 +214,14 @@ int main() {
         clearScreen();
         coutWithColor(colors::LIGHT_BLUE, "Текущий размер массива: " + to_string(n) + "\n");
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        switch (displaySelection(new string[4]{
+        switch (displaySelection({
                  "1.Ввести размер массива",
                  "2.Отсортировать и посмотреть результаты",
                  "3.График зависимости времени выполнения и измений массива от количества элементов",
                  "4.Выйти"
-            }, 4)) {
+            })) {
         case 1:
-            n = inputData("Введите размер: ", false, strictPositive, 
+            n = (int)inputDouble("Введите размер: ", false, strictPositive,
                 "Размер должен быть больше 0, повторите ввод: ");
             break;
         case 2:
@@ -252,9 +252,9 @@ int main() {
             break;
         case 3:
 
-            a = inputData("Введите начало промежутка: ", false, strictPositive, 
+            a = (int)inputDouble("Введите начало промежутка: ", false, strictPositive,
                 "Начало должно быть больше 0, повторите ввод: ");
-            b = inputData("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;}, 
+            b = (int)inputDouble("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;},
                 "Конец должен быть больше начала, повторите ввод: ");
 
             clearScreen();

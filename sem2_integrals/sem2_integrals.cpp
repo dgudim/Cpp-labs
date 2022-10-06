@@ -27,28 +27,28 @@ int main() {
         coutWithColor(colors::LIGHT_BLUE, "Текущая точность: " + to_string(eps) + "\n");
         coutWithColor(colors::LIGHT_GREEN, "Балансирова по " +  string(balanceByEps ? "точности" : "количеству разбиений") + " \n");
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        choice = displaySelection(new string[5]{
+        choice = displaySelection({
                 "1.Ввести промежуток",
                 "2.Ввести количество разбиений",
                 "3.Ввести точность",
                 "4.Вычислить",
                 "5.Выйти"
-            }, 5);
+            });
         switch (choice) {
         case 1:
-            a = inputData("Введите начало промежутка: ", false);
-            b = inputData("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;}, 
+            a = (int)inputDouble("Введите начало промежутка: ", false);
+            b = (int)inputDouble("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;},
                 "Конец должен быть больше начала, повторите ввод: ");
             break;
         case 2:
-            divisions = inputData("Введите шаг: ", false, strictPositive,
+            divisions = (int)inputDouble("Введите шаг: ", false, strictPositive,
                 "Количество разбиений не может быть меньше или = 0, повторите ввод: ");
             divisions += divisions % 2 != 0;
             
             balanceByEps = false;
             break;
         case 3:
-            eps = inputData("Введите новую точность: ", false, [](double input) -> bool {return input < 0.5 && input >= 0.000001;},
+            eps = inputDouble("Введите новую точность: ", false, [](double input) -> bool {return input < 0.5 && input >= 0.000001;},
                 "Точность слишком большая или слишком маленькая (от 0.5 до 0.000001), повторите ввод: ");
                 
             balanceByEps = true;

@@ -128,14 +128,14 @@ int main()
         }
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        switch (displaySelection(new string[5]{
+        switch (displaySelection({
             "1.Добавить данные в стек",
         "2.Удалить n элементов",
         "3.Удалить элементы между максимальным и минимальным элементами",
         "4.Удалить все четные элементы",
-        "5.Выйти" }, 5)) {
+        "5.Выйти" })) {
         case 1:
-            n = (int)inputData("Сколько элементов добавить? : ", false);
+            n = (int)inputDouble("Сколько элементов добавить? : ", false);
             if (n <= 0) {
                 clearScreen();
                 coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество элементов\n");
@@ -143,10 +143,10 @@ int main()
             }
             size += n;
             coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели ввести элементы?\n");
-            manual = displaySelection(new string[2]{ "1.Случайно", "2.Вручную" }, 2) == 2;
+            manual = displaySelection({ "1.Случайно", "2.Вручную" }) == 2;
             for (int i = 0; i < n; i++) {
                 if (manual) {
-                    root = add(root, inputData(""));
+                    root = add(root, inputDouble(""));
                 } else {
                     root = add(root, rand() % 100 / 2 - 25);
                 }
@@ -156,7 +156,7 @@ int main()
             break;
         case 2:
             if (root) {
-                n = (int)inputData("Сколько элементов удалить? : ", false);
+                n = (int)inputDouble("Сколько элементов удалить? : ", false);
                 clearScreen();
                 if (n <= 0) {
                     coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");

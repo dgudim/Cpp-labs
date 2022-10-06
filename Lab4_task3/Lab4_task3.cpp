@@ -17,12 +17,12 @@ int main()
         int n;
 
         coutWithColor(colors::LIGHT_YELLOW, "\nВыберите промежуток, шаг и n для суммы\n");
-        switch (displaySelection(new string[5]{
+        switch (displaySelection({
             "1. начальный x = 0, конечный x = 10, шг = 0.1, n = 50", 
             "2. начальный x = 0, конечный x = 1, шаг = 0.05, n = 50",
             "3. начальный x = 10, конечный x = 20, шаг = 0.2, n = 100",
             "4. начальный x = -10, конечный x = 10, шаг = 1, n = 100",
-            "5. Ввести вручную"}, 5)) {
+            "5. Ввести вручную"})) {
 
         case 1:
             from = 0;
@@ -49,10 +49,10 @@ int main()
             n = 100;
             break;
         case 5:
-            from = inputData("Введите начальный x: ");
-            to = inputData("Введите конечный x: ");
-            step = inputData("Введите шаг: ");
-            n = (int)inputData("Введите n для суммы: ");
+            from = inputDouble("Введите начальный x: ");
+            to = inputDouble("Введите конечный x: ");
+            step = inputDouble("Введите шаг: ");
+            n = inputDouble("Введите n для суммы: ");
             break;
         }
 
@@ -85,16 +85,14 @@ int main()
 
         coutWithColor(colors::LIGHT_YELLOW, "\nВыберите функции (backspace - выбрать/отменить), (enter - подтвердить)\n");
 
-        const unsigned int functions_len = 3;
+        vector<string> functions = { "1. (exp(x) + exp(-x)) / 2", "2. exp(x * cos(PI / 4)) * cos(x * sin(PI / 4))", "3. 2 * (cos(x) * cos(x) - 1)" };
+        vector<FunctionPointer> pArray = { expXexpX, expXcosX, cosXcosX };
+        vector<SumFunctionPointer> pArray_sum = { expXexpX_sum, expXcosX_sum, cosXcosX_sum };
 
-        string functions[functions_len] = { "1. (exp(x) + exp(-x)) / 2", "2. exp(x * cos(PI / 4)) * cos(x * sin(PI / 4))", "3. 2 * (cos(x) * cos(x) - 1)" };
-        FunctionPointer pArray[functions_len] = { expXexpX, expXcosX, cosXcosX };
-        SumFunctionPointer pArray_sum[functions_len] = { expXexpX_sum, expXcosX_sum, cosXcosX_sum };
-
-        bool* selectedFunctions = displayMultiSelection(functions, functions_len);
+        vector<bool> selectedFunctions = displayMultiSelection(functions);
 
         int selectedFunctionsCount = 0;
-        for (int i = 0; i < functions_len; i++) {
+        for (int i = 0; i < functions.size(); i++) {
             selectedFunctionsCount += selectedFunctions[i];
         }
         
@@ -103,18 +101,16 @@ int main()
         }
 
         coutWithColor(colors::LIGHT_YELLOW, "\nВыберите дополнительные опции\n");
-        bool* selectedOptions = displayMultiSelection(new string[3]{ "1. Печатать сумму", "2. Печатать |S-Y|", "3. Печатать график" }, 3);
+        vector<bool> selectedOptions = displayMultiSelection({ "1. Печатать сумму", "2. Печатать |S-Y|", "3. Печатать график" });
 
         cout << endl;
-        for (int i = 0; i < functions_len; i++) {
+        for (int i = 0; i < functions.size(); i++) {
             if (selectedFunctions[i]) {
                 coutWithColor(colors::LIGHT_GREEN, "\nФункция: " + functions[i] + "\n");
                 printTable(pArray[i], pArray_sum[i], from, to, step, n, selectedOptions[0], selectedOptions[1], selectedOptions[2]);
             }
         }
 
-        delete[] selectedFunctions;
-        delete[] selectedOptions;
         continueOrExit();
     }
 }

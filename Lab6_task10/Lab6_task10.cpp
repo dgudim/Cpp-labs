@@ -6,7 +6,7 @@ int main() {
     double** matrix;
     int size;
     while (true) {
-        size = (int)inputData("Введите размер квадратной матрицы: ", false);
+        size = (int)inputDouble("Введите размер квадратной матрицы: ", false);
         if (size <= 0) {
             coutWithColor(colors::RED, "Размер не может быть меньше иле или равен 0, устанавливаю размер 3\n");
             size = 3;
@@ -33,7 +33,7 @@ double** inputMatrix(int size){
     cout << "Введите элементы матрицы:\n";
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
-            matrix[i][j] = inputData("");
+            matrix[i][j] = inputDouble("");
     return matrix;
 }
 

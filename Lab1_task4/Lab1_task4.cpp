@@ -10,7 +10,10 @@ double calculate(double z, double y, double x) {
 int main()
 {
     while (true) {
-        cout << "\n\tОтвет: " << calculate(inputData("Пожалуйста, введите z = "), inputData("Пожалуйста, введите y = "), inputData("Пожалуйста, введите x = ")) << ", хорошего дня\n" << endl;
+        cout << "\n\tОтвет: " << calculate(
+            inputDouble("Пожалуйста, введите z = "), 
+            inputDouble("Пожалуйста, введите y = "), 
+            inputDouble("Пожалуйста, введите x = ")) << ", хорошего дня\n" << endl;
         continueOrExit();
     }
     return 0;

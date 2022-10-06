@@ -11,8 +11,8 @@ int main()
 
     while (true) {
 
-        a = inputData("Please, input a = ");
-        z = inputData("Please, input z = ");
+        a = inputDouble("Please, input a = ");
+        z = inputDouble("Please, input z = ");
 
         if (z < 1) {
             x = z * z;
@@ -25,7 +25,7 @@ int main()
         cout << "1 - 2x (default)" << endl;
         cout << "2 - x^2" << endl;
         cout << "3 - x/3" << endl;
-        int func = (int)floor(inputData("Function: "));
+        int func = (int)inputDouble("Function: ");
 
         string selectedFunc = "";
 

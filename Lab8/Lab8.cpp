@@ -47,7 +47,7 @@ int main()
         listFiles();
         coutWithColor(colors::CYAN, "\nМеню (Выбор стрелками и Enter)\n");
         coutWithColor(colors::LIGHTER_BLUE, "Текущий файл: " + currentFile + "\n\n");
-        switch (displaySelection(new string[5]{ "1.Открыть файл", "2.Создать файл", "3.Удалить файлы", "4.Редактировать/просмотреть текущий файл", "5.Выйти" }, 5)) {
+        switch (displaySelection({ "1.Открыть файл", "2.Создать файл", "3.Удалить файлы", "4.Редактировать/просмотреть текущий файл", "5.Выйти" })) {
             case 1:
                 loadFromFile(&entries);
                 break;
@@ -85,7 +85,7 @@ void edit(vector<student_entry>* entries) {
     while (true) {
         printSummary(entries);
         bool save = true;
-        switch (displaySelection(new string[6]{ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по выбранному полю", "6.Назад" }, 6)) {
+        switch (displaySelection({ "1.Добавить записи", "2.Просмотреть записи", "3.Удалить записи", "4.Редактировать запись", "5.Сортировать по выбранному полю", "6.Назад" })) {
         case 1:
             save = addEntries(entries);
             break;
@@ -122,7 +122,7 @@ void sort(vector<student_entry>* entries) {
     coutWithColor(colors::LIGHT_YELLOW, "Сортировать по\n");
     bool sort = true;
     SortFunction sortFunction = NULL;
-    switch (displaySelection(new string[5]{ "1.Алфавиту", "2.Году рождения", "3.Номеру группы", "4.Среднему баллу", "5.Отмена" }, 5)) {
+    switch (displaySelection({ "1.Алфавиту", "2.Году рождения", "3.Номеру группы", "4.Среднему баллу", "5.Отмена" })) {
     case 1:
         sortFunction = fio_compare;
         break;
@@ -144,7 +144,7 @@ void sort(vector<student_entry>* entries) {
         entrySort(entries, sortFunction);
         printSummary(entries);
         coutWithColor(colors::LIGHT_YELLOW, "Сохранить изменения?\n");
-        switch(displaySelection(new string[3]{ "1.Да", "2.Да, в другой файл", "3.Нет"}, 3)) {
+        switch(displaySelection({ "1.Да", "2.Да, в другой файл", "3.Нет"})) {
         case 1:
             write_entries(entries, currentFile);
             break;
@@ -159,16 +159,16 @@ void sort(vector<student_entry>* entries) {
 }
 
 void inputEntry(student_entry* entry) {
-    entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."));
-    entry->year_of_birth = stoi(inputData("Введите год рождения: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9]")));
-    entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
+    entry->fio = inputString("Введите Ф.И.О: ", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM.", regex(".*[.].[.]."));
+    entry->year_of_birth = stoi(inputString("Введите год рождения: ", "1234567890", regex("[1-9][0-9][0-9][0-9]")));
+    entry->group = stoi(inputString("Введите номер группы: ", "1234567890", regex("[1-9][0-9][0-9][0-9][0-9][0-9]")));
     unsigned int grades_sum = 0;
     unsigned int grades_count = 0;
     string failureBuffer = "";
     string lastInput = "";
     for (unsigned int i = 0; i < lessons_size; i++) {
         cout << "Введите отметки по " << lessons_map_case[i] << " через пробел: " << flush;
-        string input = trim(inputData("", new char[12]{ "1234567890 " }, 11, failureBuffer)) + ' ';
+        string input = trim(inputString("", "1234567890 ", failureBuffer)) + ' ';
         lastInput = input;
         failureBuffer = "";
         if (input.length() != 1) {
@@ -200,9 +200,9 @@ void inputEntry(student_entry* entry) {
 }
 
 void editEntry(student_entry* entry) {
-    entry->fio = inputData("Введите Ф.И.О: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53, regex(".*[.].[.]."), entry->fio);
-    entry->year_of_birth = stoi(inputData("Введите год рождения: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9]"), to_string(entry->year_of_birth)));
-    entry->group = stoi(inputData("Введите номер группы: ", new char[11]{ "1234567890" }, 10, regex("[1-9][0-9][0-9][0-9][0-9][0-9]"), to_string(entry->group)));
+    entry->fio = inputString("Введите Ф.И.О: ", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM.", regex(".*[.].[.]."), entry->fio);
+    entry->year_of_birth = stoi(inputString("Введите год рождения: ", "1234567890", regex("[1-9][0-9][0-9][0-9]"), to_string(entry->year_of_birth)));
+    entry->group = stoi(inputString("Введите номер группы: ", "1234567890", regex("[1-9][0-9][0-9][0-9][0-9][0-9]"), to_string(entry->group)));
     unsigned int grades_sum = 0;
     unsigned int grades_count = 0;
     string failureBuffer = "";
@@ -217,10 +217,10 @@ void editEntry(student_entry* entry) {
             for (unsigned int gr = 0; gr < previous_grades_len; gr++) {
                 previous_grades.append(to_string(entry->grades[(lessons)i].at(gr)) + " ");
             }
-            input = trim(inputData("", new char[12]{ "1234567890 " }, 11, previous_grades)) + ' ';
+            input = trim(inputString("", "1234567890 ", previous_grades)) + ' ';
         }
         else {
-            input = trim(inputData("", new char[12]{ "1234567890 " }, 11, failureBuffer)) + ' ';
+            input = trim(inputString("", "1234567890 ", failureBuffer)) + ' ';
             failureBuffer = "";
         }
 
@@ -416,7 +416,7 @@ string createFile() {
     while (true) {
         exit = true;
 
-        fileName = inputData("Введите название файла: ", new char[65]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890" }, 64);
+        fileName = inputString("Введите название файла: ", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890");
 
         ifstream file_read(workingDir + fileName + ".dat", ios::in | ios::binary);
 
@@ -441,38 +441,29 @@ string createFile() {
 }
 
 void loadFromFile(vector<student_entry>* entries) {
-    unsigned int files = 0;
+    vector<string> file_names;
     for (const auto& entry : fs::directory_iterator(workingDir)) {
-        files++;
+        file_names.push_back(entry.path().filename().u8string());
     }
-    string* file_names = new string[files];
-    unsigned int i = 0;
-    for (const auto& entry : fs::directory_iterator(workingDir)) {
-        file_names[i] = entry.path().filename().u8string();
-        i++;
-    }
-    int file_chosen = displaySelection(file_names, files);
+    int file_chosen = displaySelection(file_names);
     read_entries(entries, file_names[file_chosen - 1]);
-    delete[] file_names;
 }
 
 void deleteFiles() {
-    unsigned int files = 0;
+
+    vector<string> file_names;
     for (const auto& entry : fs::directory_iterator(workingDir)) {
-        files++;
+        file_names.push_back(entry.path().filename().u8string());
     }
-    string* file_names = new string[files];
-    unsigned int i = 0;
-    for (const auto& entry : fs::directory_iterator(workingDir)) {
-        file_names[i] = entry.path().filename().u8string();
-        i++;
-    }
+
+    int file_count = file_names.size();
+
     coutWithColor(colors::LIGHT_YELLOW, "Выберите файлы (backspace - выбрать/отменить), (enter - подтвердить)\n");
-    bool* files_chosen = displayMultiSelection(file_names, files);
+    vector<bool> files_chosen = displayMultiSelection(file_names);
     unsigned int deleted_files = 0;
     unsigned int files_to_delete = 0;
 
-    for (unsigned int i = 0; i < files; i++) {
+    for (unsigned int i = 0; i < file_count; i++) {
         if (files_chosen[i]) {
             files_to_delete++;
         }
@@ -481,7 +472,7 @@ void deleteFiles() {
     if (files_to_delete > 0) {
         string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
         if (input == "yes" || input == "y" || input == "1") {
-            for (unsigned int i = 0; i < files; i++) {
+            for (unsigned int i = 0; i < file_count; i++) {
                 if (files_chosen[i]) {
                     if (file_names[i] == currentFile) {
                         currentFile = "";
@@ -499,8 +490,6 @@ void deleteFiles() {
     else {
         clearScreen();
     }
-    delete[] file_names;
-    delete[] files_chosen;
 }
 
 unsigned int getStats(string path) {
@@ -530,21 +519,19 @@ void listFiles() {
 }
 
 void viewEntries(vector<student_entry>* entries) {
-    unsigned int size = entries->size();
-    string* selection = new string[size];
-    for (unsigned int i = 0; i < size; i++) {
-        selection[i] = entries->at(i).fio;
+    vector<string> selection;
+    for (unsigned int i = 0; i < selection.size(); i++) {
+        selection.push_back(entries->at(i).fio);
     }
     coutWithColor(colors::LIGHT_YELLOW, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
-    bool* selected = displayMultiSelection(selection, size);
+    vector<bool> selected = displayMultiSelection(selection);
     clearScreen();
-    for (unsigned int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < selection.size(); i++) {
         if (selected[i]) {
             printEntry(&(entries->at(i)));
         }
     }
     cout << endl;
-    delete[] selected;
 }
 
 bool isInvalid(student_entry entry) {
@@ -552,27 +539,25 @@ bool isInvalid(student_entry entry) {
 }
 
 void deleteEntries(vector<student_entry>* entries) {
-    unsigned int size = entries->size();
-    string* selection = new string[size];
-    for (unsigned int i = 0; i < size; i++) {
-        selection[i] = entries->at(i).fio;
+
+    vector<string> selection;
+    for (unsigned int i = 0; i < entries->size(); i++) {
+        selection.push_back(entries->at(i).fio);
     }
     coutWithColor(colors::LIGHT_YELLOW, "Выберите студентов (backspace - выбрать/отменить), (enter - подтвердить)\n");
-    bool* selected = displayMultiSelection(selection, size);
+    vector<bool> selected = displayMultiSelection(selection);
 
     string input = displayWarningWithInput(colors::YELLOW, "Вы уверены, что хотите удалить?\n");
     if (input == "yes" || input == "y" || input == "1") {
-        for (unsigned int i = 0; i < size; i++) {
+        for (unsigned int i = 0; i < entries->size(); i++) {
             entries->at(i).valid = !selected[i];
         }
         entries->erase(remove_if(entries->begin(), entries->end(), isInvalid), entries->end());
     }
-
-    delete[] selected;
 }
 
 bool addEntries(vector<student_entry>* entries) {
-    unsigned int entries_to_add = (unsigned int)max(inputData("Сколько записей добавить?\n"), 0.0);
+    unsigned int entries_to_add = (unsigned int)max(inputDouble("Сколько записей добавить?\n"), 0.0);
     
     for (unsigned int i = 0; i < entries_to_add; i++) {
         student_entry entry;
@@ -583,11 +568,10 @@ bool addEntries(vector<student_entry>* entries) {
 }
 
 void editEntries(vector<student_entry>* entries) {
-    unsigned int size = entries->size();
-    string* selection = new string[size];
-    for (unsigned int i = 0; i < size; i++) {
-        selection[i] = entries->at(i).fio;
+    vector<string> selection;
+    for (unsigned int i = 0; i < entries->size(); i++) {
+        selection.push_back(entries->at(i).fio);
     }
     coutWithColor(colors::LIGHT_YELLOW, "Выберите студента\n");
-    editEntry(&(entries->at(displaySelection(selection, size) - 1)));
+    editEntry(&(entries->at(displaySelection(selection) - 1)));
 }

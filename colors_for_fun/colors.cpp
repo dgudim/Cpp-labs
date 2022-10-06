@@ -21,11 +21,11 @@ void renderFrame(double phase, AnimationType type);
 int main() {
     double k = 0, delta;
     AnimationType animationType;
-    switch (displaySelection(new string[4]{
+    switch (displaySelection({
             "1.Линии",
             "2.Поток",
             "3.Сетка",
-            "4.Круг"}, 4)){
+            "4.Круг"})){
     case 1:
         delta = 0.001;
         animationType = AnimationType::LINES;

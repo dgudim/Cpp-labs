@@ -16,8 +16,8 @@ string& convert (int num, int scale_of_notation, string& buf) {
 
 int main()
 {
-    int num = inputData("Введите число: ");
-    int scale_of_notation = inputData("Введите систему систему счисления: ");
+    int num = (int)inputDouble("Введите число: ");
+    int scale_of_notation = (int)inputDouble("Введите систему систему счисления: ");
 
     if (scale_of_notation >= 35 || scale_of_notation < 2) {
         cout << "Прикалываетесь?, перевожу в двоичную\n";

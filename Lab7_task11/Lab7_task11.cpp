@@ -6,7 +6,7 @@ int main()
 {
     
     while(true){
-        string input = trim(inputData("Введите английские слова, разделенные пробелом: ", new char[54]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM " }, 53)) + ' ';
+        string input = trim(inputString("Введите английские слова, разделенные пробелом: ", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM ")) + ' ';
         cout << endl;
         if (input.length() == 1) {
             coutWithColor(colors::RED, "Ошибка ввода: пустая строка или только пробелы, повторите ввод\n");

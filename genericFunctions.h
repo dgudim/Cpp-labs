@@ -396,7 +396,7 @@ bool strictPositive(double n) {
     return n > 0;
 }
 
-double inputData(const string& message, bool allowWhiteSpaces, function<bool(double)> limit_function = acceptAll, const string& limitExcededMessage = "") {
+double inputDouble(const string& message, bool allowWhiteSpaces = true, function<bool(double)> limit_function = acceptAll, const string& limitExcededMessage = "") {
     std::cout << message << std::flush;
     double toReturn;
     while (true) {
@@ -412,11 +412,7 @@ double inputData(const string& message, bool allowWhiteSpaces, function<bool(dou
     }
 }
 
-double inputData(const string& message) {
-    return inputData(message, true);
-}
-
-string inputData(const string& message, char* allowedChars, int allowedChars_size, const regex& pattern, const string& previousBuffer) {
+string inputString(const string& message, const string& allowedChars, const regex& pattern, const string& previousBuffer) {
     printf("%s", (message + previousBuffer).c_str());
     string buffer = previousBuffer;
     while (true) {
@@ -438,7 +434,7 @@ string inputData(const string& message, char* allowedChars, int allowedChars_siz
             }
         }
 
-        for (int i = 0; i < allowedChars_size; i++) {
+        for (int i = 0; i < allowedChars.size(); i++) {
             if (allowedChars[i] == currChar) {
                 addToBuffer = true;
                 putchar(currChar);
@@ -455,18 +451,18 @@ string inputData(const string& message, char* allowedChars, int allowedChars_siz
     return buffer;
 }
 
-string inputData(const string& message, char* allowedChars, int allowedChars_size, const string& previousBuffer) {
+string inputString(const string& message, const string& allowedChars, const string& previousBuffer) {
     regex str_expr(".*");
-    return inputData(message, allowedChars, allowedChars_size, str_expr, previousBuffer);
+    return inputString(message, allowedChars, str_expr, previousBuffer);
 }
 
-string inputData(const string& message, char* allowedChars, int allowedChars_size, const regex& pattern) {
-    return inputData(message, allowedChars, allowedChars_size, pattern, "");
+string inputString(const string& message, const string& allowedChars, const regex& pattern) {
+    return inputString(message, allowedChars, pattern, "");
 }
 
-string inputData(const string& message, char* allowedChars, int allowedChars_size) {
+string inputString(const string& message, const string& allowedChars) {
     regex str_expr(".*");
-    return inputData(message, allowedChars, allowedChars_size, str_expr);
+    return inputString(message, allowedChars, str_expr);
 }
 
 string doubleToString(double value, int precision) {
@@ -541,12 +537,13 @@ double lerp(double from, double to, double progress) {
     return from * (1 - progress) + to * progress;
 }
 
-int displaySelection(string* options, int optionCount) {
+int displaySelection(const vector<string>& options) {
 
     int offset = getConsoleCursorPosition().Y;
     int counter = 0;
     int prev_counter = 0;
     int key = 0;
+    int optionCount = options.size();
 
     for (int i = 0; i < optionCount; i++) {
         setConsoleCursorPosition(0, offset + i);
@@ -591,11 +588,13 @@ int displaySelection(string* options, int optionCount) {
     }
 }
 
-bool* displayMultiSelection(string* options, int optionCount) {
+std::vector<bool> displayMultiSelection(const std::vector<string>& options) {
 
-    bool* selectedFunctions = new bool[optionCount];
+    int optionCount = options.size();
+
+    vector<bool> selectedFunctions;
     for (int i = 0; i < optionCount; i++) {
-        selectedFunctions[i] = false;
+        selectedFunctions.push_back(false);
     }
 
     int offset = getConsoleCursorPosition().Y;

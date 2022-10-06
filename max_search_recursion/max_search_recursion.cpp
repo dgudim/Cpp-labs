@@ -30,7 +30,7 @@ int main()
 {
     double* dynamic_array;
 
-    int array_size = inputData("Введите размер массива: ");
+    int array_size = (int)inputDouble("Введите размер массива: ");
 
     dynamic_array = (double*)malloc(array_size * 8 + 1);
 

@@ -592,7 +592,7 @@ void checkDataAndCalculate() {
 
         cout << "Step 3: variable input" << endl;
         for (int i = 0; i < variableCount; i++) {
-            user_variable_values[i] = inputData("Please input value for " + user_variables[i] + " = ");
+            user_variable_values[i] = inputDouble("Please input value for " + user_variables[i] + " = ");
         }
 
         cout << "Step 4: actual calculation" << endl;

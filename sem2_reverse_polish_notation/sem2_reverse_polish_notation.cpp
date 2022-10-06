@@ -343,7 +343,7 @@ void calculate(deque<Token> queue) {
                 if (var_map.find(token.str) != var_map.end()) {
                     stack.push_back(var_map.at(token.str));
                 } else {
-                    in_var = inputData("Введите значение для " + token.str + ": ");
+                    in_var = inputDouble("Введите значение для " + token.str + ": ");
                     var_map.insert(std::pair<string, double>(token.str, in_var));
                     stack.push_back(in_var);
                 }
@@ -420,11 +420,11 @@ int main() {
         }
         cout << endl;
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection(new string[4]{
+        int choise = displaySelection({
             "1.Ввести пример",
             "2.Преобразовать в польскую запись",
             "3.Решить",
-            "4.Выйти" }, 4);
+            "4.Выйти" });
 
         switch (choise)
         {

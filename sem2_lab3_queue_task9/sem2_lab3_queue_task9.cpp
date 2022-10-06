@@ -173,18 +173,18 @@ int main()
         printQueue(root, tail, size);
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection(new string[7]{
+        int choise = displaySelection({
             "1.Добавить данные в очередь с начала",
             "2.Добавить данные в очередь с конца",
             "3.Удалить n элементов с начала",
             "4.Удалить n элементов с конца",
             "5.Удалить элементы между максимальным и минимальным элементами",
             "6.Удалить все отрицательные элементы",
-            "7.Выйти" }, 7);
+            "7.Выйти" });
         switch (choise) {
         case 1:
         case 2:
-            n = (int)inputData("Сколько элементов добавить? : ", false);
+            n = (int)inputDouble("Сколько элементов добавить? : ", false);
             if (n <= 0) {
                 clearScreen();
                 coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество элементов\n");
@@ -192,7 +192,7 @@ int main()
             }
             size += n;
             coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели ввести элементы?\n");
-            manual = displaySelection(new string[2]{ "1.Случайно", "2.Вручную" }, 2) == 2;
+            manual = displaySelection({ "1.Случайно", "2.Вручную" }) == 2;
 
             clearScreen();
             coutWithColor(colors::BLUE, "Старая очередь\n");
@@ -205,7 +205,7 @@ int main()
 
             for (int i = 0; i < n; i++) {
                 if (manual) {
-                    add(root, tail, (int)inputData(""), choise == 2);
+                    add(root, tail, (int)inputDouble(""), choise == 2);
                 } else {
                     add(root, tail, rand() % 100 / 2 - 25, choise == 2);
                 }
@@ -217,7 +217,7 @@ int main()
         case 3:
         case 4:
             if (root) {
-                n = (int)inputData("Сколько элементов удалить? : ", false);
+                n = (int)inputDouble("Сколько элементов удалить? : ", false);
                 clearScreen();
                 if (n <= 0) {
                     coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");
