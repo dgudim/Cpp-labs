@@ -8,12 +8,12 @@ int main() {
         clearScreen();
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=MENU=-=-=-=-=-=-=-\n");
         coutWithColor(colors::LIGHT_PURPLE, "Choose lab pack\n");
-        switch (displaySelection(new string[4]{
+        switch (displaySelection({
             "1.Labs 1",
             "2.Labs 2",
             "3.Labs 3",
             "4.Exit"
-            }, 4)) {
+            })) {
         case 1:
             labs1();
             break;
@@ -37,7 +37,7 @@ void labs1() {
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=LABS 1=-=-=-=-=-=-=-\n");
         coutWithColor(colors::LIGHT_PURPLE, "Choose task\n");
 
-        int choice = displaySelection(new string[10]{
+        int choice = displaySelection({
             "1.Minutes to hours and minutes",
             "2.Print integers",
             "3.Days to weeks and days",
@@ -48,7 +48,7 @@ void labs1() {
             "8.Modulus",
             "9.Fahrenheit to celcius and kelvin",
             "10.Exit to main menu"
-            }, 10);
+            });
 
         switch (choice) {
         case 1:
@@ -71,7 +71,7 @@ void labs1() {
             break;
         case 7:
             while (true) {
-                double target = inputData("Input an integer: ", false);
+                double target = inputDouble("Input an integer: ", false);
                 if (target <= 0) {
                     break;
                 }
@@ -94,7 +94,7 @@ void labs1() {
 
 void M_to_HM() {
     while (true) {
-        int minutes = inputData("Input number of minutes: ", false);
+        int minutes = inputDouble("Input number of minutes: ", false);
         if (minutes <= 0) {
             return;
         }
@@ -111,7 +111,7 @@ void M_to_HM() {
 
 void printIntegers() {
     while (true) {
-        int start = inputData("Input start number: ", false);
+        int start = (int)inputDouble("Input start number: ", false);
         if (start <= 0) {
             return;
         }
@@ -126,7 +126,7 @@ void printIntegers() {
 
 void D_to_WD() {
     while (true) {
-        int days = inputData("Input number of days: ", false);
+        int days = (int)inputDouble("Input number of days: ", false);
         if (days <= 0) {
             return;
         }
@@ -143,7 +143,7 @@ void D_to_WD() {
 
 void Cm_to_feet_inches() {
     while (true) {
-        double cm = inputData("Input height in centimeters: ", false);
+        double cm = inputDouble("Input height in centimeters: ", false);
         if (cm <= 0) {
             return;
         }
@@ -163,7 +163,7 @@ void Cm_to_feet_inches() {
 
 void addemup(bool square) {
     while (true) {
-        int target = inputData("Input target integer: ", false);
+        int target = (int)inputDouble("Input target integer: ", false);
         if (target <= 0) {
             return;
         }
@@ -182,9 +182,9 @@ double cube(double num) {
 }
 
 void modulus() {
-    int second_operand = inputData("Input an integer to serve as the second operand: ", false);
+    int second_operand = (int)inputDouble("Input an integer to serve as the second operand: ", false);
     while (true) {
-        int first_operand = inputData("Input an integer to serve as the first operand: ", false);
+        int first_operand = (int)inputDouble("Input an integer to serve as the first operand: ", false);
         if (first_operand <= 0) {
             return;
         }
@@ -199,7 +199,7 @@ void modulus() {
 // TODO: exit on letters
 void fahrenheitToCelsiusKelvin() {
     while (true) {
-        double fahrenheit = inputData("Input temperature in fahrenheit: ", false);
+        double fahrenheit = inputDouble("Input temperature in fahrenheit: ", false);
         double celcius = 5.0 / 9.0 * (fahrenheit - 32.0);
         double kelvin = celcius + 273.16;
         cout << "that would be " << std::fixed << std::setprecision(2);
@@ -219,22 +219,204 @@ void fahrenheitToCelsiusKelvin() {
 
 // pack 2
 void labs2() {
-    coutWithColor(colors::RED, "Not implemented\n");
-    waitForButtonInput("Press any key to return\n");
+    while (true) {
+        clearScreen();
+        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=LABS 2=-=-=-=-=-=-=-\n");
+        coutWithColor(colors::LIGHT_PURPLE, "Choose task\n");
+
+        char chars[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        int offset = 0;
+        int a, b;
+        string str;
+
+        long int res;
+
+        vector<string> x;
+        vector<string> xx;
+        vector<string> xxx;
+
+        int choice = displaySelection({
+            "1.Arrow tree (2)",
+            "2.Letter tree (4)",
+            "3.Triangle Tree (5)",
+            "4.Table (6)",
+            "5.Words backwards (7)",
+            "6.Sum integer squares (10)",
+            "7.Array thingy (13)",
+            "8.Cumulative sum (14)",
+            "9.Chuckie (17)",
+            "10.Exit to main menu"
+            });
+
+        switch (choice) {
+        case 1:
+            for (int h = 1; h <= 5; h++) {
+                for (int w = 0; w < h; w++) {
+                    cout << '^';
+                }
+                cout << "\n";
+            }
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 2:
+            offset = 0;
+            for (int h = 1; h <= 6; h++) {
+                for (int w = 0; w < h; w++) {
+                    cout << chars[w + offset];
+                }
+                offset += h;
+                cout << "\n";
+            }
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 3:
+            for (int h = 1; h <= 9; h += 2) {
+                for (int w = 0; w < (9 - h) / 2; w++) {
+                    cout << " ";
+                }
+                for (int w = 0; w < h; w++) {
+                    cout << chars[abs(abs(w - h / 2) - h / 2)];
+                }
+                cout << "\n";
+            }
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 4:
+            a = inputDouble("lower limit = ", false);
+            b = inputDouble("upper limit = ", false);
+
+            if (a > b) {
+                std::swap(a, b);
+            }
+
+            x.clear();
+            xx.clear();
+            xxx.clear();
+            for (int i = a; i <= b; i++) {
+                x.push_back(std::to_string(i));
+                xx.push_back(std::to_string(i * i));
+                xxx.push_back(std::to_string(i * i * i));
+            }
+
+            printTable({ "X", "X^2", "X^3" }, { x, xx, xxx });
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 5:
+            str = inputString("word = ", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM");
+            cout << "Word backwards: ";
+            for (auto i = str.end() - 1; i >= str.begin(); i--) {
+                cout << *i;
+            }
+            cout << "\n";
+            waitForButtonInput("Press any key to return\n");
+            break;
+        case 6:
+            while (true) {
+                a = inputDouble("lower limit = ", false);
+                b = inputDouble("upper limit = ", false);
+
+                if (a >= b) {
+                    break;
+                }
+
+                for (int i = a; i <= b; i++) {
+                    res += i * i;
+                }
+
+                cout << "Result is " << res << "\n\n";
+            }
+            break;
+        case 7:
+            eight_elem_array();
+            waitForButtonInput("Press any key to return\n");
+        case 8:
+            cumulative_sum();
+            break;
+        case 9:
+            chuckie();
+            break;
+        case 10:
+            return;
+        }
+    }
     return;
+}
+
+void eight_elem_array() {
+    int arr[8];
+    for (int i = 1; i <= 8; i++) {
+        arr[i - 1] = std::pow(2, i);
+    }
+    int index = 0;
+    do {
+        cout << arr[index] << " ";
+        index++;
+    } while (index < 8);
+    cout << "\n";
+}
+
+void cumulative_sum() {
+    double arr[8];
+    cout << "array = ";
+    for (int i = 0; i < 8; i++) {
+        arr[i] = inputDouble("");
+    }
+    coutWithColor(colors::LIGHT_BLUE, "\nfinal array = ");
+
+    vector<string> indexes;
+    vector<string> elements;
+    vector<string> sums;
+    vector<string> sums_full;
+    int sum = 0;
+    string sum_str = doubleToString(arr[0]);
+
+    for (int i = 0; i < 8; i++) {
+        cout << arr[i] << " ";
+
+        elements.push_back(doubleToString(arr[i]));
+        indexes.push_back(std::to_string(i + 1));
+        sum += arr[i];
+        if (i > 0) {
+            sum_str += " + " + elements[i];
+        }
+        sums.push_back(doubleToString(sum));
+        sums_full.push_back(sum_str);
+    }
+
+    cout << "\n";
+
+    printTable({ "Index", "Element", "Cumulative sum", "Cumulative sum (full)" }, { indexes, elements, sums, sums_full });
+    waitForButtonInput("Press any key to return\n");
+}
+
+void chuckie() {
+    double starting_win = 1000000;
+    double interest = 0.08;
+    double withdrawal = 100000;
+
+    double current_balance = starting_win;
+    int year = 0;
+    while (current_balance > 0) {
+        current_balance *= (1 + interest);
+        current_balance -= withdrawal;
+        year ++;
+    }
+
+    cout << "Account will be empty in " << year << " years\n";
+    waitForButtonInput("Press any key to return\n");
 }
 
 // pack 3
 void labs3() {
     while (true) {
         clearScreen();
-        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=LABS 1=-=-=-=-=-=-=-\n");
+        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=LABS 3=-=-=-=-=-=-=-\n");
         coutWithColor(colors::LIGHT_PURPLE, "Choose task\n");
 
         char ch;
         string str;
         double a, b, c;
-        int choice = displaySelection(new string[8]{
+        int choice = displaySelection({
             "1.Min",
             "2.Print char n times",
             "3.Harmonic mean",
@@ -243,20 +425,20 @@ void labs3() {
             "6.Report letters",
             "7.Fibonachi",
             "8.Exit to main menu"
-            }, 8);
+            });
 
         switch (choice) {
         case 1:
-            a = inputData("a = ", false);
-            b = inputData("b = ", false);
+            a = inputDouble("a = ", false);
+            b = inputDouble("b = ", false);
             cout << "min(a, b) = " << mmin(a, b) << std::endl;
             waitForButtonInput("Press any key to return\n");
             break;
         case 2:
-            ch = inputData("char = ", new char[54] { "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM." }, 53)[0];
-            a = inputData("width = ", false);
-            b = inputData("height = ", false);
-            for(int h = 0; h < b; h++) {
+            ch = inputString("char = ", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM.")[0];
+            a = inputDouble("width = ", false);
+            b = inputDouble("height = ", false);
+            for (int h = 0; h < b; h++) {
                 for (int w = 0; w < a; w++) {
                     cout << ch;
                 }
@@ -265,14 +447,14 @@ void labs3() {
             waitForButtonInput("Press any key to return\n");
             break;
         case 3:
-            a = inputData("a = ", false);
-            b = inputData("b = ", false);
+            a = inputDouble("a = ", false);
+            b = inputDouble("b = ", false);
             cout << "harmonic mean of a and b = " << harmonic_mean(a, b) << std::endl;
             waitForButtonInput("Press any key to return\n");
             break;
         case 4:
-            a = inputData("a = ", false);
-            b = inputData("b = ", false);
+            a = inputDouble("a = ", false);
+            b = inputDouble("b = ", false);
             larger_of(a, b);
             cout << "calling 'larger_of'\n";
             cout << "a = " << a << std::endl;
@@ -280,9 +462,9 @@ void labs3() {
             waitForButtonInput("Press any key to return\n");
             break;
         case 5:
-            a = inputData("a = ", false);
-            b = inputData("b = ", false);
-            c = inputData("c = ", false);
+            a = inputDouble("a = ", false);
+            b = inputDouble("b = ", false);
+            c = inputDouble("c = ", false);
             cout << "calling 'swap_doubles'\n";
             swap_doubles(&a, &b, &c);
             cout << "a = " << a << std::endl;
@@ -294,7 +476,7 @@ void labs3() {
             cout << "Input string: ";
             cin >> str;
             int index;
-            for(char ch: str) {
+            for (char ch : str) {
                 index = getAlphaIndex(ch);
                 cout << ch << ((index == -1) ? " is not a letter" : (" is a letter, index is " + std::to_string(index))) << "\n";
             }
@@ -314,7 +496,7 @@ void labs3() {
 
 int getAlphaIndex(char ch) {
     string alphabet = "abcdefghijklmnopqrstuvwxyz";
-    for(int i = 0; i < alphabet.length(); i++) {
+    for (int i = 0; i < alphabet.length(); i++) {
         if (alphabet[i] == std::tolower(ch)) {
             return i + 1;
         }
@@ -331,7 +513,7 @@ double mmin(T a, T b) {
     return a < b ? a : b;
 }
 
-void larger_of(double &a, double &b) {
+void larger_of(double& a, double& b) {
     double max = std::max(a, b);
     a = max;
     b = max;
@@ -356,7 +538,7 @@ void fibonachi() {
     double num1 = 0;
     double num2 = 1;
     while (true) {
-        int nums = inputData("Input how many numbers to calculate: ", false);
+        int nums = inputDouble("Input how many numbers to calculate: ", false);
         if (nums <= 0) {
             return;
         }

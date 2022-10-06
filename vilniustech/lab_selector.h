@@ -10,6 +10,11 @@ void modulus();
 void fahrenheitToCelsiusKelvin();
 
 void labs2();
+
+void eight_elem_array();
+void cumulative_sum();
+void chuckie();
+
 void labs3();
 
 void fibonachi();
