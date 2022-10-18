@@ -37,7 +37,7 @@ do
         continue
     fi
     
-    ( if g++ $elem -o ./compiled_binaries_linux/$name -I $name -I . ; then
+    ( if clang++ -std=c++17 $elem -o ./compiled_binaries_linux/$name -I $name -I . $(cat $name/params 2> /dev/null | tr -d '\n') ; then
             printf "${GREEN}compiled: $name\n${NC}"
             echo -n "c" >> compiled_tmp
             echo "$hash" > $name/hash
