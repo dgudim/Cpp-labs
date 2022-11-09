@@ -71,7 +71,7 @@ int main() {
     cout << ": ";
     string res = convertInt(int_part, radix, str);
     if(num_digits > 0) {
-        res += convertFract(frac_part, radix, num_digits, str2);
+        res += "," + convertFract(frac_part, radix, num_digits, str2);
     }
     coutWithColor(colors::GREEN, res);
     waitForButtonInput("\n\nPress any button to close the window...");
