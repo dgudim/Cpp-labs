@@ -10,11 +10,11 @@ int getNumSignificantDigits(int radix, double eps) {
     return (int)ceil(log(1 / eps) / log(radix));
 }
 
-string& convertInt(int num, int radix, string& buf) {
+string& convertInt(long long num, int radix, string& buf) {
     if (num == 0) {
         return buf;
     }
-    int remainder = num % radix;
+    long long remainder = num % radix;
     buf.insert(0, 1, conversion_arr[remainder]);
     return convertInt(num / radix, radix, buf);
 }
@@ -24,7 +24,7 @@ string& convertFract(double num, int radix, int num_digits, string& buf) {
         return buf;
     }
     double mul = num * radix;
-    int int_part = floor(mul);
+    long long int_part = floor(mul);
     double frac_part = mul - int_part;
 
     buf += conversion_arr[int_part];
@@ -39,7 +39,7 @@ int main() {
 
     cout << "\n";
 
-    int int_part = floor(num);
+    long long int_part = floor(num);
     double frac_part = num - int_part;
 
     if (radix >= 35 || radix < 2) {
