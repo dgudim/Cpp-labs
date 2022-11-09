@@ -76,5 +76,6 @@
     },
     "code-runner.executorMap": {
         "cpp": "lxterminal -e bash -c 'cd compiled_binaries_linux && ./menu.sh $fileNameWithoutExt'"
-    }
+    },
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json"
 }
