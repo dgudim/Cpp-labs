@@ -47,6 +47,11 @@ int main() {
         radix = 2;
     }
 
+    if (eps > 1 || eps < DBL_MIN) {
+        cout << "Invalid eps, using 1\n";
+        eps = 1;
+    }
+
     string str;
     string str2;
 
@@ -56,14 +61,18 @@ int main() {
     cout << "    Number of significant digits: ";
     coutWithColor(colors::LIGHT_PURPLE, to_string(num_digits));
     cout << " (corresponds to epsilon_sup: ";
-    coutWithColor(colors::LIGHT_BLUE, to_string(eps));
+    coutWithColor(colors::LIGHT_BLUE, doubleToString(eps));
     cout << ")\n";
 
     cout << "    The result of converting: ";
-    coutWithColor(colors::LIGHT_GREEN, to_string(num) + "₁₀");
+    coutWithColor(colors::LIGHT_GREEN, doubleToString(num) + "₁₀");
     cout << " to radix ";
     coutWithColor(colors::PURPLE, to_string(radix));
     cout << ": ";
-    coutWithColor(colors::GREEN, convertInt(int_part, radix, str) + "," + convertFract(frac_part, radix, num_digits, str2));
+    string res = convertInt(int_part, radix, str);
+    if(num_digits > 0) {
+        res += convertFract(frac_part, radix, num_digits, str2);
+    }
+    coutWithColor(colors::GREEN, res);
     waitForButtonInput("\n\nPress any button to close the window...");
 }
