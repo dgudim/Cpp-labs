@@ -6,7 +6,7 @@ using namespace std;
 // 36
 string conversion_arr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-int getNumSignificantDigits(int radix, double eps) {
+int getNumSignificantDigits(int radix, long double eps) {
     return (int)ceil(log(1 / eps) / log(radix));
 }
 
@@ -35,7 +35,7 @@ int main() {
     coutWithColor(colors::LIGHT_GREEN, "Input initial data:\n");
     double num = inputDouble("    Initial decimal number: ");
     int radix = (int)inputDouble("    Target radix: ");
-    double eps = inputDouble("    Target precision (epsilon_sup): ");
+    long double eps = inputDouble("    Target precision (epsilon_sup): ");
 
     cout << "\n";
 
@@ -61,7 +61,7 @@ int main() {
     cout << "    Number of significant digits: ";
     coutWithColor(colors::LIGHT_PURPLE, to_string(num_digits));
     cout << " (corresponds to epsilon_sup: ";
-    coutWithColor(colors::LIGHT_BLUE, doubleToString(eps));
+    coutWithColor(colors::LIGHT_BLUE, doubleToString(eps, 10));
     cout << ")\n";
 
     cout << "    The result of converting: ";
