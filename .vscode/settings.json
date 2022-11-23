@@ -1,4 +1,6 @@
 {
+    "C_Cpp.formatting": "Disabled",
+    "C_Cpp.intelliSenseEngine": "Disabled",
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
