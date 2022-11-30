@@ -78,7 +78,8 @@ void printResult(std::string functionName, int x, int value) {
     coutWithColor(colors::LIGHT_GREEN, " is:");
     coutWithColor(colors::BLUE, " " + functionName + "(");
     coutWithColor(colors::LIGHT_PURPLE, std::to_string(x));
-    coutWithColor(colors::LIGHT_GREEN, ") = ");
+    coutWithColor(colors::BLUE, ") ");
+    coutWithColor(colors::LIGHT_GREEN, "= ");
     coutWithColor(colors::LIGHTER_BLUE, std::to_string(value));
     waitForButtonInput("\n\nPress any key to return\n");
 }
