@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <limits.h>
+#include <map>
 #include <numeric>
 #include <set>
 #include <string>
@@ -19,14 +21,70 @@ template <typename T> set<T> inputSet(int size) {
     return sett;
 }
 
+template <typename T, typename K> void upsert(map<T, K> &m, T key, K val) {
+    if (m.find(key) == m.end()) {
+        m[key] = val;
+    } else {
+        m[key] += val;
+    }
+}
+
 int main() {
+    int size;
+    cin >> size;
+    map<int, int> mmap;
+    for (int i = 0; i < size; i++) {
+        int m;
+        cin >> m;
+        upsert(mmap, m, 1);
+    }
+    int min = INT_MAX;
+    int restaurant = 0;
+    for (const auto [key, value] : mmap) {
+        cout << key << " " << value << endl;
+        if (value < min) {
+            restaurant = key;
+            min = value;
+        }
+    }
+    cout << restaurant;
+    return 0;
+}
+
+int set26() {
+    int size;
+    cin >> size;
+    set<string> sett;
+    for (int i = 0; i < size; i++) {
+        int m;
+        string s1, s2;
+        cin >> m >> s1 >> s2;
+        sett.insert(s1 + s2);
+    }
+    cout << sett.size();
+    return 0;
+}
+
+int set25() {
+    int size;
+    cin >> size;
+    set<int> sett;
+    for (int i = 0; i < size; i++) {
+        int m;
+        cin >> m;
+        cout << (sett.insert(m).second ? "NO\n" : "YES\n");
+    }
+    return 0;
+}
+
+int set24() {
     int workers, days;
     set<int> sett;
     cin >> workers >> days;
     for (int i = 0; i < workers; i++) {
         int from, to;
         cin >> from >> to;
-        for(int d = from; d <= to; d++) {
+        for (int d = from; d < to; d++) {
             sett.insert(d);
         }
     }
