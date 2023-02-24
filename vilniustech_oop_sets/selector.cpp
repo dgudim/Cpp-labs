@@ -21,33 +21,35 @@ template <typename T> set<T> inputSet(int size) {
     return sett;
 }
 
-template <typename T, typename K> void upsert(map<T, K> &m, T key, K val) {
-    if (m.find(key) == m.end()) {
-        m[key] = val;
-    } else {
-        m[key] += val;
-    }
+int main() {
+    return 0;
 }
 
-int main() {
+int sets28() {
     int size;
     cin >> size;
     map<int, int> mmap;
     for (int i = 0; i < size; i++) {
         int m;
         cin >> m;
-        upsert(mmap, m, 1);
+        mmap.insert_or_assign(m, i);
     }
-    int min = INT_MAX;
-    int restaurant = 0;
-    for (const auto& [key, value] : mmap) {
-        cout << key << " " << value << endl;
-        if (value < min) {
-            restaurant = key;
-            min = value;
+    int min_last_visit = INT_MAX;
+    int min_restaurant = 0;
+    for (const auto& [restaurant, last_visit] : mmap) {
+        if (last_visit < min_last_visit) {
+            min_last_visit = last_visit;
+            min_restaurant = restaurant;
         }
     }
-    cout << restaurant;
+    cout << min_restaurant;
+    return 0;
+}
+
+int sets27() {
+    int size;
+    cin >> size;
+    cout << ((inputSet<int>(size).size() <= 3) ? "YES" : "NO");
     return 0;
 }
 
