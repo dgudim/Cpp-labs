@@ -39,7 +39,78 @@ template <typename T> void outputVector(const vector<T> &vec, const char *sep = 
 }
 
 int main() {
-    
+    return 0;
+}
+
+int maps17() {
+    int x, y;
+    cin >> x >> y;
+    map<int, int> mapp;
+    for (int xp = 0; xp < x; xp++) {
+        for (int yp = 0; yp < y; yp++) {
+            int m;
+            cin >> m;
+            upsert(mapp, m, 1);
+        }
+    }
+    int max_repeats = INT_MIN;
+    for (const auto &[ch__, repeats] : mapp) {
+        if (repeats > max_repeats) {
+            max_repeats = repeats;
+        }
+    }
+    cout << x * y - max_repeats;
+    return 0;
+}
+
+int maps16() {
+    string word;
+    cin >> word;
+    map<char, int> mapp;
+    for (char ch : word) {
+        upsert(mapp, ch, 1);
+    }
+    int max_repeats = INT_MIN;
+    for (const auto &[ch__, repeats] : mapp) {
+        if (repeats > max_repeats) {
+            max_repeats = repeats;
+        }
+    }
+    cout << word.length() - max_repeats;
+    return 0;
+}
+
+int maps15() {
+    int size, rep;
+    cin >> size >> rep;
+    map<int, int> mmap = input_and_upsert<int, int>(size, 1);
+    for (const auto &[number, repeats] : mmap) {
+        if (repeats > rep) {
+            cout << "YES";
+            return 0;
+        }
+    }
+    cout << "NO";
+    return 0;
+}
+
+int maps14() {
+    int size;
+    cin >> size;
+    map<int, int> mmap = input_and_upsert<int, int>(size, 1);
+    int max_repeats = INT_MIN;
+    int num = 0;
+    for (const auto &[number, repeats] : mmap) {
+        if (repeats > max_repeats && number % 2 != 0) {
+            max_repeats = repeats;
+            num = number;
+        }
+    }
+    if (max_repeats == INT_MIN) {
+        cout << "NO";
+    } else {
+        cout << num;
+    }
     return 0;
 }
 
