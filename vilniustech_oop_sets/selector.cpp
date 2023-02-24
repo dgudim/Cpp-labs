@@ -40,7 +40,7 @@ int main() {
     }
     int min = INT_MAX;
     int restaurant = 0;
-    for (const auto [key, value] : mmap) {
+    for (const auto& [key, value] : mmap) {
         cout << key << " " << value << endl;
         if (value < min) {
             restaurant = key;
