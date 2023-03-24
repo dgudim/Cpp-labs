@@ -37,7 +37,7 @@ do
     printf "${YELLOW}compiling: $name\n${NC}"
     hash=$(md5sum $elem | cut -d" " -f1)
     
-    COMMAND=/usr/bin/clang++\ -std=c++17\ $elem\ -o\ ./compiled_binaries_linux/$name\ -I\ $name\ -I\ .\ $(cat $name/params 2> /dev/null | tr -d '\n')
+    COMMAND=/usr/bin/clang++\ -std=c++20\ $elem\ -o\ ./compiled_binaries_linux/$name\ -I\ $name\ -I\ .\ $(cat $name/params 2> /dev/null | tr -d '\n')
 
     if [ ! -z ${ADD_COMA+x} ]; then
         echo , >> $COMPILE_COMMANDS
