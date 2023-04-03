@@ -318,7 +318,7 @@ int main() {
     cin >> n;
     map<string, int> mapp;
     set<int> score_set;
-    set<string> disqual_set;
+    set<int> disqual_set;
     for (int i = 0; i < n; i++) {
         string name;
         int m1, m2, m3;
@@ -326,13 +326,13 @@ int main() {
         int score = m1 * 5 + m2 * 3 + m3 * 15;
         mapp.insert(pair(name, score));
         if (!score_set.insert(score).second) {
-            disqual_set.insert(name);
+            disqual_set.insert(score);
         }
     }
     string max_name;
     int max_score = -1;
     for (auto &[name, score] : mapp) {
-        if (score > max_score && !disqual_set.contains(name)) {
+        if (score > max_score && !disqual_set.contains(score)) {
             max_name = name;
             max_score = score;
         }
