@@ -162,38 +162,6 @@ int _7_cicrle_intersection() {
     return 0;
 }
 
-int _19_mushrooms_BAD() {
-    int n;
-    cin >> n;
-    map<string, int> mapp;
-    set<int> score_set;
-    set<string> disqual_set;
-    for (int i = 0; i < n; i++) {
-        string name;
-        int m1, m2, m3;
-        cin >> name >> m1 >> m2 >> m3;
-        int score = m1 * 5 + m2 * 3 + m3 * 15;
-        mapp.insert(pair(name, score));
-        if (!score_set.insert(score).second) {
-            disqual_set.insert(name);
-        }
-    }
-    string max_name;
-    int max_score = -1;
-    for (auto &[name, score] : mapp) {
-        if (score > max_score && !disqual_set.contains(name)) {
-            max_name = name;
-            max_score = score;
-        }
-    }
-    if (max_score == -1) {
-        cout << "all disqualified";
-    } else {
-        cout << max_name;
-    }
-    return 0;
-}
-
 int _8_triangles_obtuse() {
     int n, x1, x2, x3, y1, y2, y3, n_obtuse = 0, n_valid = 0;
     cin >> n;
@@ -296,5 +264,87 @@ int _11_time_delta() {
         }
     }
     printTime(min_delta);
+    return 0;
+}
+
+int _15_exam_marks() {
+    int n, n_passed;
+    string best_student;
+    double max_average = 0;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        string name;
+        int n1, n2, n3, n4, n5;
+        cin >> name >> n1 >> n2 >> n3 >> n4 >> n5;
+        double average = (n1 + n2 + n3 + n4 + n5) / 5.0;
+        if (average > max_average) {
+            max_average = average;
+            best_student = name;
+        }
+        if (average > 9) {
+            n_passed++;
+        }
+    }
+    cout << n_passed << "\n" << best_student;
+    return 0;
+}
+
+int _16_certificate_of_honor() {
+    int n, n_marks, n_passed, mark;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        cin >> n_marks;
+        bool passed = true;
+        double accumulator = 0;
+        for (int m = 0; m < n_marks; m++) {
+            cin >> mark;
+            if (mark < 8) {
+                passed = false;
+            }
+            if (passed) {
+                accumulator += mark;
+            }
+        }
+        if(passed && accumulator / n_marks > 8.5) {
+            n_passed ++;
+        }
+    }
+    cout << n_passed;
+    return 0;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    map<string, int> mapp;
+    set<int> score_set;
+    set<string> disqual_set;
+    for (int i = 0; i < n; i++) {
+        string name;
+        int m1, m2, m3;
+        cin >> name >> m1 >> m2 >> m3;
+        int score = m1 * 5 + m2 * 3 + m3 * 15;
+        mapp.insert(pair(name, score));
+        if (!score_set.insert(score).second) {
+            disqual_set.insert(name);
+        }
+    }
+    string max_name;
+    int max_score = -1;
+    for (auto &[name, score] : mapp) {
+        if (score > max_score && !disqual_set.contains(name)) {
+            max_name = name;
+            max_score = score;
+        }
+    }
+    if (max_score == -1) {
+        cout << "all disqualified";
+    } else {
+        cout << max_name;
+    }
+    return 0;
+}
+
+int main2() {
     return 0;
 }
