@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <limits.h>
@@ -82,6 +83,45 @@ class Circle {
     bool intersects(const Circle &c) {
         double distance = distanceBetweenPoints(x, y, c.x, c.y);
         return distance <= (r + c.r) && distance >= r - c.r && distance >= c.r - r;
+    }
+};
+
+class MushroomPicker {
+  private:
+    string name;
+    int oregano, boletus, jungle, points;
+
+  public:
+    MushroomPicker(string &name, int oregano, int boletus, int jungle)
+        : name(name), oregano(oregano), boletus(boletus), jungle(jungle) {
+        this->points = oregano * 5 + boletus * 3 + jungle * 15;
+    }
+
+    string getName() const { return name; }
+
+    int getPoints() const { return points; }
+};
+
+class HexagonalTube {
+
+    double height, innerRadius, hexRadius;
+
+    constexpr static double PIOnCrack = 355 / 113.0;
+
+  public:
+    HexagonalTube(double height, double innerRadius, double hexRadius)
+        : height(height), innerRadius(innerRadius), hexRadius(hexRadius) {}
+
+    double getSurfaceArea() {
+        return (hexRadius * 6 + 2 * PIOnCrack * innerRadius) * height + // walls and inner hole
+               3 * sqrt(3) * hexRadius * hexRadius -
+               PIOnCrack * innerRadius * innerRadius * 2; // caps x2
+    }
+
+    double getMetalVolume() {
+        double outerHexArea = 3 * sqrt(3) / 2 * hexRadius * hexRadius;
+        double innerCircleVolume = PIOnCrack * innerRadius * innerRadius;
+        return (outerHexArea - innerCircleVolume) * height;
     }
 };
 
@@ -305,46 +345,126 @@ int _16_certificate_of_honor() {
                 accumulator += mark;
             }
         }
-        if(passed && accumulator / n_marks > 8.5) {
-            n_passed ++;
+        if (passed && accumulator / n_marks > 8.5) {
+            n_passed++;
         }
     }
     cout << n_passed;
     return 0;
 }
 
-int main() {
-    int n;
+bool compareMushroomPickers(const MushroomPicker &a, const MushroomPicker &b) {
+    return a.getPoints() > b.getPoints();
+}
+
+int _19_mushroom_pickers() {
+    int n, a, b, c;
     cin >> n;
-    map<string, int> mapp;
-    set<int> score_set;
-    set<int> disqual_set;
+    vector<MushroomPicker> pickers;
     for (int i = 0; i < n; i++) {
         string name;
-        int m1, m2, m3;
-        cin >> name >> m1 >> m2 >> m3;
-        int score = m1 * 5 + m2 * 3 + m3 * 15;
-        mapp.insert(pair(name, score));
-        if (!score_set.insert(score).second) {
-            disqual_set.insert(score);
+        cin >> name >> a >> b >> c;
+        pickers.push_back(MushroomPicker(name, a, b, c));
+    }
+
+    sort(pickers.begin(), pickers.end(), compareMushroomPickers);
+
+    bool allDisqualified = true;
+    for (int i = 0; i < n; i++) {
+        if ((pickers[i - 1].getPoints() != pickers[i].getPoints() || i == 0) &&
+            (pickers[i].getPoints() != pickers[i + 1].getPoints() || i == n - 1)) {
+            cout << pickers[i].getName();
+            allDisqualified = false;
+            break;
         }
     }
-    string max_name;
-    int max_score = -1;
-    for (auto &[name, score] : mapp) {
-        if (score > max_score && !disqual_set.contains(score)) {
-            max_name = name;
-            max_score = score;
-        }
+
+    if (allDisqualified) {
+        cout << "all disqualified" << std::endl;
     }
-    if (max_score == -1) {
-        cout << "all disqualified";
-    } else {
-        cout << max_name;
-    }
+
     return 0;
 }
 
-int main2() {
+int _18_hexagonal_tube() {
+    int n, len, innerDi, hexDi;
+    double surfaceArea = 0;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        cin >> len >> innerDi >> hexDi;
+        HexagonalTube tube(len, innerDi / 2.0, hexDi / 2.0);
+        cout << (i + 1) << " volume: " << fixed << setprecision(3) << tube.getMetalVolume()
+             << "\n";
+        surfaceArea += tube.getSurfaceArea();
+    }
+    cout << "Sum of the surface areas: " << surfaceArea;
+    return 0;
+}
+
+int _17_doors_and_tin() {
+    double a, b;
+    int n, height, width;
+    cin >> a >> b >> n;
+    double diagonal = sqrt(a * a + b * b);
+    int passed = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> height >> width;
+        passed += (min(height, width) <= max(max(a, b), diagonal));
+    }
+    cout << passed;
+    return 0;
+}
+
+int _12_scores() {
+    int n, _2p, _2p_good, _3p, _3p_good, pen, pen_good;
+    cin >> n;
+    int maxScore = INT_MIN, maxPlayer = INT_MIN;
+    for (int i = 0; i < n; i++) {
+        cin >> _2p >> _2p_good >> _3p >> _3p_good >> pen >> pen_good;
+        int score = _2p_good * 3 - _2p + _3p_good * 4 - _3p + pen_good * 2 - pen;
+        if (score > maxScore) {
+            maxScore = score;
+            maxPlayer = i + 1;
+        }
+    }
+    cout << maxPlayer;
+    return 0;
+}
+
+int _13_scores_accuracy() {
+    double n, _2p, _2p_good, _3p, _3p_good, pen, pen_good;
+    cin >> n;
+    double maxAccuracy = -1;
+    int maxScore = INT_MIN;
+    for (int i = 0; i < n; i++) {
+        cin >> _2p >> _2p_good >> _3p >> _3p_good >> pen >> pen_good;
+        double all = _2p + _3p + pen;
+        double accuracy = all == 0 ? 0 : ((_2p_good + _3p_good + pen_good) / all);
+        int score = _2p_good * 2 + _3p_good * 3 + pen_good;
+        if (accuracy > maxAccuracy) {
+            maxScore = score;
+            maxAccuracy = accuracy;
+        }
+    }
+    cout << maxScore;
+    return 0;
+}
+
+int main() {
+    double n, _2p, _2p_good, _3p, _3p_good, pen, pen_good;
+    cin >> n;
+    double maxAccuracy = -1;
+    int maxScore = INT_MIN;
+    for (int i = 0; i < n; i++) {
+        cin >> _2p >> _2p_good >> _3p >> _3p_good >> pen >> pen_good;
+        double all = _2p + _3p + pen;
+        double accuracy = all == 0 ? 0 : ((_2p_good + _3p_good + pen_good) / all);
+        int score = _2p_good * 2 + _3p_good * 3 + pen_good;
+        if (score > maxScore) {
+            maxScore = score;
+            maxAccuracy = accuracy;
+        }
+    }
+    cout << fixed << setprecision(2) << maxAccuracy * 100;
     return 0;
 }
