@@ -1,17 +1,17 @@
+#include "../genericFunctions.h"
+#include <deque>
 #include <iostream>
+#include <map>
+#include <math.h>
 #include <sstream>
+#include <stdio.h>
 #include <string>
 #include <vector>
-#include <deque>
-#include <map>
-#include <stdio.h>
-#include <math.h>
-#include "../genericFunctions.h"
 
 using namespace std;
 
 class Token {
-public:
+  public:
     enum class Type {
         Undefined,
         Number,
@@ -21,8 +21,8 @@ public:
         RightParen,
     };
 
-    Token(Type t, const string& s, int prec = -1, bool ra = false)
-        : type{ t }, str(s), precedence{ prec }, rightAssociative{ ra } {}
+    Token(Type t, const string &s, int prec = -1, bool ra = false)
+        : type{t}, str(s), precedence{prec}, rightAssociative{ra} {}
 
     const Type type;
     const string str;
@@ -30,62 +30,79 @@ public:
     const bool rightAssociative;
 };
 
-ostream& operator<<(ostream& os, const Token& token) {
+ostream &operator<<(ostream &os, const Token &token) {
     os << token.str;
     return os;
 }
 
-bool isLetter(char ch) {
-    return isalpha(ch) || isupper(ch);
-}
+bool isLetter(char ch) { return isalpha(ch) || isupper(ch); }
 
-bool isLetterOrNumber(char ch) {
-    return isLetter(ch) || isdigit(ch) || ch == '.';
-}
+bool isLetterOrNumber(char ch) { return isLetter(ch) || isdigit(ch) || ch == '.'; }
 
 bool isOperator(char ch) {
     return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
 }
 
-deque<Token> exprToTokens(const string& expr) {
+deque<Token> exprToTokens(const string &expr) {
     deque<Token> tokens;
 
-    for (const auto* ch = expr.c_str(); *ch; ++ch) {
+    for (const auto *ch = expr.c_str(); *ch; ++ch) {
         if (isblank(*ch)) {
             // ignore
         } else if (isLetterOrNumber(*ch)) {
-            const auto* b = ch;
+            const auto *b = ch;
             bool isVar = false;
             while (isLetterOrNumber(*ch)) {
-                if (isLetter(*ch)) isVar = true;
+                if (isLetter(*ch))
+                    isVar = true;
                 ++ch;
             }
             const auto str = string(b, ch);
-            tokens.push_back(Token{ isVar ? Token::Type::Variable : Token::Type::Number, str });
+            tokens.push_back(Token{isVar ? Token::Type::Variable : Token::Type::Number, str});
             --ch;
         } else {
             Token::Type type = Token::Type::Undefined;
             int precedence = -1;
             bool ra = false;
             switch (*ch) {
-            default:                                       break;
-            case '(':   type = Token::Type::LeftParen;     break;
-            case ')':   type = Token::Type::RightParen;    break;
-            case '^':   type = Token::Type::Operator;      precedence = 4; ra = true;  break;
-            case '*':   type = Token::Type::Operator;      precedence = 3; break;
-            case '/':   type = Token::Type::Operator;      precedence = 3; break;
-            case '+':   type = Token::Type::Operator;      precedence = 2; break;
-            case '-':   type = Token::Type::Operator;      precedence = 2; break;
+            default:
+                break;
+            case '(':
+                type = Token::Type::LeftParen;
+                break;
+            case ')':
+                type = Token::Type::RightParen;
+                break;
+            case '^':
+                type = Token::Type::Operator;
+                precedence = 4;
+                ra = true;
+                break;
+            case '*':
+                type = Token::Type::Operator;
+                precedence = 3;
+                break;
+            case '/':
+                type = Token::Type::Operator;
+                precedence = 3;
+                break;
+            case '+':
+                type = Token::Type::Operator;
+                precedence = 2;
+                break;
+            case '-':
+                type = Token::Type::Operator;
+                precedence = 2;
+                break;
             }
-            tokens.push_back(Token{ type, string(1, *ch), precedence, ra });
+            tokens.push_back(Token{type, string(1, *ch), precedence, ra});
         }
     }
 
     return tokens;
 }
 
-
-deque<Token> shuntingYard(const deque<Token>& tokens) {
+deque<Token> shuntingYard(const deque<Token> &tokens) {
     deque<Token> queue;
     vector<Token> stack;
 
@@ -98,8 +115,7 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
             queue.push_back(token);
             break;
 
-        case Token::Type::Operator:
-        {
+        case Token::Type::Operator: {
             // If the token is operator, o1, then:
             const Token o1 = token;
 
@@ -112,10 +128,8 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
                 // *less than or equal* to that of o2,
                 // or o1 if right associative, and has precedence
                 // *less than* that of o2,
-                if (
-                    (!o1.rightAssociative && o1.precedence <= o2.precedence)
-                    || (o1.rightAssociative && o1.precedence < o2.precedence)
-                    ) {
+                if ((!o1.rightAssociative && o1.precedence <= o2.precedence) ||
+                    (o1.rightAssociative && o1.precedence < o2.precedence)) {
                     // then pop o2 off the stack,
                     stack.pop_back();
                     // onto the output queue;
@@ -130,8 +144,7 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
 
             // push o1 onto the stack.
             stack.push_back(o1);
-        }
-        break;
+        } break;
 
         case Token::Type::LeftParen:
             // If token is left parenthesis, then push it onto the stack
@@ -140,31 +153,31 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
 
         case Token::Type::RightParen:
             // If token is right parenthesis:
-        {
-            bool match = false;
+            {
+                bool match = false;
 
-            // Until the token at the top of the stack
-            // is a left parenthesis,
-            while (!stack.empty() && stack.back().type != Token::Type::LeftParen) {
-                // pop operators off the stack
-                // onto the output queue.
-                queue.push_back(stack.back());
+                // Until the token at the top of the stack
+                // is a left parenthesis,
+                while (!stack.empty() && stack.back().type != Token::Type::LeftParen) {
+                    // pop operators off the stack
+                    // onto the output queue.
+                    queue.push_back(stack.back());
+                    stack.pop_back();
+                    match = true;
+                }
+
+                // Pop the left parenthesis from the stack,
+                // but not onto the output queue.
                 stack.pop_back();
-                match = true;
-            }
 
-            // Pop the left parenthesis from the stack,
-            // but not onto the output queue.
-            stack.pop_back();
-
-            if (!match && stack.empty()) {
-                // If the stack runs out without finding a left parenthesis,
-                // then there are mismatched parentheses.
-                throw "Ошибка закрывающей скобки " + token.str;
-                return {};
+                if (!match && stack.empty()) {
+                    // If the stack runs out without finding a left parenthesis,
+                    // then there are mismatched parentheses.
+                    throw "Ошибка закрывающей скобки " + token.str;
+                    return {};
+                }
             }
-        }
-        break;
+            break;
 
         default:
             throw "Неизвестный токен: " + token.str;
@@ -183,7 +196,7 @@ deque<Token> shuntingYard(const deque<Token>& tokens) {
         }
 
         // Pop the operator onto the output queue.
-        queue.push_back(move(stack.back()));
+        queue.push_back(std::move(stack.back()));
         stack.pop_back();
     }
 
@@ -198,37 +211,34 @@ void printMessageOneLineLower(colors color, string message) {
     setConsoleCursorPosition(pos.X, pos.Y);
 }
 
-string inputExpression(int& not_closed_p) {
+string inputExpression(int &not_closed_p) {
     coutWithColor(colors::LIGHT_YELLOW, "Выражение: ");
     string buffer;
-    char* allowedChars = new char[71]{ "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM.1234567890+-/*^()" };
+    char *allowedChars =
+        new char[71]{"qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM.1234567890+-/*^()"};
     int allowedChars_size = 71;
     int opening_parenthesis = 0;
     int closing_parenthesis = 0;
     char currChar = 0;
-    while (true)
-    {
+    while (true) {
         currChar = _getch();
 
-        if (currChar == (int)keys::ENTER)
-        {
-            if (buffer.empty())
-            {
+        if (currChar == (int)keys::ENTER) {
+            if (buffer.empty()) {
                 printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, пустая строка");
                 continue;
             } else if (isOperator(buffer.back())) {
-                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, последний символ оператор");
+                printMessageOneLineLower(colors::LIGHT_RED,
+                                         "Ошибка ввода, последний символ оператор");
                 continue;
             } else {
                 break;
             }
         }
 
-        if (currChar == (int)keys::BACKSPACE)
-        {
+        if (currChar == (int)keys::BACKSPACE) {
             unsigned int bufLen = buffer.length();
-            if (bufLen > 0)
-            {
+            if (bufLen > 0) {
                 char ch = buffer.back();
                 if (ch == '(') {
                     opening_parenthesis--;
@@ -242,17 +252,16 @@ string inputExpression(int& not_closed_p) {
         }
 
         bool add = false;
-        for (int i = 0; i < allowedChars_size; i++)
-        {
-            if (allowedChars[i] == currChar)
-            {
+        for (int i = 0; i < allowedChars_size; i++) {
+            if (allowedChars[i] == currChar) {
                 add = true;
                 break;
             }
         }
 
         if (!add) {
-            printMessageOneLineLower(colors::LIGHT_RED, string("Нелегальный символ: ") + currChar);
+            printMessageOneLineLower(colors::LIGHT_RED,
+                                     string("Нелегальный символ: ") + currChar);
             continue;
         }
 
@@ -261,49 +270,65 @@ string inputExpression(int& not_closed_p) {
             char ch = currChar;
             if (ch == ')') {
                 if (closing_parenthesis == opening_parenthesis) {
-                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нельзя закрыть скобку, не открыв её");
+                    printMessageOneLineLower(
+                        colors::LIGHT_RED,
+                        "Ошибка ввода, нельзя закрыть скобку, не открыв её");
                     continue;
                 }
                 if (prev_ch == '(') {
-                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нельзя закрыть пустую скобку");
+                    printMessageOneLineLower(colors::LIGHT_RED,
+                                             "Ошибка ввода, нельзя закрыть пустую скобку");
                     continue;
                 }
                 if (isOperator(prev_ch)) {
-                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нельзя закрыть скобку после оператора");
+                    printMessageOneLineLower(
+                        colors::LIGHT_RED,
+                        "Ошибка ввода, нельзя закрыть скобку после оператора");
                     continue;
                 }
             }
             if (isOperator(ch)) {
                 if (isOperator(prev_ch)) {
-                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, стоящие подряд операторы");
+                    printMessageOneLineLower(colors::LIGHT_RED,
+                                             "Ошибка ввода, стоящие подряд операторы");
                     continue;
                 }
                 if (prev_ch == '(') {
-                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, унарные операторы не поддерживаются");
+                    printMessageOneLineLower(
+                        colors::LIGHT_RED,
+                        "Ошибка ввода, унарные операторы не поддерживаются");
                     continue;
                 }
             }
             if ((ch == '.' && prev_ch == '.') || (!isdigit(ch) && prev_ch == '.')) {
-                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, нелегальная комбинация символов");
+                printMessageOneLineLower(colors::LIGHT_RED,
+                                         "Ошибка ввода, нелегальная комбинация символов");
                 continue;
             }
             if (ch == '(') {
                 if (prev_ch == ')') {
-                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между скобками");
+                    printMessageOneLineLower(
+                        colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между скобками");
                     continue;
                 }
                 if (isLetterOrNumber(prev_ch)) {
-                    printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между числом/переменной и скобкой");
+                    printMessageOneLineLower(
+                        colors::LIGHT_RED,
+                        "Ошибка ввода, отсутсвие оператора между числом/переменной и скобкой");
                     continue;
                 }
             }
             if (isLetterOrNumber(ch) && prev_ch == ')') {
-                printMessageOneLineLower(colors::LIGHT_RED, "Ошибка ввода, отсутсвие оператора между числом/переменной и скобкой");
+                printMessageOneLineLower(
+                    colors::LIGHT_RED,
+                    "Ошибка ввода, отсутсвие оператора между числом/переменной и скобкой");
                 continue;
             }
         } else {
             if (currChar == '^' || currChar == '*' || currChar == '/' || currChar == ')') {
-                printMessageOneLineLower(colors::LIGHT_RED, string("Ошибка ввода, нелегальный первый символ: ") + currChar);
+                printMessageOneLineLower(colors::LIGHT_RED,
+                                         string("Ошибка ввода, нелегальный первый символ: ") +
+                                             currChar);
                 continue;
             }
         }
@@ -352,8 +377,7 @@ void calculate(deque<Token> queue) {
             }
             break;
 
-        case Token::Type::Operator:
-        {
+        case Token::Type::Operator: {
             const auto rhs = stack.back();
             stack.pop_back();
             const auto lhs = stack.back();
@@ -365,10 +389,10 @@ void calculate(deque<Token> queue) {
                 break;
             case '^':
                 if (lhs < 0 && rhs < 1 && rhs > 0) {
-                    throw  "Возведение отрицательного числа в дробную степень";
+                    throw "Возведение отрицательного числа в дробную степень";
                 }
                 if (lhs == 0 && rhs == 0) {
-                    throw  "Возведение нуля в нулевую степень";
+                    throw "Возведение нуля в нулевую степень";
                 }
                 stack.push_back(pow(lhs, rhs));
                 break;
@@ -388,8 +412,7 @@ void calculate(deque<Token> queue) {
                 stack.push_back(lhs - rhs);
                 break;
             }
-        }
-        break;
+        } break;
 
         default:
             throw "Ошибка токена";
@@ -412,22 +435,20 @@ int main() {
         coutWithColor(colors::LIGHT_GREEN, "Текущее выражение: " + expr + "\n");
         coutWithColor(colors::LIGHT_GREEN, "Текущая польская запись: ");
         for (Token token : queue) {
-            if ((token.type == Token::Type::Variable || token.type == Token::Type::Number) && prevIsVar) {
+            if ((token.type == Token::Type::Variable || token.type == Token::Type::Number) &&
+                prevIsVar) {
                 cout << "|";
             }
             cout << token;
-            prevIsVar = token.type == Token::Type::Variable || token.type == Token::Type::Number;
+            prevIsVar =
+                token.type == Token::Type::Variable || token.type == Token::Type::Number;
         }
         cout << endl;
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection({
-            "1.Ввести пример",
-            "2.Преобразовать в польскую запись",
-            "3.Решить",
-            "4.Выйти" });
+        int choise = displaySelection(
+            {"1.Ввести пример", "2.Преобразовать в польскую запись", "3.Решить", "4.Выйти"});
 
-        switch (choise)
-        {
+        switch (choise) {
         case 1:
             exit = false;
             while (!exit) {
@@ -448,7 +469,8 @@ int main() {
 
             clearScreen();
             if (not_closed_p > 0) {
-                coutWithColor(colors::LIGHT_RED, "Закрыл " + to_string(not_closed_p) + " незакрытых скобки(ок)\n");
+                coutWithColor(colors::LIGHT_RED, "Закрыл " + to_string(not_closed_p) +
+                                                     " незакрытых скобки(ок)\n");
             }
             break;
         case 2:
@@ -457,10 +479,11 @@ int main() {
                 queue = shuntingYard(exprToTokens(expr));
             } catch (const string str) {
                 coutWithColor(colors::LIGHT_RED, str + "\n");
-            } catch (const char* str) {
+            } catch (const char *str) {
                 coutWithColor(colors::LIGHT_RED, string(str) + "\n");
             } catch (...) {
-                coutWithColor(colors::LIGHT_RED, "Неизвестная ошибка, последний токен: " + currentToken + "\n");
+                coutWithColor(colors::LIGHT_RED,
+                              "Неизвестная ошибка, последний токен: " + currentToken + "\n");
             }
             break;
         case 3:
@@ -474,7 +497,7 @@ int main() {
             } catch (const string str) {
                 clearScreen();
                 coutWithColor(colors::LIGHT_RED, str + "\n");
-            } catch (const char* str) {
+            } catch (const char *str) {
                 clearScreen();
                 coutWithColor(colors::LIGHT_RED, string(str) + "\n");
             } catch (...) {

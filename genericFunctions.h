@@ -1,22 +1,22 @@
 #include <sstream>
 
-#include <string>
-#include <locale>
 #include <codecvt>
+#include <locale>
+#include <string>
 
-#include <limits>
-#include <regex>
+#include <float.h>
 #include <iostream>
+#include <limits>
+#include <math.h>
+#include <regex>
 #include <stdio.h>
 #include <stdlib.h>
-#include <float.h>
-#include <math.h>
 #ifdef __linux__
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 
-using std::string, std::vector, std::regex, std::function, std::cin, std::cout;
+using std::string, std::vector, std::regex, std::function, std::cin, std::cout, std::lerp;
 
 int _getch(void) {
     termios oldattr, newattr;
@@ -31,9 +31,9 @@ int _getch(void) {
     return ch;
 }
 
-int get_pos(int* y, int* x) {
+int get_pos(int *y, int *x) {
 
-    char buf[30] = { 0 };
+    char buf[30] = {0};
     int ret, i, pow;
     char ch;
 
@@ -51,8 +51,7 @@ int get_pos(int* y, int* x) {
 
     for (i = 0, ch = 0; ch != 'R'; i++) {
         ret = read(0, &ch, 1);
-        if (!ret)
-        {
+        if (!ret) {
             tcsetattr(0, TCSANOW, &restore);
             fprintf(stderr, "getpos: error reading response!\n");
             return 1;
@@ -96,12 +95,7 @@ struct COORD {
 constexpr int colors_count = 12;
 
 #ifdef __linux__
-enum class keys {
-    ARROW_UP = 65,
-    ARROW_DOWN = 66,
-    ENTER = '\n',
-    BACKSPACE = 127
-};
+enum class keys { ARROW_UP = 65, ARROW_DOWN = 66, ENTER = '\n', BACKSPACE = 127 };
 enum class colors {
     DEFAULT = 39,
     WHITE = 97,
@@ -126,12 +120,7 @@ enum class colors {
     PURPLE = 35
 };
 #elif _WIN32
-enum class keys {
-    ARROW_UP = 72,
-    ARROW_DOWN = 80,
-    ENTER = 13,
-    BACKSPACE = '\b'
-};
+enum class keys { ARROW_UP = 72, ARROW_DOWN = 80, ENTER = 13, BACKSPACE = '\b' };
 enum class colors {
     DEFAULT = 7,
     WHITE = 15,
@@ -158,9 +147,10 @@ enum class colors {
 #endif
 
 class Vector2 {
-private:
+  private:
     double x, y;
-public:
+
+  public:
     Vector2(double x_, double y_) {
         x = x_;
         y = y_;
@@ -171,25 +161,15 @@ public:
         y = 0;
     }
 
-    double getX() {
-        return x;
-    }
+    double getX() { return x; }
 
-    double getY() {
-        return y;
-    }
+    double getY() { return y; }
 
-    Vector2 operator*(double b) {
-        return { x * b, y * b };
-    }
+    Vector2 operator*(double b) { return {x * b, y * b}; }
 
-    Vector2 operator+(Vector2 b) {
-        return { x + b.x, y + b.y };
-    }
+    Vector2 operator+(Vector2 b) { return {x + b.x, y + b.y}; }
 
-    Vector2 operator-(Vector2 b) {
-        return { x - b.x, y - b.y };
-    }
+    Vector2 operator-(Vector2 b) { return {x - b.x, y - b.y}; }
 
     void operator*=(double b) {
         x *= b;
@@ -201,15 +181,14 @@ public:
         y -= b.y;
     }
 
-    Vector2 operator/(double b) {
-        return { x / b, y / b };
-    }
+    Vector2 operator/(double b) { return {x / b, y / b}; }
 };
 
 class CubicBezier {
-private:
+  private:
     Vector2 a, b, c, d;
-public:
+
+  public:
     CubicBezier(Vector2 a_ = {}, Vector2 b_ = {}, Vector2 c_ = {}, Vector2 d_ = {}) {
         a = a_;
         b = b_;
@@ -225,33 +204,21 @@ public:
     }
 
     Vector2 getPoint(double t) {
-        return
-            a * pow(1 - t, 3) +
-            b * 3 * t * pow(1 - t, 2) +
-            c * 3 * (1 - t) * pow(t, 2) +
-            d * pow(t, 3);
+        return a * pow(1 - t, 3) + b * 3 * t * pow(1 - t, 2) + c * 3 * (1 - t) * pow(t, 2) +
+               d * pow(t, 3);
     }
 };
 
-enum class GraphingBackend {
-    CONSOLE,
-    GNUPLOT
-};
+enum class GraphingBackend { CONSOLE, GNUPLOT };
 
-enum class Interpolation {
-    LINEAR,
-    BEZIER
-};
+enum class Interpolation { LINEAR, BEZIER };
 
 typedef double (*Converter)(double);
 
 constexpr colors colormap[colors_count] = {
-    colors::LIGHT_GREEN, colors::GREEN,
-    colors::CYAN, colors::LIGHTER_BLUE,
-    colors::LIGHT_BLUE, colors::BLUE,
-    colors::LIGHT_PURPLE, colors::PURPLE,
-    colors::LIGHT_YELLOW, colors::YELLOW,
-    colors::LIGHT_RED, colors::RED };
+    colors::LIGHT_GREEN,  colors::GREEN,  colors::CYAN,         colors::LIGHTER_BLUE,
+    colors::LIGHT_BLUE,   colors::BLUE,   colors::LIGHT_PURPLE, colors::PURPLE,
+    colors::LIGHT_YELLOW, colors::YELLOW, colors::LIGHT_RED,    colors::RED};
 
 void setConsoleCursorPosition(int x, int y) {
 #ifdef __linux__
@@ -269,7 +236,7 @@ COORD getConsoleCursorPosition() {
     int x = 0;
     int y = 0;
     get_pos(&y, &x);
-    return { x, y };
+    return {x, y};
 #elif _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -281,7 +248,7 @@ COORD getConsoleDimensions() {
 #ifdef __linux__
     winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    return { w.ws_col, w.ws_row };
+    return {w.ws_col, w.ws_row};
 #elif _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns, rows;
@@ -290,7 +257,7 @@ COORD getConsoleDimensions() {
     columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
-    return { rows, columns };
+    return {rows, columns};
 #endif
 }
 
@@ -324,9 +291,7 @@ void setConsoleColor(int color) {
 #endif
 }
 
-void setConsoleColor(colors color) {
-    setConsoleColor((int)color);
-}
+void setConsoleColor(colors color) { setConsoleColor((int)color); }
 
 void coutWithColor(colors color, string message, int delay = 0) {
     setConsoleColor(color);
@@ -344,15 +309,11 @@ void coutWithColorAtPos(colors color, string message, int x, int y, int delay = 
     coutWithColor(color, message, delay);
 }
 
-void setTextBold() {
-    cout << "\e[1m";
-}
+void setTextBold() { cout << "\e[1m"; }
 
-void setTextNormal() {
-    cout << "\e[0m";
-}
+void setTextNormal() { cout << "\e[0m"; }
 
-string* split(string* input, bool print_count, unsigned int* len) {
+string *split(string *input, bool print_count, unsigned int *len) {
     unsigned int numberOfWords = 0;
     unsigned int strLen = (*input).length();
     for (unsigned int i = 0; i < strLen; i++) {
@@ -367,7 +328,7 @@ string* split(string* input, bool print_count, unsigned int* len) {
 
     (*len) = numberOfWords;
 
-    string* words = new string[numberOfWords];
+    string *words = new string[numberOfWords];
     int pos = 0;
     unsigned int index = 0;
 
@@ -388,21 +349,20 @@ string displayWarningWithInput(colors color, string message) {
     return input;
 }
 
-bool acceptAll(double n) {
-    return true;
-}
+bool acceptAll(double n) { return true; }
 
-bool strictPositive(double n) {
-    return n > 0;
-}
+bool strictPositive(double n) { return n > 0; }
 
-double inputDouble(const string& message, bool allowWhiteSpaces = true, function<bool(double)> limit_function = acceptAll, const string& limitExcededMessage = "") {
+double inputDouble(const string &message, bool allowWhiteSpaces = true,
+                   function<bool(double)> limit_function = acceptAll,
+                   const string &limitExcededMessage = "") {
     std::cout << message << std::flush;
     double toReturn;
     while (true) {
         while (!(std::cin >> toReturn) || (std::cin.get() != '\n' && !allowWhiteSpaces)) {
             std::cin.clear();
-            while (std::cin.get() != '\n');
+            while (std::cin.get() != '\n')
+                ;
             std::cout << "Please use numbers" << std::endl;
         }
         if (limit_function(toReturn)) {
@@ -412,7 +372,8 @@ double inputDouble(const string& message, bool allowWhiteSpaces = true, function
     }
 }
 
-string inputString(const string& message, const string& allowedChars, const regex& pattern, const string& previousBuffer) {
+string inputString(const string &message, const string &allowedChars, const regex &pattern,
+                   const string &previousBuffer) {
     printf("%s", (message + previousBuffer).c_str());
     string buffer = previousBuffer;
     while (true) {
@@ -451,16 +412,17 @@ string inputString(const string& message, const string& allowedChars, const rege
     return buffer;
 }
 
-string inputString(const string& message, const string& allowedChars, const string& previousBuffer) {
+string inputString(const string &message, const string &allowedChars,
+                   const string &previousBuffer) {
     regex str_expr(".*");
     return inputString(message, allowedChars, str_expr, previousBuffer);
 }
 
-string inputString(const string& message, const string& allowedChars, const regex& pattern) {
+string inputString(const string &message, const string &allowedChars, const regex &pattern) {
     return inputString(message, allowedChars, pattern, "");
 }
 
-string inputString(const string& message, const string& allowedChars) {
+string inputString(const string &message, const string &allowedChars) {
     regex str_expr(".*");
     return inputString(message, allowedChars, str_expr);
 }
@@ -481,11 +443,10 @@ string doubleToString(double value, int precision) {
     return strOut;
 }
 
-string doubleToString(double value) {
-    return doubleToString(value, 5);
-}
+string doubleToString(double value) { return doubleToString(value, 5); }
 
-string addSymbols(string input, unsigned int targetLength, const string& symbol, bool center = false) {
+string addSymbols(string input, unsigned int targetLength, const string &symbol,
+                  bool center = false) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     int spaces = targetLength - converter.from_bytes(input).length();
     if (center) {
@@ -509,17 +470,11 @@ string addSpaces(const string input, unsigned int targetLength, bool center = fa
     return addSymbols(input, targetLength, " ", center);
 }
 
-string ltrim(const string s) {
-    return std::regex_replace(s, std::regex("^\\s+"), string(""));
-}
+string ltrim(const string s) { return std::regex_replace(s, std::regex("^\\s+"), string("")); }
 
-string rtrim(const string s) {
-    return std::regex_replace(s, std::regex("\\s+$"), string(""));
-}
+string rtrim(const string s) { return std::regex_replace(s, std::regex("\\s+$"), string("")); }
 
-string trim(const string s) {
-    return ltrim(rtrim(s));
-}
+string trim(const string s) { return ltrim(rtrim(s)); }
 
 void continueOrExit() {
     string input = displayWarningWithInput(colors::DEFAULT, "Continue?\n");
@@ -528,16 +483,12 @@ void continueOrExit() {
     }
 }
 
-void waitForButtonInput(const string& message) {
+void waitForButtonInput(const string &message) {
     coutWithColor(colors::LIGHTER_BLUE, message);
     _getch();
 }
 
-double lerp(double from, double to, double progress) {
-    return from * (1 - progress) + to * progress;
-}
-
-int displaySelection(const vector<string>& options) {
+int displaySelection(const vector<string> &options) {
 
     int offset = getConsoleCursorPosition().Y;
     int counter = 0;
@@ -588,7 +539,7 @@ int displaySelection(const vector<string>& options) {
     }
 }
 
-std::vector<bool> displayMultiSelection(const std::vector<string>& options) {
+std::vector<bool> displayMultiSelection(const std::vector<string> &options) {
 
     int optionCount = options.size();
 
@@ -650,7 +601,7 @@ std::vector<bool> displayMultiSelection(const std::vector<string>& options) {
     }
 }
 
-vector<Vector2> getPVector(vector<Vector2>& points) {
+vector<Vector2> getPVector(vector<Vector2> &points) {
     vector<Vector2> P_vector;
     P_vector.push_back(points[0] + points[1] * 2);
     for (int i = 1; i < points.size() - 2; i++) {
@@ -660,7 +611,7 @@ vector<Vector2> getPVector(vector<Vector2>& points) {
     return P_vector;
 }
 
-vector<Vector2> getBVector(vector<Vector2>& points, vector<Vector2>& A_vector) {
+vector<Vector2> getBVector(vector<Vector2> &points, vector<Vector2> &A_vector) {
     vector<Vector2> B_vector;
     for (int i = 0; i < A_vector.size() - 1; i++) {
         B_vector.push_back(points[i + 1] * 2 - A_vector[i + 1]);
@@ -669,13 +620,13 @@ vector<Vector2> getBVector(vector<Vector2>& points, vector<Vector2>& A_vector) {
     return B_vector;
 }
 
-vector<Vector2> solve_tridiagonal_bezier(vector<Vector2>& P_vector) {
+vector<Vector2> solve_tridiagonal_bezier(vector<Vector2> &P_vector) {
 
     int size = P_vector.size();
 
-    float* diagonal = new float[size];
-    float* sub_diagonal = new float[size];
-    float* super_diagonal = new float[size];
+    float *diagonal = new float[size];
+    float *sub_diagonal = new float[size];
+    float *super_diagonal = new float[size];
 
     for (int i = 0; i < size - 1; i++) {
         diagonal[i] = 4;
@@ -692,16 +643,17 @@ vector<Vector2> solve_tridiagonal_bezier(vector<Vector2>& P_vector) {
         super_diagonal[i] = 1;
     }
 
-    float* a = sub_diagonal;
-    float* b = diagonal;
-    float* c = super_diagonal;
+    float *a = sub_diagonal;
+    float *b = diagonal;
+    float *c = super_diagonal;
 
     /*
      solves Ax = v where A is a tridiagonal matrix consisting of vectors a, b, c
-     P_vector - initially contains the input vector v, and returns the solution x. indexed from 0 to X - 1 inclusive
-     a - subdiagonal (means it is the diagonal below the main diagonal), indexed from 1 to X - 1 inclusive
-     b - the main diagonal, indexed from 0 to X - 1 inclusive
-     c - superdiagonal (means it is the diagonal above the main diagonal), indexed from 0 to X - 2 inclusive
+     P_vector - initially contains the input vector v, and returns the solution x. indexed from
+     0 to X - 1 inclusive a - subdiagonal (means it is the diagonal below the main diagonal),
+     indexed from 1 to X - 1 inclusive b - the main diagonal, indexed from 0 to X - 1 inclusive
+     c - superdiagonal (means it is the diagonal above the main diagonal), indexed from 0 to X
+     - 2 inclusive
      */
 
     c[0] = c[0] / b[0];
@@ -714,8 +666,9 @@ vector<Vector2> solve_tridiagonal_bezier(vector<Vector2>& P_vector) {
         P_vector[ix] = (P_vector[ix] - P_vector[ix - 1] * a[ix]) * m;
     }
 
-    /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer), to perform the back substitution */
-    for (size_t ix = P_vector.size() - 1; ix-- > 0; ) {
+    /* loop from X - 2 to 0 inclusive (safely testing loop condition for an unsigned integer),
+     * to perform the back substitution */
+    for (size_t ix = P_vector.size() - 1; ix-- > 0;) {
         P_vector[ix] -= P_vector[ix + 1] * c[ix];
     }
 
@@ -726,7 +679,11 @@ vector<Vector2> solve_tridiagonal_bezier(vector<Vector2>& P_vector) {
     return P_vector;
 }
 
-void printGraph(const vector<Converter>& graphs, double from, double to, double step, int field_size = 45, GraphingBackend graphingBackend = GraphingBackend::CONSOLE, Interpolation interpolation = Interpolation::LINEAR, const string& gnuplotTitle = "") {
+void printGraph(const vector<Converter> &graphs, double from, double to, double step,
+                int field_size = 45,
+                GraphingBackend graphingBackend = GraphingBackend::CONSOLE,
+                Interpolation interpolation = Interpolation::LINEAR,
+                const string &gnuplotTitle = "") {
     using namespace std;
 
     vector<vector<double>> x_points;
@@ -760,13 +717,16 @@ void printGraph(const vector<Converter>& graphs, double from, double to, double 
         plotString = "echo 'set title \"" + gnuplotTitle + "\"; plot ";
         for (int g = 0; g < graphs.size(); g++) {
             for (int p = 0; p < point; p++) {
-                system(("echo '" + to_string(x_points[g][p]) + " " + to_string(y_points[g][p]) + "' >> plot" + to_string(g)).c_str());
+                system(("echo '" + to_string(x_points[g][p]) + " " +
+                        to_string(y_points[g][p]) + "' >> plot" + to_string(g))
+                           .c_str());
             }
             if (g > 0) {
                 plotString += ", ";
             }
             plotString += "\"plot" + to_string(g) + "\" ";
-            plotString += interpolation == Interpolation::BEZIER ? "smooth bezier" : "with lines";
+            plotString +=
+                interpolation == Interpolation::BEZIER ? "smooth bezier" : "with lines";
         }
         plotString += "' | gnuplot --persist";
         system(plotString.c_str());
@@ -789,7 +749,7 @@ void printGraph(const vector<Converter>& graphs, double from, double to, double 
         }
     }
 
-    int** field = new int* [field_size];
+    int **field = new int *[field_size];
     for (unsigned int i = 0; i < field_size; i++) {
         field[i] = new int[field_size];
     }
@@ -802,24 +762,29 @@ void printGraph(const vector<Converter>& graphs, double from, double to, double 
 
     for (int g = 0; g < graphs.size(); g++) {
         for (unsigned int p = 0; p < point - 1; p++) {
-            unsigned int steps = max(abs((int)x_points[g][p] - (int)x_points[g][p + 1]), abs((int)y_points[g][p] - (int)y_points[g][p + 1])) + 1;
+            unsigned int steps = max(abs((int)x_points[g][p] - (int)x_points[g][p + 1]),
+                                     abs((int)y_points[g][p] - (int)y_points[g][p + 1])) +
+                                 1;
             if (steps > 1) {
                 for (unsigned int i = 1; i < steps; i++) {
-                    field[(int)lerp(x_points[g][p], x_points[g][p + 1], i / (double)(steps - 1))][(int)lerp(y_points[g][p], y_points[g][p + 1], i / (double)(steps - 1))] += (g + 1);
+                    field[(int)lerp(x_points[g][p], x_points[g][p + 1],
+                                    i / (double)(steps - 1))]
+                         [(int)lerp(y_points[g][p], y_points[g][p + 1],
+                                    i / (double)(steps - 1))] += (g + 1);
                 }
             } else {
                 field[(int)x_points[g][p]][(int)y_points[g][p]] += (g + 1);
             }
-
         }
     }
 
     for (unsigned int y_coord = 0; y_coord < field_size; y_coord++) {
         for (unsigned int x_coord = 0; x_coord < field_size; x_coord++) {
-            coutWithColor(field[x_coord][field_size - y_coord - 1] ?
-                mapToColor(field[x_coord][field_size - y_coord - 1] - 1) : // graphs
-                colors::BLACK, // background
-                field[x_coord][field_size - y_coord - 1] > 0 ? "██" : "░░");
+            coutWithColor(field[x_coord][field_size - y_coord - 1]
+                              ? mapToColor(field[x_coord][field_size - y_coord - 1] - 1)
+                              :              // graphs
+                              colors::BLACK, // background
+                          field[x_coord][field_size - y_coord - 1] > 0 ? "██" : "░░");
         }
         cout << endl;
     }
@@ -830,21 +795,23 @@ void printGraph(const vector<Converter>& graphs, double from, double to, double 
     delete[] field;
 }
 
-void printLayer(vector<int> column_widths, const vector<string>& column_elems,
-    const string& start, const string& middle, const string& end,
-    colors border_color, colors text_color, const string& fillWith = " ") {
+void printLayer(vector<int> column_widths, const vector<string> &column_elems,
+                const string &start, const string &middle, const string &end,
+                colors border_color, colors text_color, const string &fillWith = " ") {
     bool noElems = column_elems.empty();
     for (int column = 0; column < column_widths.size(); column++) {
         coutWithColor(border_color, column == 0 ? start : middle);
-        coutWithColor(text_color, addSymbols(noElems ? "" : column_elems[column], column_widths[column], fillWith, true));
+        coutWithColor(text_color, addSymbols(noElems ? "" : column_elems[column],
+                                             column_widths[column], fillWith, true));
     }
     coutWithColor(border_color, end + "\n");
 }
 
-void printTable(const vector<string>& titles, const vector<vector<string>>& columns, const vector<bool>& highlight_flags = {},
-    colors border_color = colors::YELLOW, colors text_color = colors::DEFAULT,
-    colors highlight_color = colors::LIGHT_GREEN,
-    const string& bottom_info = "", colors bottom_info_color = colors::CYAN) {
+void printTable(const vector<string> &titles, const vector<vector<string>> &columns,
+                const vector<bool> &highlight_flags = {}, colors border_color = colors::YELLOW,
+                colors text_color = colors::DEFAULT,
+                colors highlight_color = colors::LIGHT_GREEN, const string &bottom_info = "",
+                colors bottom_info_color = colors::CYAN) {
     using namespace std;
 
     int columns_len = columns.size();
@@ -870,38 +837,39 @@ void printTable(const vector<string>& titles, const vector<vector<string>>& colu
         column_widths.push_back(maxWidth);
     }
 
-    printLayer(column_widths, {    }, "╭", "┬", "╮", border_color, border_color, "─");
+    printLayer(column_widths, {}, "╭", "┬", "╮", border_color, border_color, "─");
     printLayer(column_widths, titles, "│", "│", "│", border_color, text_color);
-    printLayer(column_widths, {    }, "├", "┼", "┤", border_color, border_color, "─");
+    printLayer(column_widths, {}, "├", "┼", "┤", border_color, border_color, "─");
 
     bool highlight = !highlight_flags.empty();
     for (int elem = 0; elem < elems; elem++) {
         for (int column = 0; column < columns_len; column++) {
             coutWithColor(border_color, "│");
-            coutWithColor(highlight && highlight_flags[elem] ? highlight_color : text_color, addSpaces(columns[column][elem], column_widths[column]));
+            coutWithColor(highlight && highlight_flags[elem] ? highlight_color : text_color,
+                          addSpaces(columns[column][elem], column_widths[column]));
         }
         coutWithColor(border_color, "│\n");
     }
 
     if (!bottom_info.empty()) {
         int fullWidth = 0;
-        for (auto& n : column_widths)
+        for (auto &n : column_widths)
             fullWidth += n;
         fullWidth += column_widths.size() - 1;
-        printLayer(column_widths, {    }, "├", "┴", "┤", border_color, border_color, "─");
+        printLayer(column_widths, {}, "├", "┴", "┤", border_color, border_color, "─");
         coutWithColor(border_color, "│");
         coutWithColor(bottom_info_color, addSpaces(bottom_info, fullWidth));
         coutWithColor(border_color, "│\n");
-        printLayer(column_widths, {    }, "╰", "─", "╯", border_color, border_color, "─");
+        printLayer(column_widths, {}, "╰", "─", "╯", border_color, border_color, "─");
     } else {
-        printLayer(column_widths, {    }, "╰", "┴", "╯", border_color, border_color, "─");
+        printLayer(column_widths, {}, "╰", "┴", "╯", border_color, border_color, "─");
     }
-
 }
 
-const vector<string> bars = { "▁", "▂", "▃", "▄", "▅", "▆ ", "▇", "█" };
+const vector<string> bars = {"▁", "▂", "▃", "▄", "▅", "▆ ", "▇", "█"};
 
-void printBarChart(const vector<int>& values, const vector<string>& titles, int maxHeightSubpixels, int bar_width, int gap) {
+void printBarChart(const vector<int> &values, const vector<string> &titles,
+                   int maxHeightSubpixels, int bar_width, int gap) {
     using namespace std;
 
     int elems;
@@ -928,28 +896,29 @@ void printBarChart(const vector<int>& values, const vector<string>& titles, int 
         wholePart = currentValue / bar_height;
         restPart = currentValue - wholePart * bar_height;
         barXPos = cursor_pos.X + i * (bar_width + gap);
-        coutWithColorAtPos(colors::DEFAULT, addSpaces(titles[i], bar_width, true), barXPos, barYOffset + 1);
+        coutWithColorAtPos(colors::DEFAULT, addSpaces(titles[i], bar_width, true), barXPos,
+                           barYOffset + 1);
         for (int w = 0; w < bar_width; w++) {
             barColor = mapToColor(i, 0, elems);
             coutWithColorAtPos(barColor, bars[restPart], barXPos + w, barYOffset - wholePart);
             for (int p = 0; p < wholePart; p++) {
-                coutWithColorAtPos(barColor, bars[bar_height - 1], barXPos + w, barYOffset - p);
+                coutWithColorAtPos(barColor, bars[bar_height - 1], barXPos + w,
+                                   barYOffset - p);
             }
         }
     }
     setConsoleCursorPosition(cursor_pos.X, cursor_pos.Y + maxHeightPixels + 3);
 }
 
-enum class loadingIconStyle {
-    SIMPLE, DOTS, DOTS_TALL, BAR, CIRCLE, SHAPES
-};
+enum class loadingIconStyle { SIMPLE, DOTS, DOTS_TALL, BAR, CIRCLE, SHAPES };
 
-const vector<string> simple_spinner = { "-", "\\", "|", "/" };
-const vector<string> dot_spinner = { "⠇", "⠋", "⠙", "⠸",  "⠴", "⠦" };
-const vector<string> dot_spinner_tall = { "⢸", "⣰", "⣤ ", "⣆", "⡇", "⠏", "⠛", "⠹" };
-const vector<string> bar_spinner = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▉", "▊", "▋", " ▌", "▍", "▎", "▏", " " };
-const vector<string> circle_spinner = { "◐", "◓", "◑ ", "◒" };
-const vector<string> shapes_spinner = { "⧫", "◆", "■", "●", "◀", "▲  ", "▶", "▼" };
+const vector<string> simple_spinner = {"-", "\\", "|", "/"};
+const vector<string> dot_spinner = {"⠇", "⠋", "⠙", "⠸", "⠴", "⠦"};
+const vector<string> dot_spinner_tall = {"⢸", "⣰", "⣤ ", "⣆", "⡇", "⠏", "⠛", "⠹"};
+const vector<string> bar_spinner = {"▁", "▂", "▃", "▄",  "▅", "▆", "▇", "█",
+                                    "▉", "▊", "▋", " ▌", "▍", "▎", "▏", " "};
+const vector<string> circle_spinner = {"◐", "◓", "◑ ", "◒"};
+const vector<string> shapes_spinner = {"⧫", "◆", "■", "●", "◀", "▲  ", "▶", "▼"};
 
 void displayLoadingIcon(loadingIconStyle style, colors color, float progress, int x, int y) {
     COORD orig_pos = getConsoleCursorPosition();
@@ -981,9 +950,10 @@ void displayLoadingIcon(loadingIconStyle style, colors color, float progress, in
     setConsoleCursorPosition(orig_pos.X, orig_pos.Y);
 }
 
-const vector<string> bars_horizontal = { "▏", "▎", "▍", "▌", "▋", "▊ ", "▉", "█" };
+const vector<string> bars_horizontal = {"▏", "▎", "▍", "▌", "▋", "▊ ", "▉", "█"};
 
-void displayLoadingBar(colors bg_color, colors fg_color, int width, float progress, int x, int y) {
+void displayLoadingBar(colors bg_color, colors fg_color, int width, float progress, int x,
+                       int y) {
     width *= 8;
     COORD orig_pos = getConsoleCursorPosition();
     int progress_ff = progress * 100;
