@@ -1,43 +1,45 @@
-#include <iostream>
 #include "../genericFunctions.h"
+#include <algorithm>
+#include <iostream>
 using namespace std;
+using std::function;
 
 struct StackNode {
     int data;
-    StackNode* next;
+    StackNode *next;
 };
 
-StackNode* add(StackNode* root, int data) {
-    StackNode* node = new StackNode;
+StackNode *add(StackNode *root, int data) {
+    StackNode *node = new StackNode;
     node->data = data;
     node->next = root;
     return node;
 }
 
-void view(StackNode* node) {
-    StackNode* curr_node = node;
+void view(StackNode *node) {
+    StackNode *curr_node = node;
     while (curr_node) {
         cout << curr_node->data << endl;
         curr_node = curr_node->next;
     }
 }
 
-void view_rec(StackNode* node) {
+void view_rec(StackNode *node) {
     if (node) {
         cout << node->data << endl;
         view_rec(node->next);
     }
 }
 
-void view_rec_reverse(StackNode* node) {
+void view_rec_reverse(StackNode *node) {
     if (node) {
         view_rec_reverse(node->next);
         cout << node->data << endl;
     }
 }
 
-void del(StackNode*& p, int n) {
-    StackNode* curr_node = p;
+void del(StackNode *&p, int n) {
+    StackNode *curr_node = p;
     while (p && n > 0) {
         curr_node = p;
         p = p->next;
@@ -46,33 +48,62 @@ void del(StackNode*& p, int n) {
     }
 }
 
-int remove_between_min_max(StackNode* node) {
-    StackNode* min = node;
-    StackNode* max = node;
-    StackNode* curr_node = node;
+int find_min_max(StackNode *node, StackNode *&min, StackNode *&max) {
+    min = node;
+    max = node;
+    StackNode *curr_node = node;
     bool minFirst = false;
     while (curr_node) {
         if (curr_node->data < min->data) {
             min = curr_node;
             minFirst = false;
-        } else
-            if (curr_node->data > max->data) {
-                max = curr_node;
-                minFirst = true;
-            }
+        } else if (curr_node->data > max->data) {
+            max = curr_node;
+            minFirst = true;
+        }
         curr_node = curr_node->next;
     }
     if (min == max || min->next == max || max->next == min) {
-        coutWithColor(colors::LIGHT_YELLOW, "Максимальный и минимальный стоят рядом, нечего убирать\n");
+        coutWithColor(colors::LIGHT_YELLOW, "Max and min elements are adjacent\n");
         return 0;
     }
     if (!minFirst) {
-        StackNode* temp = min;
+        StackNode *temp = min;
         min = max;
         max = temp;
     }
+    return 1;
+}
+
+int product_between_min_max(StackNode *node) {
+    StackNode *min = nullptr;
+    StackNode *max = nullptr;
+    int res = find_min_max(node, min, max);
+    if (res == 0) {
+        return 0;
+    }
+    int product = 1;
+    StackNode *next_node = min->next;
+    while (next_node != max) {
+        product *= next_node->data;
+        next_node = next_node->next;
+    }
+    cout << "The product of the elements between the largest and the smallest element is "
+         << product << endl;
+    return 0;
+}
+
+int remove_between_min_max(StackNode *node) {
+    StackNode *min = nullptr;
+    StackNode *max = nullptr;
+    int res = find_min_max(node, min, max);
+    if (res == 0) {
+        return 0;
+    }
+
+    StackNode *curr_node = node;
     int deletedElems = 0;
-    StackNode* next_node = min->next;
+    StackNode *next_node = min->next;
     min->next = max;
     while (next_node != max) {
         deletedElems++;
@@ -80,25 +111,66 @@ int remove_between_min_max(StackNode* node) {
         next_node = curr_node->next;
         delete curr_node;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Удалил " + to_string(deletedElems) + " элемента(ов) между максимальным("
-        + to_string(max->data) + ") и минимальным(" + to_string(min->data) + ") элементами\n");
+    coutWithColor(colors::LIGHT_YELLOW, "Deleted " + to_string(deletedElems) +
+                                            " element(s) between max(" + to_string(max->data) +
+                                            ") and min(" + to_string(min->data) +
+                                            ") elements\n");
     return deletedElems;
 }
 
-void removeOdd(StackNode*& node) {
-    StackNode* prev = nullptr;
-    StackNode* curr = node;
+void sumAllNegative(StackNode *node) {
+    int sum = 0;
+    StackNode *curr_node = node;
+    while (curr_node) {
+        if (curr_node->data < 0) {
+            sum += curr_node->data;
+        }
+        curr_node = curr_node->next;
+    }
+    cout << "The sum of all negative elements is: " << sum << endl;
+}
+
+void displayMax(StackNode *node) {
+    int max_elem = node->data;
+    StackNode *curr_node = node;
+    while (curr_node) {
+        max_elem = max(max_elem, curr_node->data);
+        curr_node = curr_node->next;
+    }
+    cout << "Max element is " << max_elem << endl;
+}
+
+void sumUptoLastPositive(StackNode *node) {
+    int sum = 0;
+    int sum_last_positive = 0;
+    StackNode *curr_node = node;
+    while (curr_node) {
+        sum += curr_node->data;
+        if (curr_node->data > 0) {
+            sum_last_positive = sum;
+        }
+        curr_node = curr_node->next;
+    }
+    cout << "The sum of the elements up to the last positive element: " << sum_last_positive
+         << endl;
+}
+
+int removeIf(StackNode *&node, function<bool(StackNode *)> test) {
+    StackNode *prev = nullptr;
+    StackNode *curr = node;
+    int deletedElems = 0;
     while (curr) {
-        if (curr->data % 2 == 0) {
+        if (test(curr)) {
+            deletedElems++;
             if (prev) {
                 prev->next = curr->next;
-                StackNode* temp = curr->next;
+                StackNode *temp = curr->next;
                 delete curr;
                 curr = temp;
                 continue;
             } else {
                 node = node->next;
-                StackNode* temp = curr;
+                StackNode *temp = curr;
                 curr = curr->next;
                 delete temp;
                 continue;
@@ -107,43 +179,54 @@ void removeOdd(StackNode*& node) {
         prev = curr;
         curr = curr->next;
     }
+    return deletedElems;
 }
 
-int main()
-{
-    StackNode* root = nullptr;
-    int n, size = 0;
+int removeEven(StackNode *&node) {
+    return removeIf(node, [](StackNode *node) -> bool { return node->data % 2 == 0; });
+}
+
+int removeRange(StackNode *&node, int a, int b) {
+    return removeIf(
+        node, [a, b](StackNode *node) -> bool { return node->data >= a && node->data <= b; });
+}
+
+int main() {
+    StackNode *root = nullptr;
+    int n, size = 0, a, b;
     bool manual;
     while (true) {
         if (!root) {
-            coutWithColor(colors::LIGHT_RED, "Стек пустой\n");
+            coutWithColor(colors::LIGHT_RED, "Stack is empty\n");
         } else {
-            coutWithColor(colors::LIGHT_BLUE, "--- Стек --- (" + to_string(size) + ")\n");
-            coutWithColor(colors::LIGHT_GREEN, "Обычный вывод ---\n");
+            coutWithColor(colors::LIGHT_BLUE, "--- Stack --- (" + to_string(size) + ")\n");
+            coutWithColor(colors::LIGHT_GREEN, "Regular view ---\n");
             view(root);
-            coutWithColor(colors::LIGHT_GREEN, "Наоборот рекурсивно ---\n");
+            coutWithColor(colors::LIGHT_GREEN, "Reverse view (recursive) ---\n");
             view_rec_reverse(root);
-            coutWithColor(colors::LIGHT_GREEN, "Рекурсивно ---\n");
+            coutWithColor(colors::LIGHT_GREEN, "Recursive view ---\n");
             view_rec(root);
         }
         cout << "\n";
-        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        switch (displaySelection({
-            "1.Добавить данные в стек",
-        "2.Удалить n элементов",
-        "3.Удалить элементы между максимальным и минимальным элементами",
-        "4.Удалить все четные элементы",
-        "5.Выйти" })) {
+        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=MENU=-=-=-=-=-=-=-\n");
+        switch (displaySelection(
+            {"1.Add elements", "2.Delete n elements",
+             "3.Delete elements between maximum and minimum elements",
+             "4.Delete all even elements", "5.Display sum of all negative elements",
+             "6.Display product of elements between maximum and minimum elements",
+             "7.Display the sum of the elements up to the last positive element.",
+             "8.Display max element", "9.Remove elements in interval", "10.Exit"})) {
         case 1:
-            n = (int)inputDouble("Сколько элементов добавить? : ", false);
+            n = (int)inputDouble("How many elements to add? : ", false);
             if (n <= 0) {
                 clearScreen();
-                coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество элементов\n");
+                coutWithColor(colors::LIGHT_RED,
+                              "Can't add 0 or negative number of elements\n");
                 break;
             }
             size += n;
-            coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели ввести элементы?\n");
-            manual = displaySelection({ "1.Случайно", "2.Вручную" }) == 2;
+            coutWithColor(colors::LIGHTER_BLUE, "\nHow would you like to input elements?\n");
+            manual = displaySelection({"1.Randomly", "2.Manually"}) == 2;
             for (int i = 0; i < n; i++) {
                 if (manual) {
                     root = add(root, inputDouble(""));
@@ -152,23 +235,23 @@ int main()
                 }
             }
             clearScreen();
-            coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элементов\n");
+            coutWithColor(colors::LIGHTER_BLUE, "Added " + to_string(n) + " elements\n");
             break;
         case 2:
             if (root) {
-                n = (int)inputDouble("Сколько элементов удалить? : ", false);
+                n = (int)inputDouble("How many elements to delete? : ", false);
                 clearScreen();
                 if (n <= 0) {
-                    coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");
+                    coutWithColor(colors::LIGHTER_BLUE, "Nothing to delete, n <= 0\n");
                     break;
                 }
                 del(root, n);
                 n = min(n, size);
                 size -= n;
-                coutWithColor(colors::LIGHTER_BLUE, "Удалил " + to_string(n) + " элементов\n");
+                coutWithColor(colors::LIGHTER_BLUE, "Deleted " + to_string(n) + " elements\n");
             } else {
                 clearScreen();
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
+                coutWithColor(colors::LIGHTER_BLUE, "Nothing to delete, stack is empty\n");
             }
             break;
         case 3:
@@ -176,15 +259,52 @@ int main()
             if (root) {
                 size -= remove_between_min_max(root);
             } else {
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, стек пустой\n");
+                coutWithColor(colors::LIGHTER_BLUE, "Nothing to delete, stack is empty\n");
             }
             break;
         case 4:
+            clearScreen();
             if (root) {
-                removeOdd(root);
+                size -= removeEven(root);
             }
             break;
         case 5:
+            clearScreen();
+            if (root) {
+                sumAllNegative(root);
+            }
+            break;
+        case 6:
+            clearScreen();
+            if (root) {
+                product_between_min_max(root);
+            }
+            break;
+        case 7:
+            clearScreen();
+            if (root) {
+                sumUptoLastPositive(root);
+            }
+            break;
+        case 8:
+            clearScreen();
+            if (root) {
+                displayMax(root);
+            }
+            break;
+        case 9:
+            a = (int)inputDouble("Range start: ", false);
+            b = (int)inputDouble("Range end: ", false);
+            clearScreen();
+            if (b < a) {
+                coutWithColor(colors::LIGHT_RED, "Invalid range!\n");
+                break;
+            }
+            if (root) {
+                size -= removeRange(root, a, b);
+            }
+            break;
+        case 10:
             if (root)
                 del(root, size);
             return 0;
