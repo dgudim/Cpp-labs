@@ -155,12 +155,14 @@ void sumUptoLastPositive(StackNode *node) {
          << endl;
 }
 
-int removeIf(StackNode *&node, function<bool(StackNode *)> test) {
+int removeIf(StackNode *&node, function<bool(StackNode *, int)> test) {
     StackNode *prev = nullptr;
     StackNode *curr = node;
     int deletedElems = 0;
+    int index = 0;
     while (curr) {
-        if (test(curr)) {
+        index++;
+        if (test(curr, index - 1)) {
             deletedElems++;
             if (prev) {
                 prev->next = curr->next;
@@ -183,12 +185,48 @@ int removeIf(StackNode *&node, function<bool(StackNode *)> test) {
 }
 
 int removeEven(StackNode *&node) {
-    return removeIf(node, [](StackNode *node) -> bool { return node->data % 2 == 0; });
+    return removeIf(node, [](StackNode *node, int n) -> bool { return node->data % 2 == 0; });
 }
 
 int removeRange(StackNode *&node, int a, int b) {
-    return removeIf(
-        node, [a, b](StackNode *node) -> bool { return node->data >= a && node->data <= b; });
+    return removeIf(node, [a, b](StackNode *node, int n) -> bool {
+        return node->data >= a && node->data <= b;
+    });
+}
+
+int removeN(StackNode *&node, int n) {
+    return removeIf(node, [n](StackNode *node, int index) -> bool {
+        cout << index;
+        return index == n;
+    });
+}
+
+int insertXifLessThanN(StackNode *node, int check_num, int insert_num) {
+    StackNode *curr = node;
+    int addedElems = 0;
+    while (curr) {
+        if (curr->data < check_num) {
+            StackNode *curr_temp = curr->next;
+            curr->next = add(curr->next, insert_num);
+            curr = curr_temp;
+            addedElems++;
+        } else {
+            curr = curr->next;
+        }
+    }
+    return addedElems;
+}
+
+void numberOfPositiveNegativePairs(StackNode *node) {
+    StackNode *curr = node;
+    int pairs = 0;
+    while (curr && curr->next) {
+        if (curr->data * curr->next->data < 0) {
+            pairs++;
+        }
+        curr = curr->next;
+    }
+    cout << "Number of positive-negative pairs is " << pairs << endl;
 }
 
 int main() {
@@ -210,12 +248,15 @@ int main() {
         cout << "\n";
         coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=MENU=-=-=-=-=-=-=-\n");
         switch (displaySelection(
-            {"1.Add elements", "2.Delete n elements",
+            {"1.Add elements", "2.Delete n elements from start",
              "3.Delete elements between maximum and minimum elements",
              "4.Delete all even elements", "5.Display sum of all negative elements",
              "6.Display product of elements between maximum and minimum elements",
              "7.Display the sum of the elements up to the last positive element.",
-             "8.Display max element", "9.Remove elements in interval", "10.Exit"})) {
+             "8.Display max element", "9.Remove element at index",
+             "10.Remove elements with data in interval",
+             "11.Insert X after every element less than N",
+             "12.Calculate number of positive-negative pairs", "13.Exit"})) {
         case 1:
             n = (int)inputDouble("How many elements to add? : ", false);
             if (n <= 0) {
@@ -293,6 +334,17 @@ int main() {
             }
             break;
         case 9:
+            n = (int)inputDouble("Index to remove: ", false);
+            clearScreen();
+            if (n < 0) {
+                coutWithColor(colors::LIGHT_RED, "Invalid index!\n");
+                break;
+            }
+            if (root) {
+                size -= removeN(root, n);
+            }
+            break;
+        case 10:
             a = (int)inputDouble("Range start: ", false);
             b = (int)inputDouble("Range end: ", false);
             clearScreen();
@@ -304,7 +356,21 @@ int main() {
                 size -= removeRange(root, a, b);
             }
             break;
-        case 10:
+        case 11:
+            a = (int)inputDouble("X (number to insert): ", false);
+            b = (int)inputDouble("N (number to check and insert after): ", false);
+            clearScreen();
+            if (root) {
+                size += insertXifLessThanN(root, b, a);
+            }
+            break;
+        case 12:
+            clearScreen();
+            if (root) {
+                numberOfPositiveNegativePairs(root);
+            }
+            break;
+        case 13:
             if (root)
                 del(root, size);
             return 0;
