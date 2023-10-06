@@ -149,19 +149,19 @@ Metrics benchmarkSort(SortFunction sortFunction, const string& name, const vecto
     bool sorted_s = checkIfSorted(sorted);
     if(print) {
         if (sorted_s) {
-            coutWithColor(colors::LIGHT_GREEN, "Результат для ");
+            coutWithColor(colors::LIGHT_GREEN, "Result for ");
             coutWithColor(colors::CYAN, name);
-            coutWithColor(colors::LIGHT_GREEN, " на ");
+            coutWithColor(colors::LIGHT_GREEN, " on ");
             coutWithColor(colors::PURPLE, to_string(orig.size()));
-            coutWithColor(colors::LIGHT_GREEN, " элементах: ");
+            coutWithColor(colors::LIGHT_GREEN, " elements: ");
             coutWithColor(colors::YELLOW, to_string(iterations));
-            coutWithColor(colors::LIGHT_GREEN, " итераций, ");
+            coutWithColor(colors::LIGHT_GREEN, " iterations, ");
             coutWithColor(colors::YELLOW, to_string(changes));
-            coutWithColor(colors::LIGHT_GREEN, " изменений массива, ");
+            coutWithColor(colors::LIGHT_GREEN, " array changes, ");
             coutWithColor(colors::YELLOW, doubleToString(duration.count() / 1000.0));
             coutWithColor(colors::LIGHT_GREEN, "ms\n");
         } else {
-            coutWithColor(colors::LIGHT_RED, "Ошибка сортировки для " + name + "!\n");
+            coutWithColor(colors::LIGHT_RED, "Sorting error using " + name + "!\n");
         }
     }
     return { iterations, changes, duration.count() };
@@ -193,11 +193,11 @@ int main() {
         quickSortWrapper,
         shellSort };
     vector<string> sortingFunctions_displayNames = {
-        "сортировки пузырьком", 
-        "шейкерной сортировки",
-        "сортировки прямым выбором",
-        "быстрой сортировки",
-        "сортировки Шелла"};
+        "bubble sort",
+        "shaker sort",
+        "selection sort",
+        "quick sort",
+        "shell sort"};
     vector<string> sortingFunctions_fileNames = {
         "bubble",
         "shaker",
@@ -212,17 +212,17 @@ int main() {
     while (true) {
         refillArray(orig, n);
         clearScreen();
-        coutWithColor(colors::LIGHT_BLUE, "Текущий размер массива: " + to_string(n) + "\n");
+        coutWithColor(colors::LIGHT_BLUE, "Current array size: " + to_string(n) + "\n");
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
         switch (displaySelection({
-                 "1.Ввести размер массива",
-                 "2.Отсортировать и посмотреть результаты",
-                 "3.График зависимости времени выполнения и измений массива от количества элементов",
-                 "4.Выйти"
+                 "1.Enter array size",
+                 "2.Sort and see the results",
+                 "3.Graph relation of execution time and array changes to the number of elements",
+                 "4.Exit"
             })) {
         case 1:
-            n = (int)inputDouble("Введите размер: ", false, strictPositive,
-                "Размер должен быть больше 0, повторите ввод: ");
+            n = (int)inputDouble("Enter size: ", false, strictPositive,
+                "Size should be >= 0, retry: ");
             break;
         case 2:
 
@@ -242,20 +242,20 @@ int main() {
                 titles_changes.push_back(to_string(algo_metrics.changes));
             }
 
-            coutWithColor(colors::LIGHT_PURPLE, "\nВремя выполнения\n");
+            coutWithColor(colors::LIGHT_PURPLE, "\nExecution time\n");
             printBarChart(values_time, titles_time, 64, 8, 2);
 
-            coutWithColor(colors::LIGHT_PURPLE, "Количество изменений массива\n");
+            coutWithColor(colors::LIGHT_PURPLE, "Array changes\n");
             printBarChart(values_changes, titles_changes, 64, 8, 2);
 
-            waitForButtonInput("Нажмите любую кнопку, чтобы вернуться в меню\n");
+            waitForButtonInput("Press any button to return to main menu\n");
             break;
         case 3:
 
-            a = (int)inputDouble("Введите начало промежутка: ", false, strictPositive,
-                "Начало должно быть больше 0, повторите ввод: ");
-            b = (int)inputDouble("Введите конец промежутка: ", false, [a](int input) -> bool {return input > a;},
-                "Конец должен быть больше начала, повторите ввод: ");
+            a = (int)inputDouble("Enter start of range: ", false, strictPositive,
+                "Start should be >= 0, retry:: ");
+            b = (int)inputDouble("Enter end or range: ", false, [a](int input) -> bool {return input > a;},
+                "End should be > start, retry: ");
 
             clearScreen();
 
