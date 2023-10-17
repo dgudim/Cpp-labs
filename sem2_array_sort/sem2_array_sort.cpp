@@ -24,6 +24,10 @@ struct Metrics {
     }
 };
 
+enum FillType {
+    Random, Forward, Reverse
+};
+
 typedef vector<ArrayStruct>(*SortFunction)(vector<ArrayStruct>, unsigned int&, unsigned int&);
 
 bool checkIfSorted(vector<ArrayStruct> array) {
@@ -167,10 +171,10 @@ Metrics benchmarkSort(SortFunction sortFunction, const string& name, const vecto
     return { iterations, changes, duration.count() };
 }
 
-void refillArray(vector<ArrayStruct>& values, int n) {
+void refillArray(vector<ArrayStruct>& values, int n, FillType fillType) {
     values.clear();
     for (int i = 0; i < n; i++) {
-        values.push_back(ArrayStruct(rand(), ""));
+        values.push_back(ArrayStruct(fillType == FillType::Random ? rand() : (fillType == FillType::Reverse ? n -i : i), ""));
     }
 }
 
@@ -185,6 +189,8 @@ int main() {
     vector<string> titles_time, titles_changes;
 
     Metrics algo_metrics;
+
+    FillType fillType = FillType::Random;
 
     vector<SortFunction> sortingFunctions = {
         bubbleSort,
@@ -210,21 +216,42 @@ int main() {
     string plot_string, plot_string2;
 
     while (true) {
-        refillArray(orig, n);
+        refillArray(orig, n, fillType);
         clearScreen();
         coutWithColor(colors::LIGHT_BLUE, "Current array size: " + to_string(n) + "\n");
+        string fillTypeStr = "";
+        switch(fillType) {
+            case FillType::Random:
+                fillTypeStr = "unsorted";
+                break;
+            case FillType::Forward:
+                fillTypeStr = "sorted";
+                break;
+            case FillType::Reverse:
+                fillTypeStr = "backwards-sorted";
+                break;
+        }
+        coutWithColor(colors::LIGHT_GREEN, "Current array contents: " + fillTypeStr + "\n");
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
         switch (displaySelection({
                  "1.Enter array size",
-                 "2.Sort and see the results",
-                 "3.Graph relation of execution time and array changes to the number of elements",
-                 "4.Exit"
+                 "2.Set array contents",
+                 "3.Sort and see the results",
+                 "4.Graph relation of execution time and array changes to the number of elements",
+                 "5.Exit"
             })) {
         case 1:
             n = (int)inputDouble("Enter size: ", false, strictPositive,
                 "Size should be >= 0, retry: ");
             break;
         case 2:
+            fillType = (FillType)(displaySelection({
+                 "1.Unsorted",
+                 "2.Sorted",
+                 "3.Backwards-sorted"
+            }) - 1);
+            break;
+        case 3:
 
             values_time.clear();
             titles_time.clear();
@@ -250,7 +277,7 @@ int main() {
 
             waitForButtonInput("Press any button to return to main menu\n");
             break;
-        case 3:
+        case 4:
 
             a = (int)inputDouble("Enter start of range: ", false, strictPositive,
                 "Start should be >= 0, retry:: ");
@@ -260,7 +287,7 @@ int main() {
             clearScreen();
 
             for (int i = a; i <= b; i ++) {
-                refillArray(orig, i);
+                refillArray(orig, i, fillType);
                 displayLoadingIcon(loadingIconStyle::DOTS_TALL, colors::RED, i / 20.0, 1, 1);
                 displayLoadingBar(colors::GRAY, colors::CYAN, 25, (i - a) / (float)(b - a), 3, 1);
                 for (int el = 0; el < elems; el++) {
@@ -291,7 +318,7 @@ int main() {
                 system(("rm " + sortingFunctions_fileNames[el] + "_changes").c_str());
             }
             break;
-        case 4:
+        case 5:
             return 0;
         };
     }
