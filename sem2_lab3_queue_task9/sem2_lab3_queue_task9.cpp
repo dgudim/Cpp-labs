@@ -1,15 +1,15 @@
-#include <iostream>
 #include "../genericFunctions.h"
+#include <iostream>
 using namespace std;
 
 struct QueueNode {
     int data;
-    QueueNode* next;
-    QueueNode* prev;
+    QueueNode *next;
+    QueueNode *prev;
 };
 
-void add(QueueNode*& root, QueueNode*& tail, int data, bool back) {
-    QueueNode* node = new QueueNode;
+void add(QueueNode *&root, QueueNode *&tail, int data, bool back) {
+    QueueNode *node = new QueueNode;
     node->data = data;
     if (back) {
         node->next = nullptr;
@@ -36,8 +36,8 @@ void add(QueueNode*& root, QueueNode*& tail, int data, bool back) {
     }
 }
 
-void view(QueueNode* end_node) {
-    QueueNode* curr_node = end_node;
+void view(QueueNode *end_node) {
+    QueueNode *curr_node = end_node;
     bool from_back = !curr_node->next;
     while (curr_node) {
         cout << curr_node->data << " ";
@@ -46,9 +46,9 @@ void view(QueueNode* end_node) {
     cout << endl;
 }
 
-void del(QueueNode*& root, QueueNode*& tail, int n, bool from_back) {
-    QueueNode* p = from_back ? tail : root;
-    QueueNode* curr_node = p;
+void del(QueueNode *&root, QueueNode *&tail, int n, bool from_back) {
+    QueueNode *p = from_back ? tail : root;
+    QueueNode *curr_node = p;
     while (p && n > 0) {
         curr_node = p;
         p = from_back ? p->prev : p->next;
@@ -69,23 +69,23 @@ void del(QueueNode*& root, QueueNode*& tail, int n, bool from_back) {
     }
 }
 
-void printQueue(QueueNode*& root, QueueNode*& tail, int size) {
+void printQueue(QueueNode *&root, QueueNode *&tail, int size) {
     if (!root) {
-        coutWithColor(colors::LIGHT_BLUE, "--- Очередь --- (" + to_string(size) + ")\n");
-        coutWithColor(colors::LIGHT_RED, "Очередь пустая\n");
+        coutWithColor(colors::LIGHT_BLUE, "--- Queue --- (" + to_string(size) + ")\n");
+        coutWithColor(colors::LIGHT_RED, "Queue is empty\n");
     } else {
-        coutWithColor(colors::LIGHT_BLUE, "--- Очередь --- (" + to_string(size) + ")\n");
-        coutWithColor(colors::LIGHT_GREEN, "Обычный вывод ---\n");
+        coutWithColor(colors::LIGHT_BLUE, "--- Queue --- (" + to_string(size) + ")\n");
+        coutWithColor(colors::LIGHT_GREEN, "Regular output ---\n");
         view(root);
-        coutWithColor(colors::LIGHT_GREEN, "Наоборот ---\n");
+        coutWithColor(colors::LIGHT_GREEN, "Reverse ---\n");
         view(tail);
     }
 }
 
-int remove_between_min_max(QueueNode*& root, QueueNode*& tail, int size) {
-    QueueNode* min = root;
-    QueueNode* max = root;
-    QueueNode* curr_node = root;
+int remove_between_min_max(QueueNode *&root, QueueNode *&tail, int size) {
+    QueueNode *min = root;
+    QueueNode *max = root;
+    QueueNode *curr_node = root;
     bool minFirst = false;
     while (curr_node) {
         if (curr_node->data < min->data) {
@@ -99,21 +99,22 @@ int remove_between_min_max(QueueNode*& root, QueueNode*& tail, int size) {
     }
 
     if (min == max || min->next == max || max->next == min) {
-        coutWithColor(colors::LIGHT_YELLOW, "Максимальный и минимальный стоят рядом, нечего убирать\n");
+        coutWithColor(colors::LIGHT_YELLOW,
+                      "Minimum and maximum elements are adjacent, nothing to remove\n");
         return 0;
     }
 
-    coutWithColor(colors::BLUE, "Старая очередь\n");
+    coutWithColor(colors::BLUE, "Old queue\n");
     printQueue(root, tail, size);
     cout << "\n";
 
     if (!minFirst) {
-        QueueNode* temp = min;
+        QueueNode *temp = min;
         min = max;
         max = temp;
     }
     int deletedElems = 0;
-    QueueNode* next_node = min->next;
+    QueueNode *next_node = min->next;
     min->next = max;
     max->prev = min;
     while (next_node != max) {
@@ -122,16 +123,16 @@ int remove_between_min_max(QueueNode*& root, QueueNode*& tail, int size) {
         next_node = curr_node->next;
         delete curr_node;
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Удалил " + to_string(deletedElems) + " элемента(ов) между максимальным("
-        + to_string(minFirst ? max->data : min->data)
-        + ") и минимальным(" + to_string(minFirst ? min->data : max->data) + ") элементами\n");
+    coutWithColor(colors::LIGHT_YELLOW,
+                  "Deleted " + to_string(deletedElems) + " element(s) between max(" +
+                      to_string(minFirst ? max->data : min->data) + ") and min(" +
+                      to_string(minFirst ? min->data : max->data) + ") elements\n");
     return deletedElems;
 }
 
-
-int deleteAllNegative(QueueNode*& root, QueueNode*& tail) {
+int deleteAllNegative(QueueNode *&root, QueueNode *&tail) {
     int deletedElems = 0;
-    QueueNode* curr_node = root;
+    QueueNode *curr_node = root;
     bool delete_ = false;
     while (curr_node) {
         if (curr_node->data < 0) {
@@ -145,7 +146,7 @@ int deleteAllNegative(QueueNode*& root, QueueNode*& tail) {
             deletedElems++;
         }
         if (delete_) {
-            QueueNode* temp_node = curr_node;
+            QueueNode *temp_node = curr_node;
             if (curr_node == root && root) {
                 root = root->next;
             }
@@ -159,48 +160,47 @@ int deleteAllNegative(QueueNode*& root, QueueNode*& tail) {
             curr_node = curr_node->next;
         }
     }
-    coutWithColor(colors::LIGHT_YELLOW, "Удалил " + to_string(deletedElems) + " элемента(ов)\n");
+    coutWithColor(colors::LIGHT_YELLOW,
+                  "Deleted " + to_string(deletedElems) + " element(s)\n");
     return deletedElems;
 }
 
-int main()
-{
-    QueueNode* root = nullptr;
-    QueueNode* tail = nullptr;
+int main() {
+    QueueNode *root = nullptr;
+    QueueNode *tail = nullptr;
     int n, size = 0, subs = 0;
     bool manual;
     while (true) {
         printQueue(root, tail, size);
         cout << "\n";
-        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
-        int choise = displaySelection({
-            "1.Добавить данные в очередь с начала",
-            "2.Добавить данные в очередь с конца",
-            "3.Удалить n элементов с начала",
-            "4.Удалить n элементов с конца",
-            "5.Удалить элементы между максимальным и минимальным элементами",
-            "6.Удалить все отрицательные элементы",
-            "7.Выйти" });
+        coutWithColor(colors::LIGHT_YELLOW, "-=-=-=-=-=-=-=MENU=-=-=-=-=-=-=-\n");
+        int choise = displaySelection({"1.Add elements to the queue from the beginning",
+                                       "2.Add elements to the queue from the end",
+                                       "3.Delete n elements from the beginning",
+                                       "4.Delete n elements from the end",
+                                       "5.Delete elements between min and max elements",
+                                       "6.Delete ann negative elements", "7.Exit"});
         switch (choise) {
         case 1:
         case 2:
-            n = (int)inputDouble("Сколько элементов добавить? : ", false);
+            n = (int)inputDouble("How many elements to add? : ", false);
             if (n <= 0) {
                 clearScreen();
-                coutWithColor(colors::LIGHT_RED, "Не могу добавить 0 или отрицательное количество элементов\n");
+                coutWithColor(colors::LIGHT_RED,
+                              "Can't add 0 or negative number of elements\n");
                 break;
             }
             size += n;
             coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели ввести элементы?\n");
-            manual = displaySelection({ "1.Случайно", "2.Вручную" }) == 2;
+            manual = displaySelection({"1.Randomly", "2.Manually"}) == 2;
 
             clearScreen();
-            coutWithColor(colors::BLUE, "Старая очередь\n");
+            coutWithColor(colors::BLUE, "Old queue\n");
             printQueue(root, tail, size);
             cout << "\n";
 
             if (manual) {
-                coutWithColor(colors::BLUE, "Введите элементы(" + to_string(n) + "): ");
+                coutWithColor(colors::BLUE, "Input elements(" + to_string(n) + "): ");
             }
 
             for (int i = 0; i < n; i++) {
@@ -211,51 +211,57 @@ int main()
                 }
             }
 
-            coutWithColor(colors::LIGHTER_BLUE, "Добавил " + to_string(n) + " элеентов с " 
-                + (choise == 2 ? "конца\n" : "начала\n"));
+            coutWithColor(colors::LIGHTER_BLUE,
+                          "Added " + to_string(n) + " elements from " +
+                              (choise == 2 ? "the end\n" : "the beginning\n"));
             break;
         case 3:
         case 4:
             if (root) {
-                n = (int)inputDouble("Сколько элементов удалить? : ", false);
+                n = (int)inputDouble("How many elements to delete? : ", false);
                 clearScreen();
                 if (n <= 0) {
-                    coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, вы ввели число <= 0\n");
+                    coutWithColor(colors::LIGHTER_BLUE,
+                                  "here's nothing to delete, you entered a number <= 0\n");
                     break;
                 }
-                coutWithColor(colors::BLUE, "Старая очередь\n");
+                coutWithColor(colors::BLUE, "Old queue\n");
                 printQueue(root, tail, size);
                 cout << "\n";
                 del(root, tail, n, choise == 4);
                 n = min(n, size);
                 size -= n;
-                coutWithColor(colors::LIGHTER_BLUE, "Удалил " + to_string(n) + " элементов c "
-                    + (choise == 4 ? "конца\n" : "начала\n"));
+                coutWithColor(colors::LIGHTER_BLUE,
+                              "Deleted " + to_string(n) + " elements from " +
+                                  (choise == 4 ? "the end\n" : "the beginning\n"));
             } else {
                 clearScreen();
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
+                coutWithColor(colors::LIGHTER_BLUE,
+                              "There's nothing to delete, the queue is empty\n");
             }
             break;
         case 5:
             clearScreen();
             if (root) {
-                coutWithColor(colors::BLUE, "Старая очередь\n");
+                coutWithColor(colors::BLUE, "Old queue\n");
                 printQueue(root, tail, size);
                 cout << "\n";
                 size -= remove_between_min_max(root, tail, size);
             } else {
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
+                coutWithColor(colors::LIGHTER_BLUE,
+                              "There's nothing to delete, the queue is empty\n");
             }
             break;
         case 6:
             clearScreen();
             if (root) {
-                coutWithColor(colors::BLUE, "Старая очередь\n");
+                coutWithColor(colors::BLUE, "Old queue\n");
                 printQueue(root, tail, size);
                 cout << "\n";
                 size -= deleteAllNegative(root, tail);
             } else {
-                coutWithColor(colors::LIGHTER_BLUE, "Нечего удалять, очередь пустая\n");
+                coutWithColor(colors::LIGHTER_BLUE,
+                              "There's nothing to delete, the queue is empty\n");
             }
             break;
         case 7:
