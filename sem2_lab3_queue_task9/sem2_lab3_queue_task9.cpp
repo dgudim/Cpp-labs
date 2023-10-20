@@ -3,12 +3,22 @@
 using namespace std;
 
 struct QueueNode {
-    int data;
+    string data;
     QueueNode *next;
     QueueNode *prev;
+
+    uint32_t hash() {
+        uint32_t hash = 3323198485ul;
+        for (char ch : data) {
+            hash ^= ch;
+            hash *= 0x5bd1e995;
+            hash ^= hash >> 15;
+        }
+        return hash;
+    }
 };
 
-void add(QueueNode *&root, QueueNode *&tail, int data, bool back) {
+void add(QueueNode *&root, QueueNode *&tail, string data, bool back) {
     QueueNode *node = new QueueNode;
     node->data = data;
     if (back) {
@@ -125,8 +135,8 @@ int remove_between_min_max(QueueNode *&root, QueueNode *&tail, int size) {
     }
     coutWithColor(colors::LIGHT_YELLOW,
                   "Deleted " + to_string(deletedElems) + " element(s) between max(" +
-                      to_string(minFirst ? max->data : min->data) + ") and min(" +
-                      to_string(minFirst ? min->data : max->data) + ") elements\n");
+                      (minFirst ? max->data : min->data) + ") and min(" +
+                      (minFirst ? min->data : max->data) + ") elements\n");
     return deletedElems;
 }
 
@@ -135,7 +145,7 @@ int deleteAllNegative(QueueNode *&root, QueueNode *&tail) {
     QueueNode *curr_node = root;
     bool delete_ = false;
     while (curr_node) {
-        if (curr_node->data < 0) {
+        if (curr_node->hash() < 0) {
             if (curr_node->next) {
                 curr_node->next->prev = curr_node->prev;
             }
@@ -179,7 +189,7 @@ int main() {
                                        "3.Delete n elements from the beginning",
                                        "4.Delete n elements from the end",
                                        "5.Delete elements between min and max elements",
-                                       "6.Delete ann negative elements", "7.Exit"});
+                                       "6.Delete all negative elements", "7.Exit"});
         switch (choise) {
         case 1:
         case 2:
@@ -191,7 +201,7 @@ int main() {
                 break;
             }
             size += n;
-            coutWithColor(colors::LIGHTER_BLUE, "\nКак бы вы хотели ввести элементы?\n");
+            coutWithColor(colors::LIGHTER_BLUE, "\nHow would you like to input elements?\n");
             manual = displaySelection({"1.Randomly", "2.Manually"}) == 2;
 
             clearScreen();
@@ -205,9 +215,9 @@ int main() {
 
             for (int i = 0; i < n; i++) {
                 if (manual) {
-                    add(root, tail, (int)inputDouble(""), choise == 2);
+                    add(root, tail, inputString("", "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM._1234567890"), choise == 2);
                 } else {
-                    add(root, tail, rand() % 100 / 2 - 25, choise == 2);
+                    add(root, tail, to_string(rand() % 100 / 2 - 25), choise == 2);
                 }
             }
 
@@ -222,7 +232,7 @@ int main() {
                 clearScreen();
                 if (n <= 0) {
                     coutWithColor(colors::LIGHTER_BLUE,
-                                  "here's nothing to delete, you entered a number <= 0\n");
+                                  "There's nothing to delete, you entered a number <= 0\n");
                     break;
                 }
                 coutWithColor(colors::BLUE, "Old queue\n");
