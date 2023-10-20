@@ -372,10 +372,10 @@ int main() {
 
         coutWithColor(colors::LIGHT_YELLOW, "\n-=-=-=-=-=-=-=МЕНЮ=-=-=-=-=-=-=-\n");
         int choise = displaySelection(
-            {"1.Ad elements to the tree", "2.Delete element by key",
+            {"1.Add elements to the tree", "2.Delete element by key",
              "3.Delete a branch with a vertex by key", "4.Delete the whole tree",
-             "5.Найти информацию по ключу", "6.Сбалансировать дерево",
-             "7.Generate the tree by layer count", "8.Info about the tree", "9.Exit"});
+             "5.Find information by key", "6.Balance the tree",
+             "7.Generate a tree with n layers", "8.Info about the tree", "9.Exit"});
         switch (choise) {
         case 1:
             n = (int)inputDouble("How many elements to add? : ", false);
